@@ -15,7 +15,15 @@ Set production environment variables:
 SECRET_KEY=replace-me
 DEBUG=False
 ALLOWED_HOSTS=api.yourdomain.com
+CORS_ALLOWED_ORIGINS=https://yourdomain.com
+CSRF_TRUSTED_ORIGINS=https://yourdomain.com
 FRONTEND_URL=https://yourdomain.com
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+SECURE_HSTS_SECONDS=31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS=True
+SECURE_HSTS_PRELOAD=False
 STRIPE_SECRET_KEY=sk_live_or_test_key
 STRIPE_WEBHOOK_SECRET=whsec_live_or_test_secret
 STRIPE_CURRENCY=usd
@@ -23,10 +31,8 @@ STRIPE_CURRENCY=usd
 
 Update Django settings before production launch:
 
-- Read `SECRET_KEY`, `DEBUG`, and `ALLOWED_HOSTS` from env.
 - Replace SQLite with PostgreSQL.
 - Move uploaded media to object storage.
-- Set production `CORS_ALLOWED_ORIGINS` and `CSRF_TRUSTED_ORIGINS`.
 - Serve static files through the host or a package like WhiteNoise.
 
 ## Deploy backend
@@ -49,12 +55,12 @@ gunicorn config.wsgi:application
 ```bash
 cd frontend
 npm install
-npm run build
+VITE_API_URL=https://api.yourdomain.com/api npm run build
 ```
 
 Deploy `frontend/dist`.
 
-Before production, move the API base URL out of `frontend/src/main.jsx` and into a Vite env var such as `VITE_API_URL`.
+The frontend reads its API base URL from `VITE_API_URL`. For local development, copy `frontend/.env.example` to `frontend/.env.local`.
 
 ## Stripe production
 

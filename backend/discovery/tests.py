@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 
-from artists.models import ArtistFollow, ArtistProfile
+from artists.models import ArtistProfile
 from discovery.models import ArtistSignal
 from mediahub.models import MusicUpload
 from posts.models import Post
@@ -69,7 +69,6 @@ class ArtistRecommendationTests(APITestCase):
             genre="Indie Pop",
         )
         Post.objects.create(author=self.luna, title="Update", body="New demo soon.")
-        ArtistFollow.objects.create(fan=self.fan, artist=self.luna)
         FanSubscription.objects.create(fan=self.fan, artist=self.luna, monthly_amount="2.00")
 
     def test_anonymous_recommendations_include_scores_and_reasons(self):
@@ -95,7 +94,6 @@ class ArtistRecommendationTests(APITestCase):
         self.assertEqual(top_result["owner_username"], "luna")
         self.assertTrue(any("Matches your taste" in label for label in reason_labels))
         self.assertTrue(any("Near Melbourne" in label for label in reason_labels))
-        self.assertTrue(top_result["viewer_following"])
         self.assertTrue(all("category" in reason for reason in top_result["discovery_reasons"]))
         self.assertTrue(all("detail" in reason for reason in top_result["discovery_reasons"]))
 
@@ -193,7 +191,7 @@ class ArtistRecommendationTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["count"], 1)
         reason_labels = [reason["label"] for reason in response.data["results"][0]["discovery_reasons"]]
-        self.assertIn("Similar to artists you follow or support", reason_labels)
+        self.assertIn("Similar to artists you support or saved", reason_labels)
 
     def test_saved_artists_returns_saved_profiles_for_authenticated_fan(self):
         ArtistSignal.objects.create(

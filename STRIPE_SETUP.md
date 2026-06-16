@@ -14,9 +14,20 @@ pip install -r requirements.txt
 Create `backend/.env`:
 
 ```bash
+SECRET_KEY=dev-only-change-this
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+CSRF_TRUSTED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+FRONTEND_URL=http://localhost:5173
+SECURE_SSL_REDIRECT=False
+SESSION_COOKIE_SECURE=False
+CSRF_COOKIE_SECURE=False
+SECURE_HSTS_SECONDS=0
+SECURE_HSTS_INCLUDE_SUBDOMAINS=False
+SECURE_HSTS_PRELOAD=False
 STRIPE_SECRET_KEY=sk_test_your_key
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
-FRONTEND_URL=http://localhost:5173
 STRIPE_CURRENCY=usd
 ```
 

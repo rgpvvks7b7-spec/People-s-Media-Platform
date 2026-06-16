@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles/app.css";
 
-const API = "http://localhost:8000/api";
+const API = (import.meta.env.VITE_API_URL || "http://localhost:8000/api").replace(/\/$/, "");
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -42,7 +42,6 @@ function App() {
   const [music, setMusic] = useState([]);
   const [posts, setPosts] = useState([]);
   const [products, setProducts] = useState([]);
-  const [followStats, setFollowStats] = useState({});
   const [storeFormType, setStoreFormType] = useState(null);
   const [showPostForm, setShowPostForm] = useState(false);
   const [showMusicForm, setShowMusicForm] = useState(false);
@@ -52,6 +51,7 @@ function App() {
   const [subData, setSubData] = useState({ subscriptions: [], fan_totals: {}, artist_totals: {} });
   const [message, setMessage] = useState("");
   const [selectedArtist, setSelectedArtist] = useState(null);
+  const [pendingSupportArtist, setPendingSupportArtist] = useState(null);
   const [activeTab, setActiveTab] = useState("music");
   const [currentUser, setCurrentUser] = useState(null);
   const [authMode, setAuthMode] = useState("login");
@@ -75,7 +75,6 @@ function App() {
     apiFetch("/media/").then(r => r.json()).then(setMusic);
     apiFetch("/posts/").then(r => r.json()).then(setPosts);
     apiFetch("/marketplace/").then(r => r.json()).then(setProducts);
-    apiFetch("/artists/follow-stats/").then(r => r.json()).then(setFollowStats);
     apiFetch("/subscriptions/").then(r => r.json()).then(setSubData);
   }
 
@@ -142,55 +141,6 @@ function App() {
   }
 
 
-  async function followArtist(username) {
-    if (!currentUser) {
-      setMessage("Log in before following artists.");
-      return;
-    }
-
-    const artist = artists.find(
-      a => a.owner_username === username
-    );
-
-    if (!artist) return;
-
-    await apiFetch("/artists/follow/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        artist_id: artist.owner_id
-      })
-    });
-
-    loadData();
-  }
-
-  async function toggleDiscoveryFollow(artist) {
-    if (!currentUser) {
-      setMessage("Log in before following artists.");
-      return;
-    }
-
-    const endpoint = artist.viewer_following ? "/artists/unfollow/" : "/artists/follow/";
-    const res = await apiFetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ artist_id: artist.owner_id }),
-    });
-    const data = await res.json();
-
-    if (!res.ok) {
-      setMessage(data.error || "Unable to update follow.");
-      return;
-    }
-
-    setMessage(artist.viewer_following ? `Unfollowed ${artist.stage_name}.` : `Following ${artist.stage_name}.`);
-    loadData();
-    loadDiscovery({ backfill: true });
-    loadSavedArtists();
-  }
-
-
   async function supportArtist(username) {
     if (!currentUser) {
       setMessage("Log in before supporting artists.");
@@ -209,6 +159,7 @@ function App() {
 
     if (!res.ok) {
       setMessage(data.error || "Unable to start checkout.");
+      setPendingSupportArtist(null);
       return;
     }
 
@@ -218,6 +169,27 @@ function App() {
     }
 
     setMessage(data.message || "Checkout started.");
+    setPendingSupportArtist(null);
+    loadData();
+  }
+
+  function requestSupport(artist, supporting) {
+    if (supporting) {
+      manageSupport(artist.owner_username);
+      return;
+    }
+
+    if (!currentUser) {
+      setMessage("Log in before supporting artists.");
+      return;
+    }
+
+    setPendingSupportArtist(artist);
+  }
+
+  function confirmSupport() {
+    if (!pendingSupportArtist) return;
+    supportArtist(pendingSupportArtist.owner_username);
   }
 
   async function sendDiscoverySignal(artist, signalType) {
@@ -680,6 +652,93 @@ function App() {
     setSwipeDeltaX(Math.max(-160, Math.min(160, delta)));
   }
 
+  function renderSupportButton(artist, supporting, size = "default") {
+    const prompt = supporting
+      ? `Manage monthly support for ${artist.stage_name}.`
+      : `Support ${artist.stage_name} for $1 a month?`;
+
+    return (
+      <button
+        className={`support-dollar ${supporting ? "supported" : ""} ${size}`}
+        onClick={() => requestSupport(artist, supporting)}
+        title={prompt}
+        aria-label={prompt}
+      >
+        $
+      </button>
+    );
+  }
+
+  function artistFromUsername(username) {
+    return artists.find(artist => artist.owner_username === username)
+      || discoveryArtists.find(artist => artist.owner_username === username)
+      || savedArtists.find(artist => artist.owner_username === username)
+      || (selectedArtist?.owner_username === username ? selectedArtist : null);
+  }
+
+  function renderLockedContentPrompt(artist, label = "this") {
+    if (!artist) {
+      return <p className="muted">Supporters only</p>;
+    }
+
+    return (
+      <div className="locked-support">
+        <div>
+          <strong>Support for $1/month</strong>
+          <p className="muted">Unlock {label} and supporter-only drops from {artist.stage_name}.</p>
+        </div>
+        {renderSupportButton(artist, isSupporting(artist.owner_username), "small")}
+      </div>
+    );
+  }
+
+  function renderLockedTrackPrompt(track) {
+    return renderLockedContentPrompt(artistFromUsername(track.artist_username), "this track");
+  }
+
+  function renderLockedProductPrompt(product) {
+    return renderLockedContentPrompt(artistFromUsername(product.artist_username), "this item");
+  }
+
+  function renderSupportConfirmSheet() {
+    if (!pendingSupportArtist) return null;
+
+    return (
+      <div className="modal-backdrop" role="presentation" onClick={() => setPendingSupportArtist(null)}>
+        <section
+          className="support-sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="support-sheet-title"
+          onClick={event => event.stopPropagation()}
+        >
+          <button
+            className="sheet-close"
+            onClick={() => setPendingSupportArtist(null)}
+            aria-label="Cancel support"
+          >
+            ×
+          </button>
+          <div className="sheet-dollar">$</div>
+          <h2 id="support-sheet-title">Support {pendingSupportArtist.stage_name}?</h2>
+          <p className="muted">Start monthly support for $1.00. The artist receives $0.90 and IndieFund keeps $0.10.</p>
+          <div className="support-breakdown">
+            <span>Monthly total</span>
+            <strong>$1.00</strong>
+            <span>Artist share</span>
+            <strong>$0.90</strong>
+            <span>Platform share</span>
+            <strong>$0.10</strong>
+          </div>
+          <div className="sheet-actions">
+            <button className="secondary" onClick={() => setPendingSupportArtist(null)}>Cancel</button>
+            <button className="primary" onClick={confirmSupport}>Support</button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   function renderDiscoveryArtistCard(artist, compact = false) {
     const supporting = isSupporting(artist.owner_username);
     const artistTrack = music.find(track => track.artist_username === artist.owner_username);
@@ -696,18 +755,7 @@ function App() {
                 <p className="muted">{artist.genre} • {artist.city}</p>
               </div>
               <div className="artist-row-primary">
-                <button
-                  className="secondary small-pill"
-                  onClick={() => toggleDiscoveryFollow(artist)}
-                >
-                  {artist.viewer_following ? "Following" : "Follow"}
-                </button>
-                <button
-                  className={supporting ? "supporting small-pill" : "primary small-pill"}
-                  onClick={() => supporting ? manageSupport(artist.owner_username) : supportArtist(artist.owner_username)}
-                >
-                  {supporting ? "Managing" : "Support $1"}
-                </button>
+                {renderSupportButton(artist, supporting, "small")}
               </div>
             </div>
 
@@ -720,7 +768,7 @@ function App() {
                 {artistTrack.audio_file ? (
                   <audio controls preload="none" src={artistTrack.audio_file}></audio>
                 ) : (
-                  <p className="muted">{artistTrack.access_message || "Supporters only"}</p>
+                  renderLockedTrackPrompt(artistTrack)
                 )}
               </div>
             )}
@@ -745,7 +793,7 @@ function App() {
                     location: "Location match",
                     similarity: "Similar artist signal",
                     activity: "Activity signal",
-                    community: "Supporter/follower signal",
+                    community: "Supporter signal",
                   };
 
                   return (
@@ -803,7 +851,6 @@ function App() {
             <p className="muted">{artist.genre} • {artist.city}</p>
             <div className="saved-status">
               <span>{supporting ? "Supporting" : "Not supporting"}</span>
-              {artist.viewer_following && <span>Following</span>}
             </div>
           </div>
         </div>
@@ -815,7 +862,7 @@ function App() {
               {artistTrack.audio_file ? (
                 <audio controls preload="none" src={artistTrack.audio_file}></audio>
               ) : (
-                <p className="muted">{artistTrack.access_message || "Supporters only"}</p>
+                renderLockedTrackPrompt(artistTrack)
               )}
             </>
           ) : (
@@ -824,15 +871,7 @@ function App() {
         </div>
 
         <div className="saved-actions">
-          <button className="secondary small-pill" onClick={() => toggleDiscoveryFollow(artist)}>
-            {artist.viewer_following ? "Unfollow" : "Follow"}
-          </button>
-          <button
-            className={supporting ? "supporting small-pill" : "primary small-pill"}
-            onClick={() => supporting ? manageSupport(artist.owner_username) : supportArtist(artist.owner_username)}
-          >
-            {supporting ? "Manage" : "Support $1"}
-          </button>
+          {renderSupportButton(artist, supporting, "small")}
           <button className="secondary small-pill" onClick={() => removeSavedArtist(artist)}>
             Remove
           </button>
@@ -901,7 +940,7 @@ function App() {
                   {artistTrack.audio_file ? (
                     <audio controls preload="none" src={artistTrack.audio_file}></audio>
                   ) : (
-                    <p className="muted">{artistTrack.access_message || "Supporters only"}</p>
+                    renderLockedTrackPrompt(artistTrack)
                   )}
                 </div>
               )}
@@ -938,7 +977,7 @@ function App() {
                   location: "Location match",
                   similarity: "Similar artist signal",
                   activity: "Activity signal",
-                  community: "Supporter/follower signal",
+                  community: "Supporter signal",
                 };
 
                 return (
@@ -952,15 +991,7 @@ function App() {
           )}
 
           <div className="review-primary-actions">
-            <button className="secondary" onClick={() => toggleDiscoveryFollow(artist)}>
-              {artist.viewer_following ? "Following - Unfollow" : "Follow Artist"}
-            </button>
-            <button
-              className={supporting ? "supporting review-support" : "primary"}
-              onClick={() => supporting ? manageSupport(artist.owner_username) : supportArtist(artist.owner_username)}
-            >
-              {supporting ? "Managing support" : "Support Artist - $1/month"}
-            </button>
+            {renderSupportButton(artist, supporting, "review")}
           </div>
         </div>
 
@@ -1068,7 +1099,6 @@ function App() {
     const supporting = isSupporting(selectedArtist.owner_username);
     const selectedDiscoveryRecord = [...discoveryArtists, ...savedArtists]
       .find(artist => artist.owner_id === selectedArtist.owner_id);
-    const followingSelected = Boolean(selectedDiscoveryRecord?.viewer_following);
     const selectedSaved = savedArtists.some(artist => artist.owner_id === selectedArtist.owner_id);
     const profilePreviewTrack = music.find(track => track.artist_username === selectedArtist.owner_username);
 
@@ -1091,6 +1121,7 @@ function App() {
 
     return (
       <main>
+        {renderSupportConfirmSheet()}
         <nav className="topbar">
           <button className="back-button" onClick={() => goToPage("discover")}>← Back to Discover</button>
           <div className="logo">INDIE<span>FUND</span></div>
@@ -1119,23 +1150,12 @@ function App() {
             </div>
             <div className="profile-actions">
               <button
-                className="secondary"
-                onClick={() => toggleDiscoveryFollow(selectedDiscoveryRecord || selectedArtist)}
-              >
-                {followingSelected ? "Following" : "Follow"}
-              </button>
-              <button
                 className={selectedSaved ? "secondary" : "secondary"}
                 onClick={() => selectedSaved ? removeSavedArtist(selectedDiscoveryRecord || selectedArtist) : sendDiscoverySignal(selectedDiscoveryRecord || selectedArtist, "save")}
               >
                 {selectedSaved ? "Saved" : "Save"}
               </button>
-              <button
-                className={supporting ? "supporting" : "primary"}
-                onClick={() => supporting ? manageSupport(selectedArtist.owner_username) : supportArtist(selectedArtist.owner_username)}
-              >
-                {supporting ? "Managing support" : "Support $1/month"}
-              </button>
+              {renderSupportButton(selectedArtist, supporting, "profile")}
             </div>
           </div>
 
@@ -1153,7 +1173,7 @@ function App() {
                 {profilePreviewTrack.audio_file ? (
                   <audio controls preload="none" src={profilePreviewTrack.audio_file}></audio>
                 ) : (
-                  <p className="muted">{profilePreviewTrack.access_message || "Supporters only"}</p>
+                  renderLockedTrackPrompt(profilePreviewTrack)
                 )}
               </div>
             </div>
@@ -1252,7 +1272,7 @@ function App() {
                     {track.audio_file ? (
                       <audio controls src={track.audio_file}></audio>
                     ) : track.is_subscriber_only && (
-                      <p className="muted">{track.access_message || "Supporters only"}</p>
+                      renderLockedTrackPrompt(track)
                     )}
                   </article>
                 ))}
@@ -1296,7 +1316,7 @@ function App() {
                   <select name="comment_mode" defaultValue="account_default">
                     <option value="account_default">Use artist default</option>
                     <option value="anyone">Anyone</option>
-                    <option value="followers_subscribers">Followers + Supporters</option>
+                    <option value="followers_subscribers">Supporters</option>
                     <option value="subscribers_only">Supporters only</option>
                   </select>
 
@@ -1465,7 +1485,7 @@ function App() {
                         <strong>${product.price}</strong>
                         {product.preview_audio && <audio controls src={product.preview_audio}></audio>}
                         {product.product_file && <p className="muted">Download file uploaded ✅</p>}
-                        {!product.can_access && <p className="muted">{product.access_message || "Supporters only"}</p>}
+                        {!product.can_access && renderLockedProductPrompt(product)}
                       </div>
                     </article>
                   ))}
@@ -1686,6 +1706,7 @@ function App() {
 
   return (
     <main className={`page-${activePage}`}>
+      {renderSupportConfirmSheet()}
       <nav className="topbar">
         <button className="logo logo-button" onClick={() => goToPage("home")}>INDIE<span>FUND</span></button>
         <div className="page-nav">
@@ -1766,7 +1787,7 @@ function App() {
             <button className="feature-card page-link" onClick={() => goToPage("discover")}>
               <p className="eyebrow">Discovery</p>
               <h3>Recommended Artists</h3>
-              <p>Find artists ranked from your taste, location, saves, skips, follows and support.</p>
+              <p>Find artists ranked from your taste, location, saves, skips and support.</p>
             </button>
             <button className="feature-card page-link" onClick={() => goToPage("music")}>
               <p className="eyebrow">Latest drops</p>
@@ -1789,7 +1810,7 @@ function App() {
               <p className="eyebrow">Discovery</p>
               <h2>Recommended Artists</h2>
             </div>
-            <p>{currentUser ? "Ranked from your genres, location, follows and support." : "Ranked by activity, identity and early community signals."}</p>
+            <p>{currentUser ? "Ranked from your genres, location, saves and support." : "Ranked by activity, identity and early community signals."}</p>
           </section>
 
           {filteredArtists.length === 0 ? (
@@ -1899,7 +1920,7 @@ function App() {
                   {track.audio_file ? (
                     <audio controls src={track.audio_file}></audio>
                   ) : track.is_subscriber_only && (
-                    <p className="muted">{track.access_message || "Supporters only"}</p>
+                    renderLockedTrackPrompt(track)
                   )}
                 </div>
               </article>

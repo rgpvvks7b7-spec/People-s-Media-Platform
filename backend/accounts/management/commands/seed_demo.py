@@ -8,7 +8,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from PIL import Image, ImageDraw, ImageFont
 
-from artists.models import ArtistFollow, ArtistProfile
+from artists.models import ArtistProfile
 from marketplace.models import Product
 from mediahub.models import MusicUpload
 from posts.models import Comment, Like, Post
@@ -109,9 +109,6 @@ class Command(BaseCommand):
         for artist, profile_fields in extra_artists:
             self.upsert_artist_profile(artist, **profile_fields)
 
-        ArtistFollow.objects.get_or_create(fan=fan, artist=artist_luna)
-        ArtistFollow.objects.get_or_create(fan=fan, artist=artist_static)
-
         FanSubscription.objects.update_or_create(
             fan=fan,
             artist=artist_luna,
@@ -172,7 +169,7 @@ class Command(BaseCommand):
             body="Testing a supporter-first update with behind-the-scenes notes for the next single.",
             post_type=Post.TEXT,
             is_subscriber_only=False,
-            comment_mode=Post.COMMENT_FOLLOWERS,
+            comment_mode=Post.COMMENT_SUBSCRIBERS,
         )
         self.upsert_post(
             author=artist_luna,
@@ -197,7 +194,7 @@ class Command(BaseCommand):
                 body=f"Working through a new {profile_fields['genre']} idea and testing how it lands with early listeners.",
                 post_type=Post.TEXT,
                 is_subscriber_only=False,
-                comment_mode=Post.COMMENT_FOLLOWERS,
+                comment_mode=Post.COMMENT_SUBSCRIBERS,
             )
 
         Comment.objects.get_or_create(

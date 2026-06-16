@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
-from artists.models import ArtistFollow, ArtistProfile
+from artists.models import ArtistProfile
 from .models import Comment, Like, Post
 from subscriptions.models import FanSubscription
 
@@ -15,16 +15,6 @@ def is_supporter(user, artist):
         fan=user,
         artist=artist,
         active=True,
-    ).exists()
-
-
-def is_follower(user, artist):
-    if not user.is_authenticated:
-        return False
-
-    return ArtistFollow.objects.filter(
-        fan=user,
-        artist=artist,
     ).exists()
 
 
@@ -64,9 +54,9 @@ def get_comment_permission(user, post):
         return True, ""
 
     if mode == Post.COMMENT_FOLLOWERS:
-        if is_follower(user, post.author) or is_supporter(user, post.author):
+        if is_supporter(user, post.author):
             return True, ""
-        return False, "Followers and supporters only."
+        return False, "Supporters only."
 
     if mode == Post.COMMENT_SUBSCRIBERS:
         if is_supporter(user, post.author):
@@ -197,6 +187,9 @@ def toggle_like(request, post_id):
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
         return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if not can_view_post(request.user, post):
+        return Response({"error": "Supporters only."}, status=status.HTTP_403_FORBIDDEN)
 
     like, created = Like.objects.get_or_create(
         post=post,

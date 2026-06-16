@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
@@ -13,6 +13,42 @@ except ImportError:
     stripe = None
 
 User = get_user_model()
+
+
+def parse_monthly_amount(value):
+    try:
+        monthly_amount = Decimal(str(value or "1.00"))
+    except (InvalidOperation, ValueError):
+        return None, "Monthly amount must be a valid number."
+
+    if monthly_amount < Decimal("1.00"):
+        monthly_amount = Decimal("1.00")
+
+    return monthly_amount, ""
+
+
+def parse_billing_date(value):
+    try:
+        billing_date = int(value or 1)
+    except (TypeError, ValueError):
+        return None, "Billing date must be a number from 1 to 31."
+
+    if billing_date < 1 or billing_date > 31:
+        return None, "Billing date must be from 1 to 31."
+
+    return billing_date, ""
+
+
+def get_artist_or_error(artist_id):
+    try:
+        artist = User.objects.get(id=artist_id)
+    except User.DoesNotExist:
+        return None, Response({"error": "Artist not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if artist.user_type != User.ARTIST or not hasattr(artist, "artist_profile"):
+        return None, Response({"error": "Artist profile not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+    return artist, None
 
 
 def create_local_demo_subscription(fan, artist, monthly_amount):
@@ -39,7 +75,20 @@ def create_local_demo_subscription(fan, artist, monthly_amount):
 
 @api_view(["GET"])
 def subscription_list(request):
-    subs = FanSubscription.objects.select_related("fan", "artist").filter(active=True).order_by("-started_at")
+    if not request.user.is_authenticated:
+        return Response({
+            "subscriptions": [],
+            "fan_totals": {},
+            "artist_totals": {},
+        })
+
+    subs = FanSubscription.objects.select_related("fan", "artist").filter(active=True)
+    if request.user.user_type == User.ARTIST:
+        subs = subs.filter(artist=request.user)
+    else:
+        subs = subs.filter(fan=request.user)
+
+    subs = subs.order_by("-started_at")
 
     data = []
     fan_totals = {}
@@ -77,17 +126,17 @@ def subscribe_to_artist(request):
     if not request.user.is_authenticated:
         return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    artist_id = request.data.get("artist_id")
-    monthly_amount = Decimal(str(request.data.get("monthly_amount", "1.00")))
-    billing_date = int(request.data.get("billing_date", 1))
+    monthly_amount, amount_error = parse_monthly_amount(request.data.get("monthly_amount", "1.00"))
+    if amount_error:
+        return Response({"error": amount_error}, status=status.HTTP_400_BAD_REQUEST)
 
-    if monthly_amount < Decimal("1.00"):
-        monthly_amount = Decimal("1.00")
+    billing_date, billing_date_error = parse_billing_date(request.data.get("billing_date", 1))
+    if billing_date_error:
+        return Response({"error": billing_date_error}, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        artist = User.objects.get(id=artist_id)
-    except User.DoesNotExist:
-        return Response({"error": "Artist not found"}, status=status.HTTP_404_NOT_FOUND)
+    artist, artist_error = get_artist_or_error(request.data.get("artist_id"))
+    if artist_error:
+        return artist_error
 
     if request.user == artist:
         return Response({"error": "You cannot subscribe to yourself"}, status=status.HTTP_400_BAD_REQUEST)
@@ -117,16 +166,13 @@ def create_checkout_session(request):
     if not request.user.is_authenticated:
         return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    artist_id = request.data.get("artist_id")
-    monthly_amount = Decimal(str(request.data.get("monthly_amount", "1.00")))
+    monthly_amount, amount_error = parse_monthly_amount(request.data.get("monthly_amount", "1.00"))
+    if amount_error:
+        return Response({"error": amount_error}, status=status.HTTP_400_BAD_REQUEST)
 
-    if monthly_amount < Decimal("1.00"):
-        monthly_amount = Decimal("1.00")
-
-    try:
-        artist = User.objects.get(id=artist_id)
-    except User.DoesNotExist:
-        return Response({"error": "Artist not found"}, status=status.HTTP_404_NOT_FOUND)
+    artist, artist_error = get_artist_or_error(request.data.get("artist_id"))
+    if artist_error:
+        return artist_error
 
     if request.user == artist:
         return Response({"error": "You cannot subscribe to yourself"}, status=status.HTTP_400_BAD_REQUEST)

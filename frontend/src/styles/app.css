@@ -217,6 +217,79 @@ main {
   border: 1px solid rgba(134,239,172,0.25);
 }
 
+.support-dollar {
+  position: relative;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  margin-top: 0;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #f4f4f5;
+  color: #111113;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.26);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 950;
+}
+
+.support-dollar:hover,
+.support-dollar:focus-visible {
+  background: #fde047;
+  color: #111113;
+}
+
+.support-dollar.supported {
+  background: #22c55e;
+  color: #052e16;
+  border-color: rgba(134,239,172,0.65);
+}
+
+.support-dollar.supported:hover,
+.support-dollar.supported:focus-visible {
+  background: #86efac;
+  color: #052e16;
+}
+
+.support-dollar::after {
+  content: attr(aria-label);
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  width: max-content;
+  max-width: 220px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f4f4f5;
+  color: #111113;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.34);
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 850;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  z-index: 20;
+}
+
+.support-dollar:hover::after,
+.support-dollar:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.support-dollar.small {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  font-size: 18px;
+}
+
 .hero-card, .artist-card, .music-card, .post-card, .notice, .anti-bot {
   background: rgba(24,24,27,0.9);
   border: 1px solid rgba(255,255,255,0.08);
@@ -462,6 +535,33 @@ main {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.saved-actions .support-dollar {
+  flex: 0 0 36px;
+}
+
+.locked-support {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-radius: 14px;
+  background: rgba(253,224,71,0.08);
+  border: 1px solid rgba(253,224,71,0.22);
+}
+
+.locked-support strong {
+  display: block;
+  margin-bottom: 3px;
+}
+
+.locked-support p {
+  margin: 0;
+  font-size: 13px;
 }
 
 .artist-card {
@@ -887,13 +987,15 @@ main {
 
 .review-primary-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto;
   gap: 10px;
 }
 
-.review-support {
-  width: auto;
-  margin-top: 0;
+.support-dollar.review {
+  width: 54px;
+  min-width: 54px;
+  height: 54px;
+  font-size: 26px;
 }
 
 .review-controls {
@@ -1338,6 +1440,14 @@ html {
   margin-top: 0;
 }
 
+.profile-actions .support-dollar {
+  width: 54px;
+  min-width: 54px;
+  height: 54px;
+  justify-self: end;
+  font-size: 26px;
+}
+
 .profile-avatar {
   width: 120px;
   height: 120px;
@@ -1663,4 +1773,91 @@ html {
 
 .settings-form button {
   margin-top: 10px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  padding: 18px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.62);
+  backdrop-filter: blur(10px);
+}
+
+.support-sheet {
+  position: relative;
+  width: min(100%, 420px);
+  padding: 24px;
+  border-radius: 18px;
+  background: #18181b;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 28px 90px rgba(0,0,0,0.56);
+}
+
+.support-sheet h2 {
+  margin: 14px 0 8px;
+  font-size: 26px;
+  line-height: 1.05;
+}
+
+.sheet-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: white;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.sheet-dollar {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #fde047;
+  color: #111113;
+  font-size: 28px;
+  font-weight: 950;
+}
+
+.support-breakdown {
+  margin: 18px 0;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.support-breakdown span {
+  color: #a1a1aa;
+}
+
+.sheet-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sheet-actions button {
+  min-height: 46px;
+}
+
+@media (max-width: 520px) {
+  .support-sheet {
+    padding: 22px;
+  }
+
+  .sheet-actions {
+    grid-template-columns: 1fr;
+  }
 }

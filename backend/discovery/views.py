@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from artists.models import ArtistFollow, ArtistProfile
+from artists.models import ArtistProfile
 from .models import ArtistSignal
 from marketplace.models import Product
 from mediahub.models import MusicUpload
@@ -111,7 +111,6 @@ def score_artist(profile, request_user):
 
     connected_artists = []
     if request_user.is_authenticated:
-        followed_ids = ArtistFollow.objects.filter(fan=request_user).values_list("artist_id", flat=True)
         subscribed_ids = FanSubscription.objects.filter(
             fan=request_user,
             active=True,
@@ -120,7 +119,7 @@ def score_artist(profile, request_user):
             fan=request_user,
             signal_type__in=[ArtistSignal.SAVE, ArtistSignal.MORE_LIKE_THIS],
         ).values_list("artist_id", flat=True)
-        connected_artists = ArtistProfile.objects.filter(owner_id__in=set(followed_ids) | set(subscribed_ids) | set(signaled_ids))
+        connected_artists = ArtistProfile.objects.filter(owner_id__in=set(subscribed_ids) | set(signaled_ids))
 
     similarity_points = 0
     for connected in connected_artists:
@@ -135,22 +134,21 @@ def score_artist(profile, request_user):
     score += similarity_points
     add_reason(
         reasons,
-        "Similar to artists you follow or support",
+        "Similar to artists you support or saved",
         similarity_points,
         "similarity",
-        "This artist shares genre, influence, story, or city terms with artists you follow, support, saved, or asked to see more of.",
+        "This artist shares genre, influence, story, or city terms with artists you support, saved, or asked to see more of.",
     )
 
-    followers = ArtistFollow.objects.filter(artist=artist).count()
     supporters = FanSubscription.objects.filter(artist=artist, active=True).count()
-    community_points = min((followers * 2) + (supporters * 5), 15)
+    community_points = min(supporters * 5, 15)
     score += community_points
     add_reason(
         reasons,
         "Early supporter signal",
         community_points,
         "community",
-        f"{followers} followers and {supporters} active supporters are feeding the community score.",
+        f"{supporters} active supporters are feeding the community score.",
     )
 
     tracks = MusicUpload.objects.filter(artist=artist).count()
@@ -192,7 +190,6 @@ def score_artist(profile, request_user):
 
 def serialize_discovery_artist(profile, request, score, reasons):
     artist = profile.owner
-    followers = ArtistFollow.objects.filter(artist=artist).count()
     supporters = FanSubscription.objects.filter(artist=artist, active=True).count()
     tracks = MusicUpload.objects.filter(artist=artist).count()
     posts = Post.objects.filter(author=artist).count()
@@ -205,11 +202,6 @@ def serialize_discovery_artist(profile, request, score, reasons):
             artist=artist,
         ).order_by("-created_at").first()
         viewer_signal = signal.signal_type if signal else None
-    viewer_following = (
-        ArtistFollow.objects.filter(fan=request.user, artist=artist).exists()
-        if request.user.is_authenticated
-        else False
-    )
 
     return {
         "id": profile.id,
@@ -230,14 +222,12 @@ def serialize_discovery_artist(profile, request, score, reasons):
         "discovery_score": round(score, 2),
         "discovery_reasons": reasons[:4],
         "signals": {
-            "followers": followers,
             "supporters": supporters,
             "tracks": tracks,
             "posts": posts,
             "products": products,
         },
         "viewer_signal": viewer_signal,
-        "viewer_following": viewer_following,
     }
 
 

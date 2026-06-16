@@ -16,21 +16,49 @@ Backend: Django, Django REST Framework
 Frontend: React + Vite
 Database: PostgreSQL recommended, SQLite works for first local testing
 
-## Next steps
-1. Create a Python virtual environment inside `backend`.
-2. Install backend requirements.
-3. Run Django migrations.
-4. Seed local demo data:
+## Local setup
+Create a Python virtual environment inside `backend`. Python 3.11 is known to work for this project.
 
 ```bash
 cd backend
-python3 manage.py seed_demo
+python3.11 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+cp .env.example .env
+.venv/bin/python manage.py migrate
+.venv/bin/python manage.py seed_demo
 ```
 
 Demo logins all use `demo12345`:
 - Fan: `demo_fan`
 - Artists: `luna_lane`, `static_harbor`, `mika_north`
 
-5. Start React frontend.
+Start the backend:
+
+```bash
+cd backend
+.venv/bin/python manage.py runserver localhost:8000
+```
+
+Start the frontend:
+
+```bash
+cd frontend
+npm install
+cp .env.example .env.local
+npm run dev -- --host localhost
+```
+
+Run checks before changing behavior:
+
+```bash
+cd backend
+.venv/bin/python manage.py check
+.venv/bin/python manage.py test
+```
+
+```bash
+cd frontend
+npm run build
+```
 
 This is a strong planning/code starter, not a finished production app yet.

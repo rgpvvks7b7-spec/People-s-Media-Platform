@@ -23,7 +23,7 @@ class ArtistProfile(models.Model):
 
     comment_mode = models.CharField(max_length=40, default=COMMENT_SUBSCRIBERS, choices=[
         (COMMENT_ANYONE, "Anyone"),
-        (COMMENT_FOLLOWERS, "Followers and Subscribers"),
+        (COMMENT_FOLLOWERS, "Supporters"),
         (COMMENT_SUBSCRIBERS, "Subscribers Only"),
     ])
 

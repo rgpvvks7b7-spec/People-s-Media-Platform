@@ -50,6 +50,9 @@ def follow_artist(request):
     except User.DoesNotExist:
         return Response({"error": "Artist not found"}, status=status.HTTP_404_NOT_FOUND)
 
+    if artist.user_type != User.ARTIST or not ArtistProfile.objects.filter(owner=artist).exists():
+        return Response({"error": "Artist profile not found"}, status=status.HTTP_400_BAD_REQUEST)
+
     if request.user == artist:
         return Response({"error": "You cannot follow yourself"}, status=status.HTTP_400_BAD_REQUEST)
 

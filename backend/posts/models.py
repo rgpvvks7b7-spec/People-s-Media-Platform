@@ -22,7 +22,7 @@ class Post(models.Model):
     COMMENT_MODES = [
         (COMMENT_DEFAULT, "Use Artist Default"),
         (COMMENT_ANYONE, "Anyone"),
-        (COMMENT_FOLLOWERS, "Followers and Subscribers"),
+        (COMMENT_FOLLOWERS, "Supporters"),
         (COMMENT_SUBSCRIBERS, "Subscribers Only"),
     ]
 
