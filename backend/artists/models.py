@@ -63,12 +63,5 @@ class ArtistFollow(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    show_music = models.BooleanField(default=True)
-    show_posts = models.BooleanField(default=True)
-    show_store = models.BooleanField(default=True)
-    show_lives = models.BooleanField(default=True)
-    show_about = models.BooleanField(default=True)
-
-
     class Meta:
         unique_together = ("fan", "artist")
