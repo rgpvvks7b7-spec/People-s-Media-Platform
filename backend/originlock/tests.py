@@ -252,7 +252,14 @@ class ProductReleaseApprovalTests(APITestCase):
         public = self.client.get("/api/marketplace/")
         payload = next(product for product in public.data if product["id"] == product_id)
         self.assertIn("Origin Locked", payload["origin_badges"])
-        self.assertIn(f"/api/marketplace/files/{product_id}/download/", payload["product_file"])
+        # Paid download copies stay purchase-gated even after sealing.
+        self.assertIsNone(payload["product_file"])
+        self.assertFalse(payload["can_download"])
+
+        self.client.force_authenticate(self.artist)
+        owner = self.client.get("/api/marketplace/")
+        owner_payload = next(product for product in owner.data if product["id"] == product_id)
+        self.assertIn(f"/api/marketplace/files/{product_id}/download/", owner_payload["product_file"])
 
     def test_non_file_product_stays_immediate(self):
         self.client.force_authenticate(self.artist)

@@ -1,6 +1,10 @@
 from django.conf import settings
 from django.db import models
 from artists.models import ArtistProfile
+from originlock.models import (
+    AI_TRAINING_CONSENT_CHOICES,
+    AI_TRAINING_NOT_ALLOWED,
+)
 
 class MusicUpload(models.Model):
     HUMAN_MADE = "human_made"
@@ -23,6 +27,26 @@ class MusicUpload(models.Model):
     )
     title = models.CharField(max_length=160)
     audio_file = models.FileField(upload_to='music/')
+    # Protected-file architecture placeholders. The master stays private;
+    # fans only ever receive the stream copy (via signed tokens) or, after
+    # purchase, the download copy. Until transcoding exists, ``audio_file``
+    # doubles as both and these stay empty.
+    master_file = models.FileField(upload_to='music/masters/', blank=True, null=True)
+    stream_file = models.FileField(upload_to='music/streams/', blank=True, null=True)
+    download_file = models.FileField(upload_to='music/downloads/', blank=True, null=True)
+    file_hash_sha256 = models.CharField(max_length=64, blank=True)
+    # Placeholder for a future perceptual audio fingerprint (e.g. chromaprint).
+    # Never biometric data - it identifies the recording, not a person.
+    acoustic_fingerprint = models.CharField(max_length=255, blank=True)
+    is_master_private = models.BooleanField(default=True)
+    public_stream_enabled = models.BooleanField(default=True)
+    download_requires_purchase = models.BooleanField(default=True)
+    ai_training_consent = models.CharField(
+        max_length=20,
+        choices=AI_TRAINING_CONSENT_CHOICES,
+        default=AI_TRAINING_NOT_ALLOWED,
+    )
+    no_ai_training_notice = models.BooleanField(default=True)
     cover_art = models.ImageField(upload_to='cover_art/', blank=True, null=True)
     library_cover = models.ForeignKey(
         "SongCoverArt",

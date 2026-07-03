@@ -54,9 +54,12 @@ class MarketplaceAccessTests(APITestCase):
         self.assertIsNone(anonymous_payload["preview_audio"])
         self.assertIsNone(anonymous_payload["product_file"])
         self.assertTrue(supporter_payload["can_access"])
-        self.assertIn("/media/marketplace/previews/preview.mp3", supporter_payload["preview_audio"])
-        self.assertIn(f"/api/marketplace/files/{self.product.id}/download/", supporter_payload["product_file"])
-        self.assertNotIn("/media/marketplace/files/pack.zip", supporter_payload["product_file"])
+        # Preview audio is served through the protected endpoint, never /media/.
+        self.assertIn(f"/api/marketplace/files/{self.product.id}/preview/", supporter_payload["preview_audio"])
+        self.assertNotIn("/media/marketplace/previews/preview.mp3", supporter_payload["preview_audio"])
+        # The paid download copy requires a purchase, not just supporter access.
+        self.assertIsNone(supporter_payload["product_file"])
+        self.assertFalse(supporter_payload["can_download"])
 
     def test_inactive_subscription_does_not_unlock_supporter_only_files(self):
         FanSubscription.objects.create(fan=self.fan, artist=self.artist, profession="visual_art", active=False)

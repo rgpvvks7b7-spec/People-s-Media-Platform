@@ -12,12 +12,18 @@ from artists.models import ArtistProfile, FanJourneyEvent
 from subscriptions.models import FanSubscription
 from originlock.services import (
     approvals_for,
+    compute_file_sha256,
     create_pending_approval,
     get_approval_for,
     origin_badges,
     serialize_origin_lock,
 )
-from originlock.models import ReleaseApproval
+from originlock.models import MediaAccessLog, ReleaseApproval
+from originlock.protection import (
+    compute_acoustic_fingerprint,
+    log_media_access,
+    serialize_protection,
+)
 
 _UNSET = object()
 
@@ -136,9 +142,11 @@ def serialize_track(track, request, approval=_UNSET):
 
     can_access = (not track.is_subscriber_only) or has_access(request.user, track.artist, track.profession)
     can_preview = bool(track.is_subscriber_only and track.preview_enabled and track.audio_file)
-    audio_url = resolve_track_audio_url(track, request, "full")
-    preview_url = resolve_track_audio_url(track, request, "preview")
+    stream_allowed = track.public_stream_enabled or is_owner
+    audio_url = resolve_track_audio_url(track, request, "full") if stream_allowed else None
+    preview_url = resolve_track_audio_url(track, request, "preview") if stream_allowed else None
     release_status = approval.approval_status if approval else ReleaseApproval.APPROVED
+    badges = origin_badges(approval)
     payload = {
         "id": track.id,
         "title": track.title,
@@ -166,7 +174,8 @@ def serialize_track(track, request, approval=_UNSET):
         "created_at": track.created_at,
         "release_status": release_status,
         "origin_lock": serialize_origin_lock(approval),
-        "origin_badges": origin_badges(approval),
+        "origin_badges": badges,
+        "protection": serialize_protection(track, badges=badges),
     }
     if is_owner:
         payload["funnel"] = get_track_funnel_metrics(track)
@@ -493,6 +502,8 @@ def create_music(request):
         cover_art=cover_art,
         library_cover=library_cover if not cover_art else None,
         audio_file=audio_file,
+        file_hash_sha256=compute_file_sha256(audio_file),
+        acoustic_fingerprint=compute_acoustic_fingerprint(audio_file),
         is_downloadable=request.data.get("is_downloadable") == "true",
         is_subscriber_only=request.data.get("is_subscriber_only", "true") in {True, "true", "1", "on"},
         preview_enabled=request.data.get("preview_enabled", "true") in {True, "true", "1", "on"},
@@ -662,12 +673,22 @@ def stream_track(request, track_id):
     if not released and not is_owner:
         return Response({"error": "This release has not been finalised yet."}, status=status.HTTP_403_FORBIDDEN)
 
+    if not track.public_stream_enabled and not is_owner:
+        return Response({"error": "Streaming is disabled for this track."}, status=status.HTTP_403_FORBIDDEN)
+
     if access == "preview":
         if not track.is_subscriber_only or not track.preview_enabled:
             return Response({"error": "Preview not available"}, status=status.HTTP_403_FORBIDDEN)
     elif track.is_subscriber_only and not has_access(request.user, track.artist, track.profession):
         if not (request.user.is_authenticated and request.user == track.artist):
             return Response({"error": "Subscription required"}, status=status.HTTP_403_FORBIDDEN)
+
+    log_media_access(
+        request,
+        track,
+        track.artist,
+        MediaAccessLog.PREVIEW if access == "preview" else MediaAccessLog.STREAM,
+    )
 
     content_type = "audio/mpeg"
     name = track.audio_file.name.lower()

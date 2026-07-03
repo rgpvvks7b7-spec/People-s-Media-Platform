@@ -24,8 +24,20 @@ from config.stripe_checkout import (
 from notifications.services import notify_opted_in_supporters
 from subscriptions.models import FanSubscription
 from config.media_access import build_signed_file_url, parse_file_access_token
-from originlock.models import ReleaseApproval
-from originlock.services import approvals_for, create_pending_approval, get_approval_for, origin_badges, serialize_origin_lock
+from originlock.models import MediaAccessLog, ReleaseApproval
+from originlock.protection import (
+    compute_acoustic_fingerprint,
+    log_media_access,
+    serialize_protection,
+)
+from originlock.services import (
+    approvals_for,
+    compute_file_sha256,
+    create_pending_approval,
+    get_approval_for,
+    origin_badges,
+    serialize_origin_lock,
+)
 
 try:
     import stripe
@@ -84,6 +96,17 @@ def has_access(user, artist, profession):
         profession=profession,
         active=True,
     ).exists()
+
+
+def product_download_allowed(user, product, is_owner):
+    """Paid download copies require a purchase unless the artist opts out."""
+    if is_owner:
+        return True
+    if not product.download_requires_purchase:
+        return True
+    if not user.is_authenticated:
+        return False
+    return fan_already_purchased_product(user, product.id)
 
 
 def parse_decimal_or_none(value):
@@ -145,11 +168,18 @@ def product_list(request):
 
         can_access = (not product.is_supporter_only) or has_access(request.user, product.artist, product.profession)
         show_files = can_access and (released or is_owner)
+        can_download = show_files and product.product_file and product_download_allowed(request.user, product, is_owner)
         product_file_url = (
             build_signed_file_url(request, "product", product.id)
-            if product.product_file and show_files
+            if can_download
             else None
         )
+        preview_audio_url = (
+            build_signed_file_url(request, "product_preview", product.id, access="preview")
+            if product.preview_audio and show_files
+            else None
+        )
+        badges = origin_badges(approval)
         data.append({
             "id": product.id,
             "artist_id": product.artist.id,
@@ -164,8 +194,9 @@ def product_list(request):
             "platform_fee": str(product.platform_fee),
             "host_share": str(product.host_share),
             "image": request.build_absolute_uri(product.image.url) if product.image else None,
-            "preview_audio": request.build_absolute_uri(product.preview_audio.url) if product.preview_audio and show_files else None,
+            "preview_audio": preview_audio_url,
             "product_file": product_file_url,
+            "can_download": bool(can_download),
             "external_url": product.external_url,
             "external_discount_code": product.external_discount_code,
             "stock_quantity": product.stock_quantity,
@@ -183,7 +214,8 @@ def product_list(request):
             "created_at": product.created_at,
             "release_status": approval.approval_status if approval else ReleaseApproval.APPROVED,
             "origin_lock": serialize_origin_lock(approval),
-            "origin_badges": origin_badges(approval),
+            "origin_badges": badges,
+            "protection": serialize_protection(product, badges=badges),
         })
 
     return Response(data)
@@ -213,7 +245,51 @@ def download_product_file(request, product_id):
     if not can_access:
         return Response({"error": "Supporters only"}, status=status.HTTP_403_FORBIDDEN)
 
+    if not product_download_allowed(request.user, product, is_owner):
+        return Response({"error": "Purchase required to download this file."}, status=status.HTTP_403_FORBIDDEN)
+
+    log_media_access(request, product, product.artist, MediaAccessLog.DOWNLOAD)
     return FileResponse(product.product_file.open("rb"), as_attachment=True)
+
+
+@api_view(["GET"])
+def preview_product_audio(request, product_id):
+    kind, token_object_id, access = parse_file_access_token(request.GET.get("token", ""))
+    if kind != "product_preview" or token_object_id != product_id or access != "preview":
+        return Response({"error": "Invalid or expired preview token"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        product = Product.objects.select_related("artist").get(id=product_id)
+    except Product.DoesNotExist:
+        raise Http404
+
+    if not product.preview_audio:
+        raise Http404
+
+    is_owner = request.user.is_authenticated and request.user == product.artist
+    approval = get_approval_for(product)
+    released = approval is None or approval.approval_status == ReleaseApproval.APPROVED
+    if not released and not is_owner:
+        return Response({"error": "This release has not been finalised yet."}, status=status.HTTP_403_FORBIDDEN)
+
+    can_access = (not product.is_supporter_only) or has_access(request.user, product.artist, product.profession)
+    if not can_access:
+        return Response({"error": "Supporters only"}, status=status.HTTP_403_FORBIDDEN)
+
+    log_media_access(request, product, product.artist, MediaAccessLog.PREVIEW)
+
+    name = product.preview_audio.name.lower()
+    content_type = "audio/mpeg"
+    if name.endswith(".wav"):
+        content_type = "audio/wav"
+    elif name.endswith(".ogg"):
+        content_type = "audio/ogg"
+    elif name.endswith(".flac"):
+        content_type = "audio/flac"
+    elif name.endswith(".m4a") or name.endswith(".aac"):
+        content_type = "audio/mp4"
+
+    return FileResponse(product.preview_audio.open("rb"), content_type=content_type)
 
 
 @api_view(["POST"])
@@ -251,6 +327,8 @@ def create_product(request):
         image=image,
         preview_audio=preview_audio,
         product_file=product_file,
+        file_hash_sha256=compute_file_sha256(product_file) if product_file else "",
+        acoustic_fingerprint=compute_acoustic_fingerprint(product_file) if product_file else "",
         external_url=request.data.get("external_url", ""),
         external_discount_code=request.data.get("external_discount_code", ""),
         stock_quantity=request.data.get("stock_quantity", 0) or 0,

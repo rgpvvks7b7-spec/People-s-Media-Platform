@@ -9,6 +9,7 @@ _file_signer = TimestampSigner(salt="originlock-file")
 # these kinds so downloads can be revoked and time-limited.
 FILE_ACCESS_PATHS = {
     "product": "/api/marketplace/files/{object_id}/download/",
+    "product_preview": "/api/marketplace/files/{object_id}/preview/",
 }
 
 

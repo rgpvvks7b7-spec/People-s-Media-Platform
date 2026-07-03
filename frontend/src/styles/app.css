@@ -7970,6 +7970,29 @@ h3 .artist-name-link.click-title:focus-visible {
   text-transform: none;
 }
 
+.protection-badges span {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+  text-transform: none;
+}
+
+.protected-work-notice {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.product-download-link {
+  display: inline-block;
+  margin-top: 8px;
+  text-decoration: none;
+  text-align: center;
+}
+
 .origin-lock-pending {
   display: flex;
   align-items: center;

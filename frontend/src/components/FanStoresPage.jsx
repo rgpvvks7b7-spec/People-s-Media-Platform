@@ -62,6 +62,11 @@ export function FanStoresPage({
                 />
               </p>
               <h3>{product.title}</h3>
+              {product.protection?.labels?.length > 0 && (
+                <div className="post-badges protection-badges">
+                  {product.protection.labels.map(label => <span key={label}>{label}</span>)}
+                </div>
+              )}
               <p>{product.description}</p>
               <strong>${product.price}</strong>
               {isPurchasableProduct(product) && (
@@ -80,6 +85,14 @@ export function FanStoresPage({
                 >
                   {currentTrack?.id === product.id && currentTrack?.is_product && isPlaying ? "Pause preview" : "Play preview"}
                 </button>
+              )}
+              {product.product_file && product.can_download && (
+                <a className="secondary compact product-download-link" href={product.product_file} download>
+                  Download
+                </a>
+              )}
+              {product.protection?.notice && (
+                <p className="protected-work-notice">{product.protection.notice}</p>
               )}
               {!product.can_access && renderLockedProductPrompt?.(product)}
             </div>

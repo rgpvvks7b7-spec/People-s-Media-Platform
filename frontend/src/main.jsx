@@ -233,6 +233,29 @@ function formatTime(seconds) {
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 }
 
+function ProtectionBadges({ protection }) {
+  if (!protection?.labels?.length) return null;
+  return (
+    <div className="post-badges protection-badges">
+      {protection.labels.map(label => <span key={label}>{label}</span>)}
+    </div>
+  );
+}
+
+function ProtectedWorkNotice({ protection }) {
+  if (!protection?.notice) return null;
+  return <p className="protected-work-notice">{protection.notice}</p>;
+}
+
+function ProductDownloadButton({ product }) {
+  if (!product.product_file || !product.can_download) return null;
+  return (
+    <a className="secondary compact product-download-link" href={product.product_file} download>
+      Download
+    </a>
+  );
+}
+
 function GlobalPlayer({
   track,
   isPlaying,
@@ -10172,6 +10195,7 @@ function App() {
                         {track.origin_badges.map(badge => <span key={badge}>{badge}</span>)}
                       </div>
                     )}
+                    <ProtectionBadges protection={track.protection} />
                     {isOwner && track.release_status === "pending" && (
                       <div className="origin-lock-pending">
                         <span className="origin-lock-pending-label">Not published yet</span>
@@ -10690,6 +10714,7 @@ function App() {
                             {product.origin_badges.map(badge => <span key={badge}>{badge}</span>)}
                           </div>
                         )}
+                        <ProtectionBadges protection={product.protection} />
                         {isOwner && product.release_status === "pending" && (
                           <div className="origin-lock-pending">
                             <span className="origin-lock-pending-label">Not published yet</span>
@@ -10725,12 +10750,14 @@ function App() {
                             {currentTrack?.id === product.id && currentTrack?.is_product && isPlaying ? "Pause Preview" : "Play Preview"}
                           </button>
                         )}
-                        {product.product_file && <p className="muted">Download file uploaded ✅</p>}
+                        {isOwner && product.product_file && <p className="muted">Download file uploaded ✅</p>}
+                        {!isOwner && <ProductDownloadButton product={product} />}
                         {product.external_url && (
                           <button className="secondary compact" onClick={() => openExternalSocial(buildExternalStoreUrl(product), "external store")}>
                             Open Store
                           </button>
                         )}
+                        <ProtectedWorkNotice protection={product.protection} />
                         {!product.can_access && renderLockedProductPrompt(product)}
                       </div>
                     </article>
@@ -10788,6 +10815,7 @@ function App() {
                           {product.origin_badges.map(badge => <span key={badge}>{badge}</span>)}
                         </div>
                       )}
+                      <ProtectionBadges protection={product.protection} />
                       {isOwner && product.release_status === "pending" && (
                         <div className="origin-lock-pending">
                           <span className="origin-lock-pending-label">Not published yet</span>
@@ -10820,6 +10848,8 @@ function App() {
                           {currentTrack?.id === product.id && currentTrack?.is_product && isPlaying ? "Pause Preview" : "Play Preview"}
                         </button>
                       )}
+                      {!isOwner && <ProductDownloadButton product={product} />}
+                      <ProtectedWorkNotice protection={product.protection} />
                       {!product.can_access && renderLockedProductPrompt(product)}
                     </div>
                   </article>
@@ -11345,6 +11375,7 @@ function App() {
                           {track.ai_disclosure_badge && (
                             <div className="post-badges ai-badges"><span>{track.ai_disclosure_badge}</span></div>
                           )}
+                          <ProtectionBadges protection={track.protection} />
                           {renderTrackTitle(track, { className: "track-name-link click-title" })}
                           <p className="muted">
                             {renderArtistName(track.artist_username)} • {track.genre} • {formatTrackBpm(track.bpm)}

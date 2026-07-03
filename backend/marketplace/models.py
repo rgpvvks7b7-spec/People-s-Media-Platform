@@ -7,6 +7,10 @@ from config.platform_fees import (
     split_amount,
     split_ticket_sale,
 )
+from originlock.models import (
+    AI_TRAINING_CONSENT_CHOICES,
+    AI_TRAINING_NOT_ALLOWED,
+)
 
 class Product(models.Model):
     MERCH = "merch"
@@ -70,6 +74,25 @@ class Product(models.Model):
     image = models.ImageField(upload_to="marketplace/images/", blank=True, null=True)
     preview_audio = models.FileField(upload_to="marketplace/previews/", blank=True, null=True)
     product_file = models.FileField(upload_to="marketplace/files/", blank=True, null=True)
+    # Protected-file architecture placeholders. The master stays private;
+    # buyers only ever receive the paid download copy behind signed tokens.
+    # Until transcoding exists, ``product_file`` doubles as both.
+    master_file = models.FileField(upload_to="marketplace/masters/", blank=True, null=True)
+    stream_file = models.FileField(upload_to="marketplace/streams/", blank=True, null=True)
+    download_file = models.FileField(upload_to="marketplace/downloads/", blank=True, null=True)
+    file_hash_sha256 = models.CharField(max_length=64, blank=True)
+    # Placeholder for a future perceptual audio fingerprint (e.g. chromaprint).
+    # Never biometric data - it identifies the recording, not a person.
+    acoustic_fingerprint = models.CharField(max_length=255, blank=True)
+    is_master_private = models.BooleanField(default=True)
+    public_stream_enabled = models.BooleanField(default=True)
+    download_requires_purchase = models.BooleanField(default=True)
+    ai_training_consent = models.CharField(
+        max_length=20,
+        choices=AI_TRAINING_CONSENT_CHOICES,
+        default=AI_TRAINING_NOT_ALLOWED,
+    )
+    no_ai_training_notice = models.BooleanField(default=True)
     external_url = models.URLField(blank=True)
     external_discount_code = models.CharField(max_length=80, blank=True)
 

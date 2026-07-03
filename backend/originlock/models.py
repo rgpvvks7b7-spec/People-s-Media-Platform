@@ -16,6 +16,20 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+# AI training consent values shared by MusicUpload and Product.
+# "not_allowed" is the protective default: works are opted out of AI training
+# unless the artist explicitly allows it. This is a legal/policy signal, not a
+# technical guarantee that public audio can never be analysed.
+AI_TRAINING_ALLOWED = "allowed"
+AI_TRAINING_NOT_ALLOWED = "not_allowed"
+AI_TRAINING_UNKNOWN = "unknown"
+
+AI_TRAINING_CONSENT_CHOICES = [
+    (AI_TRAINING_ALLOWED, "Allowed"),
+    (AI_TRAINING_NOT_ALLOWED, "Not allowed"),
+    (AI_TRAINING_UNKNOWN, "Unknown"),
+]
+
 
 class ReleaseApproval(models.Model):
     PENDING = "pending"
@@ -134,3 +148,116 @@ class WebAuthnChallenge(models.Model):
 
     def __str__(self):
         return f"WebAuthnChallenge({self.user_id}:{self.purpose})"
+
+
+class MediaAccessLog(models.Model):
+    """One row per protected-file access (stream, download, or preview).
+
+    This is the audit trail behind the anti-scraping foundation: abuse
+    detection reads from it and admins can inspect who touched which file.
+    """
+
+    STREAM = "stream"
+    DOWNLOAD = "download"
+    PREVIEW = "preview"
+
+    ACCESS_TYPES = [
+        (STREAM, "Stream"),
+        (DOWNLOAD, "Download"),
+        (PREVIEW, "Preview"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="media_access_logs",
+    )
+    artist = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="media_access_logs_as_artist",
+    )
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    access_type = models.CharField(max_length=20, choices=ACCESS_TYPES)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.CharField(max_length=400, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["content_type", "object_id", "created_at"]),
+            models.Index(fields=["artist", "created_at"]),
+            models.Index(fields=["ip_address", "created_at"]),
+        ]
+
+    def __str__(self):
+        return f"MediaAccessLog({self.access_type} {self.content_type_id}:{self.object_id})"
+
+
+class MediaAbuseFlag(models.Model):
+    """Raised when access patterns look like scraping or mass-downloading.
+
+    Heuristic only: flags are for admin review, not automatic punishment.
+    """
+
+    TOO_MANY_STREAMS = "too_many_streams"
+    TOO_MANY_DOWNLOADS = "too_many_downloads"
+    BOT_LIKE_ACCESS = "bot_like_access"
+    REPEATED_FULL_TRACK_ACCESS = "repeated_full_track_access"
+
+    FLAG_TYPES = [
+        (TOO_MANY_STREAMS, "Too many streams"),
+        (TOO_MANY_DOWNLOADS, "Too many downloads"),
+        (BOT_LIKE_ACCESS, "Bot-like access"),
+        (REPEATED_FULL_TRACK_ACCESS, "Repeated full track access"),
+    ]
+
+    OPEN = "open"
+    REVIEWED = "reviewed"
+    DISMISSED = "dismissed"
+
+    STATUS_CHOICES = [
+        (OPEN, "Open"),
+        (REVIEWED, "Reviewed"),
+        (DISMISSED, "Dismissed"),
+    ]
+
+    flag_type = models.CharField(max_length=40, choices=FLAG_TYPES)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="media_abuse_flags",
+    )
+    artist = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="media_abuse_flags_as_artist",
+    )
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
+    object_id = models.PositiveIntegerField(blank=True, null=True)
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    detail = models.CharField(max_length=300, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=OPEN)
+    created_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["flag_type", "status"]),
+        ]
+
+    def __str__(self):
+        return f"MediaAbuseFlag({self.flag_type}) [{self.status}]"
