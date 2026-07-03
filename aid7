@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+exec "$(dirname "$0")/scripts/aider_open.py" "ollama/qwen2.5-coder:7b"

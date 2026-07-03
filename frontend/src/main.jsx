@@ -12,6 +12,7 @@ import { FanStoresPage } from "./components/FanStoresPage.jsx";
 import { FanSubscriptionsRail } from "./components/FanSubscriptionsRail.jsx";
 import { FanFeedUpdateCard } from "./components/FanFeedUpdateCard.jsx";
 import { ArtistThemeSettings } from "./components/ArtistThemeSettings.jsx";
+import { ArtistVisitorBanner } from "./components/ArtistVisitorBanner.jsx";
 import { LiveTab } from "./components/LiveTab.jsx";
 import { MyScenePage } from "./components/MyScene.jsx";
 import { TicketStubIconButton, TicketStubNavIcon, TicketStubSheet } from "./components/TicketStubSheet.jsx";
@@ -27,6 +28,7 @@ import { SpaceListingAvailabilityPicker, slotsToWindows } from "./components/Spa
 import { SpaceListingCardPreview, SpaceListingDetailModal } from "./components/SpaceListingDetailModal.jsx";
 import { ExternalLinkConfirm, PlaylistPickerSheet, PreviewBeforeShareSheet, ProductTypePicker, SupportConfirmSheet } from "./components/Modals.jsx";
 import { StoreCart } from "./components/StoreCart.jsx";
+import { FinalizeReleasePanel } from "./components/FinalizeReleasePanel.jsx";
 import { SpaceListingWizard } from "./components/SpaceListingWizard.jsx";
 import { ArtistTopbar, MainTopbar } from "./components/Topbar.jsx";
 import { LegalFooter, LegalPageView } from "./components/LegalPages.jsx";
@@ -60,10 +62,18 @@ import { getLegalPage, LEGAL_PAGE_IDS } from "./legal/index.js";
 import { fetchArtistMeta, updateArtistPageMeta, updateLegalPageMeta } from "./lib/seo.js";
 import { resolveArtistThemeName, resolvePersonalAppTheme, normalizeThemeId, normalizeHostThemeId, DEFAULT_THEME } from "./lib/themes.js";
 import { resolveSettingsSection } from "./lib/profileSettings.js";
+import { buildProductPageUrl, readArtistDeepLinkParams } from "./lib/productLinks.js";
 import { getStructuredWindows, validateBookingWindow } from "./lib/spaceAvailability.js";
 import "./styles/app.css";
 
-const API = (import.meta.env.VITE_API_URL || "http://localhost:8000/api").replace(/\/$/, "");
+function resolveApiBase() {
+  const configured = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
+  if (configured.startsWith("/")) return configured;
+  if (import.meta.env.DEV && typeof window !== "undefined") return "/api";
+  return configured;
+}
+
+const API = resolveApiBase();
 const FAN_PAGES = new Set(["home", "feed", "listen", "discover", "music", "my-music", "my-scene", "stores", "spaces", "notifications", "profile", "promote", "ads-manager", "faq", "prelaunch"]);
 const FAN_ARTIST_RAIL_PAGES = new Set(["home", "feed", "my-scene", "listen", "my-music", "stores"]);
 const HOST_PAGES = new Set(["spaces", "notifications", "profile", "faq"]);
@@ -576,6 +586,7 @@ function App() {
   const [showPovForm, setShowPovForm] = useState(false);
   const [showInstantForm, setShowInstantForm] = useState(false);
   const [showMusicForm, setShowMusicForm] = useState(false);
+  const [pendingRelease, setPendingRelease] = useState(null);
   const [showSongCoverForm, setShowSongCoverForm] = useState(false);
   const [trackCoverMode, setTrackCoverMode] = useState("upload");
   const [selectedLibraryCoverId, setSelectedLibraryCoverId] = useState("");
@@ -623,8 +634,10 @@ function App() {
   ]);
   const livePreviewRef = useRef(null);
   const [previewAsFan, setPreviewAsFan] = useState(false);
+  const [highlightedProductId, setHighlightedProductId] = useState("");
   const [showPreviewBeforeShare, setShowPreviewBeforeShare] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [visitorBannerSaving, setVisitorBannerSaving] = useState(false);
   const [subData, setSubData] = useState({ subscriptions: [], fan_totals: {}, artist_totals: {} });
   const [supportTiers, setSupportTiers] = useState([]);
   const [tipData, setTipData] = useState({ results: [], count: 0 });
@@ -1877,14 +1890,43 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const artistUsername = params.get("artist");
     const profession = params.get("profession") || "";
+    const { tab, productId } = readArtistDeepLinkParams(window.location.search);
     if (!artistUsername || artists.length === 0) return;
-    if (selectedArtist?.owner_username === artistUsername && (!profession || profession === activeProfession)) return;
 
     const artist = artists.find(item => item.owner_username === artistUsername);
-    if (artist) {
-      openArtist(artist, false, { profession });
+    if (!artist) return;
+
+    const sameArtist = selectedArtist?.owner_username === artistUsername;
+    const sameProfession = !profession || profession === activeProfession;
+    if (sameArtist && sameProfession && !productId) {
+      if (!tab) return;
+      const mapped = LEGACY_PROFILE_TAB_MAP[tab];
+      if (mapped) {
+        const shopMatches = !mapped.shopTab || activeShopTab === mapped.shopTab;
+        if (activeTab === mapped.section && shopMatches) return;
+      }
     }
-  }, [artists, selectedArtist?.owner_username, activeProfession]);
+
+    openArtist(artist, false, { profession, tab, productId });
+  }, [artists, selectedArtist?.owner_username, activeProfession, activeTab, activeShopTab]);
+
+  useEffect(() => {
+    if (!highlightedProductId) return undefined;
+
+    const frameId = window.requestAnimationFrame(() => {
+      const element = document.getElementById(`product-${highlightedProductId}`);
+      if (!element) return;
+
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      element.classList.add("product-card--highlight");
+      window.setTimeout(() => {
+        element.classList.remove("product-card--highlight");
+        setHighlightedProductId("");
+      }, 3200);
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [highlightedProductId, products, activeTab, activeShopTab, selectedArtist?.owner_id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -2173,8 +2215,11 @@ function App() {
 
   function navigateProfileSection(section, { shopTab, moreTab } = {}) {
     const mapped = LEGACY_PROFILE_TAB_MAP[section] || { section };
-    setActiveTab(mapped.section);
-    if (mapped.shopTab || shopTab) {
+    const nextSection = mapped.section || section;
+    setActiveTab(nextSection);
+    if (nextSection === "shop" && shopTab) {
+      setActiveShopTab(shopTab);
+    } else if (mapped.shopTab || shopTab) {
       setActiveShopTab(shopTab || mapped.shopTab);
     }
     if (mapped.moreTab || moreTab) {
@@ -2203,19 +2248,38 @@ function App() {
     return professions[0]?.key || DEFAULT_PROFESSION;
   }
 
-  function buildArtistPageUrl(artist, profession = "", ref = "") {
+  function buildArtistPageUrl(artist, profession = "", { ref = "", tab = "", productId = "" } = {}) {
     const params = new URLSearchParams({ artist: artist.owner_username });
     if (profession) params.set("profession", profession);
     if (ref) params.set("ref", ref);
+    if (tab) params.set("tab", tab);
+    if (productId) params.set("product", String(productId));
     return `${window.location.pathname}?${params.toString()}`;
   }
 
-  function updateArtistPageUrl(artist, profession = "", { replace = false, ref = "" } = {}) {
-    const url = buildArtistPageUrl(artist, profession, ref);
+  function updateArtistPageUrl(artist, profession = "", { replace = false, ref = "", tab = "", productId = "" } = {}) {
+    const url = buildArtistPageUrl(artist, profession, { ref, tab, productId });
     if (replace) {
       window.history.replaceState({}, "", url);
     } else {
       window.history.pushState({}, "", url);
+    }
+  }
+
+  function applyArtistPageRoute(options = {}) {
+    const mapped = options.tab ? LEGACY_PROFILE_TAB_MAP[options.tab] : null;
+    if (mapped) {
+      setActiveTab(mapped.section);
+      if (mapped.shopTab) setActiveShopTab(mapped.shopTab);
+      if (mapped.moreTab) setActiveMoreTab(mapped.moreTab);
+    } else if (options.shopTab) {
+      setActiveTab("shop");
+      setActiveShopTab(options.shopTab);
+    } else if (options.sectionTab) {
+      setActiveTab(options.sectionTab);
+    }
+    if (options.productId) {
+      setHighlightedProductId(String(options.productId));
     }
   }
 
@@ -2601,6 +2665,14 @@ function App() {
 
   async function shareArtistPageLink(ref = "") {
     copyText(getArtistPublicUrl(ref), "Public page link copied.");
+  }
+
+  async function copyProductLink(product, artist = selectedArtist) {
+    const url = buildProductPageUrl(product, {
+      artistUsername: artist?.owner_username || product.artist_username || currentUser?.username || "",
+      profession: product.profession || activeProfession,
+    });
+    await copyText(url, "Product link copied.");
   }
 
   function openExternalSocial(url, provider = "social platform") {
@@ -3582,7 +3654,7 @@ function App() {
       loadArtistDashboard();
       return;
     }
-    setMessage(data.error || data.message || "Purchase failed.");
+    setMessage(data.error || data.detail || data.message || "Purchase failed.");
   }
 
   function parseNotificationTarget(targetUrl = "") {
@@ -3705,6 +3777,13 @@ function App() {
     const data = await res.json();
     setMessage(data.message || data.error || "Product saved.");
     setStoreFormType(null);
+    if (res.ok && data.release_approval_id) {
+      setPendingRelease({
+        id: data.release_approval_id,
+        content_title: data.title,
+        file_name: data.title,
+      });
+    }
     loadData();
   }
 
@@ -3997,6 +4076,14 @@ function App() {
     setSelectedLibraryCoverId("");
     setSaveCoverToLibrary(true);
     setAiDisclosureLevel("human_made");
+    if (res.ok && data.release_approval_id) {
+      setPendingRelease({
+        id: data.release_approval_id,
+        content_title: data.title,
+        file_name: data.title,
+        ai_usage_status: aiDisclosureLevel,
+      });
+    }
     loadData();
   }
 
@@ -4681,6 +4768,37 @@ function App() {
     });
   }
 
+  async function saveVisitorBanner({ file, durationSeconds, clear } = {}) {
+    const artist = selectedArtist || getCurrentArtist();
+    if (!artist) return;
+
+    setVisitorBannerSaving(true);
+    const formData = new FormData();
+    formData.append("stage_name", artist.stage_name);
+    formData.append("active_profession", activeProfession);
+    if (file) formData.append("profession_visitor_banner", file);
+    if (durationSeconds) formData.append("profession_visitor_banner_duration", String(durationSeconds));
+    if (clear) formData.append("profession_clear_visitor_banner", "true");
+
+    try {
+      const res = await apiFetch("/artists/update-profile/", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      setMessage(data.message || data.error || (clear ? "Visitor visual removed." : "Visitor visual saved."));
+      if (res.ok) {
+        loadData();
+        setSelectedArtist(current => (current ? {
+          ...current,
+          profession_profiles: data.profession_profiles || current.profession_profiles,
+        } : current));
+      }
+    } finally {
+      setVisitorBannerSaving(false);
+    }
+  }
+
 
   async function savePageBuilder(event) {
     event.preventDefault();
@@ -4789,11 +4907,23 @@ function App() {
     const profession = resolveArtistProfession(artist, options.profession || "");
     setSelectedArtist(artist);
     setActiveProfession(profession);
-    setActiveTab(options.tab || primaryContentTab(profession));
-    setActiveShopTab(options.shopTab || "merch");
-    setActiveMoreTab("settings");
+    if (options.tab || options.shopTab || options.sectionTab) {
+      applyArtistPageRoute(options);
+    } else {
+      setActiveTab(primaryContentTab(profession));
+      setActiveShopTab(options.shopTab || "merch");
+      setActiveMoreTab("settings");
+    }
+    if (options.productId) {
+      setHighlightedProductId(String(options.productId));
+    }
     if (updateUrl) {
-      updateArtistPageUrl(artist, profession);
+      const shopTab = options.tab ? (LEGACY_PROFILE_TAB_MAP[options.tab]?.shopTab || options.tab) : "";
+      updateArtistPageUrl(artist, profession, {
+        replace: options.replaceUrl,
+        tab: shopTab || options.shopTab || "",
+        productId: options.productId || "",
+      });
     }
     apiFetch("/artists/page-view/", {
       method: "POST",
@@ -6191,6 +6321,13 @@ function App() {
     );
   }
 
+  function resolveStudioTabUrlParam(tab, mapped) {
+    if (mapped.shopTab) return mapped.shopTab;
+    if (mapped.moreTab) return mapped.moreTab;
+    if (LEGACY_PROFILE_TAB_MAP[tab]) return tab;
+    return "";
+  }
+
   function openStudioTab(tab, options = {}) {
     const artist = getCurrentArtist();
 
@@ -6200,7 +6337,10 @@ function App() {
     }
 
     setPreviewAsFan(false);
-    setActivePage("home");
+    const onOwnArtistPage = selectedArtist?.owner_username === currentUser?.username;
+    if (!onOwnArtistPage) {
+      setActivePage("home");
+    }
     setSelectedArtist(artist);
     const profession = resolveArtistProfession(artist, options.profession || activeProfession);
     setActiveProfession(profession);
@@ -6215,7 +6355,10 @@ function App() {
     }
 
     if (options.updateUrl !== false) {
-      updateArtistPageUrl(artist, profession, { replace: true });
+      updateArtistPageUrl(artist, profession, {
+        replace: true,
+        tab: resolveStudioTabUrlParam(tab, mapped),
+      });
     }
 
     if (options.createPost) setShowPostForm(true);
@@ -7149,6 +7292,39 @@ function App() {
 
   function renderLockedProductPrompt(product) {
     return renderLockedContentPrompt(artistFromUsername(product.artist_username), "this item");
+  }
+
+  function renderProductTitle(product) {
+    if (!isOwner || previewAsFan) {
+      return <h3>{product.title}</h3>;
+    }
+
+    return (
+      <h3>
+        <button
+          type="button"
+          className="product-title-link"
+          aria-label={`Copy link for ${product.title}`}
+          onClick={() => copyProductLink(product)}
+        >
+          {product.title}
+        </button>
+      </h3>
+    );
+  }
+
+  function renderProductLinkAction(product) {
+    if (!isOwner || previewAsFan) return null;
+
+    return (
+      <button
+        className="secondary compact product-copy-link"
+        type="button"
+        onClick={() => copyProductLink(product)}
+      >
+        Copy product link
+      </button>
+    );
   }
 
   function openChallengeAction(challenge) {
@@ -9203,12 +9379,20 @@ function App() {
 
         {message && <div className="notice">{message}</div>}
 
-        {showPublicProfileHero && (
-        <section className="profile-hero">
-          <div
-            className="profile-banner"
-            style={activeCoverImage ? { backgroundImage: `url(${activeCoverImage})` } : undefined}
-          ></div>
+        {(showPublicProfileHero || isOwner) && (
+        <section className={`profile-hero${!showPublicProfileHero && isOwner ? " profile-hero--banner-only" : ""}`}>
+          <ArtistVisitorBanner
+            artistId={selectedArtist.owner_id}
+            profession={activeProfession}
+            bannerUrl={activeProfessionProfile?.visitor_banner}
+            bannerDurationSeconds={activeProfessionProfile?.visitor_banner_duration_seconds || 30}
+            fallbackCoverImage={activeCoverImage}
+            isOwner={isOwner}
+            isSaving={visitorBannerSaving}
+            onSaveVisitorBanner={saveVisitorBanner}
+          />
+          {showPublicProfileHero && (
+          <>
           <div className="profile-info">
             <div className="profile-avatar">
               {selectedArtist.avatar
@@ -9529,6 +9713,8 @@ function App() {
               </div>
             </section>
           )}
+          </>
+          )}
         </section>
         )}
 
@@ -9588,12 +9774,14 @@ function App() {
         </section>
 
         {profileSection === "shop" && shopSubTabs.length > 0 && (
-          <section className="tabs tabs--sub" aria-label="Shop">
+          <section className="shop-tabs" role="tablist" aria-label="Shop">
             {shopSubTabs.map(shopTab => (
               <button
                 key={shopTab}
                 type="button"
-                className={resolvedShopTab === shopTab ? "tab active" : "tab"}
+                role="tab"
+                aria-selected={resolvedShopTab === shopTab}
+                className={resolvedShopTab === shopTab ? "shop-tab is-active" : "shop-tab"}
                 onClick={() => navigateProfileSection("shop", { shopTab })}
               >
                 {getProfileShopLabel(shopTab)}
@@ -9940,7 +10128,7 @@ function App() {
                   </label>
 
                   <div className="action-grid">
-                    <button className="primary" type="submit">Publish Track</button>
+                    <button className="primary" type="submit">Upload Track</button>
                     <button
                       className="secondary"
                       type="button"
@@ -9978,6 +10166,28 @@ function App() {
                     )}
                     {track.ai_disclosure_badge && (
                       <div className="post-badges ai-badges"><span>{track.ai_disclosure_badge}</span></div>
+                    )}
+                    {track.origin_badges?.length > 0 && (
+                      <div className="post-badges origin-lock-badges">
+                        {track.origin_badges.map(badge => <span key={badge}>{badge}</span>)}
+                      </div>
+                    )}
+                    {isOwner && track.release_status === "pending" && (
+                      <div className="origin-lock-pending">
+                        <span className="origin-lock-pending-label">Not published yet</span>
+                        <button
+                          className="secondary compact"
+                          type="button"
+                          onClick={() => setPendingRelease({
+                            id: track.origin_lock?.id,
+                            content_title: track.title,
+                            file_name: track.origin_lock?.file_name || track.title,
+                            ai_usage_status: track.ai_disclosure_level,
+                          })}
+                        >
+                          Finalise Release
+                        </button>
+                      </div>
                     )}
                     {renderTrackTitle(track, { className: "track-name-link click-title" })}
                     <p>{track.genre} • {formatTrackBpm(track.bpm)}</p>
@@ -10425,7 +10635,7 @@ function App() {
                   )}
 
                   <div className="action-grid">
-                    <button className="primary" type="submit">Save Product</button>
+                    <button className="primary" type="submit">Upload Product</button>
                     <button className="secondary" type="button" onClick={() => setStoreFormType(null)}>Cancel</button>
                   </div>
                 </form>
@@ -10441,7 +10651,7 @@ function App() {
               {artistProducts.filter(p => !MUSIC_PRODUCT_TYPES.includes(p.product_type)).length > 0 && (
                 <div className="product-grid">
                   {artistProducts.filter(p => !MUSIC_PRODUCT_TYPES.includes(p.product_type)).map(product => (
-                    <article className="product-card" key={product.id}>
+                    <article className="product-card" id={`product-${product.id}`} key={product.id}>
                       {product.image && <img src={product.image} alt={product.title} />}
                       <div>
                         <p className="eyebrow">{productTypeLabel(product.product_type)}</p>
@@ -10475,9 +10685,31 @@ function App() {
                         {product.external_discount_code && (
                           <div className="post-badges"><span>Member code: {product.external_discount_code}</span></div>
                         )}
-                        <h3>{product.title}</h3>
+                        {product.origin_badges?.length > 0 && (
+                          <div className="post-badges origin-lock-badges">
+                            {product.origin_badges.map(badge => <span key={badge}>{badge}</span>)}
+                          </div>
+                        )}
+                        {isOwner && product.release_status === "pending" && (
+                          <div className="origin-lock-pending">
+                            <span className="origin-lock-pending-label">Not published yet</span>
+                            <button
+                              className="secondary compact"
+                              type="button"
+                              onClick={() => setPendingRelease({
+                                id: product.origin_lock?.id,
+                                content_title: product.title,
+                                file_name: product.origin_lock?.file_name || product.title,
+                              })}
+                            >
+                              Finalise Release
+                            </button>
+                          </div>
+                        )}
+                        {renderProductTitle(product)}
                         <p>{product.description}</p>
                         <strong>${product.price}</strong>
+                        {renderProductLinkAction(product)}
                         {isPurchasableProduct(product) && (
                           <div className="product-buy-row">
                             {isCartableProduct(product) && (
@@ -10546,13 +10778,35 @@ function App() {
 
               <div className="product-grid">
                 {artistProducts.filter(p => MUSIC_PRODUCT_TYPES.includes(p.product_type)).map(product => (
-                  <article className="product-card" key={product.id}>
+                  <article className="product-card" id={`product-${product.id}`} key={product.id}>
                     {product.image && <img src={product.image} alt={product.title} />}
                     <div>
                       <p className="eyebrow">{productTypeLabel(product.product_type)}</p>
-                      <h3>{product.title}</h3>
+                      {renderProductTitle(product)}
+                      {product.origin_badges?.length > 0 && (
+                        <div className="post-badges origin-lock-badges">
+                          {product.origin_badges.map(badge => <span key={badge}>{badge}</span>)}
+                        </div>
+                      )}
+                      {isOwner && product.release_status === "pending" && (
+                        <div className="origin-lock-pending">
+                          <span className="origin-lock-pending-label">Not published yet</span>
+                          <button
+                            className="secondary compact"
+                            type="button"
+                            onClick={() => setPendingRelease({
+                              id: product.origin_lock?.id,
+                              content_title: product.title,
+                              file_name: product.origin_lock?.file_name || product.title,
+                            })}
+                          >
+                            Finalise Release
+                          </button>
+                        </div>
+                      )}
                       <p>{product.description}</p>
                       <strong>${product.price}</strong>
+                      {renderProductLinkAction(product)}
                       {isPurchasableProduct(product) && (
                         <div className="product-buy-row">
                           {isCartableProduct(product) && (
@@ -11200,6 +11454,20 @@ function App() {
           onClose={() => setShowStoreCart(false)}
           onOpenArtist={openArtistByUsername}
           onRemove={removeFromCart}
+        />
+      )}
+
+      {pendingRelease && (
+        <FinalizeReleasePanel
+          release={pendingRelease}
+          currentUser={currentUser}
+          apiFetch={apiFetch}
+          onClose={() => setPendingRelease(null)}
+          onMessage={setMessage}
+          onSealed={() => {
+            setPendingRelease(null);
+            loadData();
+          }}
         />
       )}
 

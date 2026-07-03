@@ -26,6 +26,15 @@ def env_list(name, default=None):
     return [item.strip() for item in value.split(',') if item.strip()]
 
 
+def default_frontend_origins():
+    origins = []
+    for port in (5173, 5180, 4173):
+        origins.extend([f'http://localhost:{port}', f'http://127.0.0.1:{port}'])
+    frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173').rstrip('/')
+    if frontend_url and frontend_url not in origins:
+        origins.append(frontend_url)
+    return origins
+
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-only-change-this')
 DEBUG = env_bool('DEBUG', True)
 ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', [])
@@ -54,6 +63,7 @@ INSTALLED_APPS = [
     'promotions',
     'campaigns',
     'moderation',
+    'originlock',
 ]
 
 MIDDLEWARE = [
@@ -140,7 +150,7 @@ FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 from config.platform_mode import normalize_platform_mode
 
 PLATFORM_MODE = normalize_platform_mode(os.getenv('PLATFORM_MODE', 'live'))
-DEFAULT_FRONTEND_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173']
+DEFAULT_FRONTEND_ORIGINS = default_frontend_origins()
 CORS_ALLOWED_ORIGINS = env_list('CORS_ALLOWED_ORIGINS', DEFAULT_FRONTEND_ORIGINS)
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS', DEFAULT_FRONTEND_ORIGINS)

@@ -1,4 +1,10 @@
 import React, { useMemo, useState } from "react";
+import {
+  CAMPAIGN_TYPES,
+  getCampaignDefaults,
+  getCampaignTypeMeta,
+  getStepTip,
+} from "../lib/campaignWizardTips.js";
 
 const STEPS = [
   { id: "promote", label: "Promoting", intro: "What are you putting in front of new fans?" },
@@ -11,14 +17,21 @@ const STEPS = [
   { id: "review", label: "Review", intro: "Check everything, then save your plan." },
 ];
 
-const CAMPAIGN_TYPES = [
-  { id: "new_song", label: "New song", detail: "Single or release push" },
-  { id: "album", label: "Album", detail: "Full project rollout" },
-  { id: "artist_page", label: "Artist page", detail: "Grow your overall profile" },
-  { id: "merch", label: "Merch", detail: "Promote a store item" },
-  { id: "show", label: "Show", detail: "Sell tickets or RSVPs" },
-  { id: "video", label: "Video", detail: "Music video or clip" },
-];
+function CampaignStepTip({ campaignType, stepId }) {
+  const meta = getCampaignTypeMeta(campaignType);
+  const tip = getStepTip(campaignType, stepId);
+  if (!tip) return null;
+
+  return (
+    <aside className="campaign-step-tip" aria-label={`Tip for ${meta.label} campaigns`}>
+      <p className="campaign-step-tip-label">
+        Tip for <strong>{meta.label}</strong>
+        <span className="muted"> · {meta.detail}</span>
+      </p>
+      <p className="campaign-step-tip-body">{tip}</p>
+    </aside>
+  );
+}
 
 const GOALS = [
   { id: "more_streams", label: "More streams", detail: "Send fans to listen on Spotify or other platforms" },
@@ -51,6 +64,8 @@ const DESTINATION_TYPES = [
 ];
 
 function defaultFormValues(initialCampaign = null, artistPageUrl = "") {
+  const starterDefaults = getCampaignDefaults("new_song", artistPageUrl);
+
   if (initialCampaign) {
     return {
       title: initialCampaign.title || "",
@@ -76,9 +91,9 @@ function defaultFormValues(initialCampaign = null, artistPageUrl = "") {
   return {
     title: "",
     campaign_type: "new_song",
-    goal: "more_streams",
+    goal: starterDefaults.goal,
     ad_networks: ["meta"],
-    destination_type: "smart_link",
+    destination_type: starterDefaults.destination_type,
     destination_url: artistPageUrl,
     budget_daily: "10",
     budget_total: "300",
@@ -121,8 +136,26 @@ export function CampaignWizard({
     return (daily * days).toFixed(2);
   }, [formValues.budget_daily, formValues.duration_days]);
 
+  const typeDefaults = useMemo(
+    () => getCampaignDefaults(formValues.campaign_type, artistPageUrl),
+    [formValues.campaign_type, artistPageUrl],
+  );
+
   function updateField(name, value) {
     setFormValues(current => ({ ...current, [name]: value }));
+  }
+
+  function updateCampaignType(campaignType) {
+    const defaults = getCampaignDefaults(campaignType, artistPageUrl);
+    setFormValues(current => ({
+      ...current,
+      campaign_type: campaignType,
+      goal: defaults.goal,
+      destination_type: defaults.destination_type,
+      destination_url: campaignType === "artist_page"
+        ? artistPageUrl
+        : (current.destination_url || artistPageUrl),
+    }));
   }
 
   function toggleNetwork(networkId) {
@@ -233,6 +266,7 @@ export function CampaignWizard({
         <form className="auth-form campaign-wizard-form" onSubmit={handleSubmit}>
           <h2 id="campaign-wizard-title">{initialCampaign ? "Edit growth campaign" : "Plan a growth campaign"}</h2>
           <p className="muted wizard-step-intro">{step.intro}</p>
+          <CampaignStepTip campaignType={formValues.campaign_type} stepId={step.id} />
 
           <div className={step.id === "promote" ? "wizard-panel" : "wizard-panel wizard-panel--hidden"} aria-hidden={step.id !== "promote"}>
             <label htmlFor="campaign-title">Campaign name</label>
@@ -241,7 +275,7 @@ export function CampaignWizard({
               name="title"
               value={formValues.title}
               onChange={event => updateField("title", event.target.value)}
-              placeholder="e.g. Summer single push"
+              placeholder={typeDefaults.titlePlaceholder}
               required
             />
             <p className="form-hint muted">Choose what you are putting in front of new fans.</p>
@@ -253,7 +287,7 @@ export function CampaignWizard({
                     name="campaign_type"
                     value={item.id}
                     checked={formValues.campaign_type === item.id}
-                    onChange={() => updateField("campaign_type", item.id)}
+                    onChange={() => updateCampaignType(item.id)}
                   />
                   <strong>{item.label}</strong>
                   <span className="muted">{item.detail}</span>
@@ -265,7 +299,10 @@ export function CampaignWizard({
           <div className={step.id === "goal" ? "wizard-panel" : "wizard-panel wizard-panel--hidden"} aria-hidden={step.id !== "goal"}>
             <div className="campaign-choice-grid" role="radiogroup" aria-label="Campaign goal">
               {GOALS.map(item => (
-                <label key={item.id} className={`campaign-choice-card${formValues.goal === item.id ? " active" : ""}`}>
+                <label
+                  key={item.id}
+                  className={`campaign-choice-card${formValues.goal === item.id ? " active" : ""}${typeDefaults.goal === item.id ? " suggested" : ""}`}
+                >
                   <input
                     type="radio"
                     name="goal"
@@ -274,6 +311,7 @@ export function CampaignWizard({
                     onChange={() => updateField("goal", item.id)}
                   />
                   <strong>{item.label}</strong>
+                  {typeDefaults.goal === item.id && <span className="campaign-suggested-tag">Suggested</span>}
                   <span className="muted">{item.detail}</span>
                 </label>
               ))}
@@ -281,7 +319,6 @@ export function CampaignWizard({
           </div>
 
           <div className={step.id === "networks" ? "wizard-panel" : "wizard-panel wizard-panel--hidden"} aria-hidden={step.id !== "networks"}>
-            <p className="form-hint muted">Most artists start with Instagram and Facebook (Meta). You can add more platforms anytime.</p>
             <div className="campaign-network-grid" role="group" aria-label="Ad platforms">
               {AD_NETWORKS.map(item => {
                 const selected = (formValues.ad_networks || []).includes(item.id);
@@ -323,7 +360,6 @@ export function CampaignWizard({
               placeholder="https://"
               required
             />
-            <p className="form-hint muted">Tip: use a landing page with listen buttons instead of sending people straight to one platform.</p>
           </div>
 
           <div className={step.id === "audience" ? "wizard-panel" : "wizard-panel wizard-panel--hidden"} aria-hidden={step.id !== "audience"}>
@@ -333,7 +369,7 @@ export function CampaignWizard({
               name="audience_description"
               value={formValues.audience_description}
               onChange={event => updateField("audience_description", event.target.value)}
-              placeholder="e.g. Indie pop fans who also listen to bedroom pop and alt R&B"
+              placeholder={typeDefaults.audiencePlaceholder}
             />
             <label htmlFor="similar-artists">Similar artists</label>
             <input
@@ -423,7 +459,6 @@ export function CampaignWizard({
             {computedTotal && (
               <p className="form-hint muted">Suggested total from daily budget: ${computedTotal} over {formValues.duration_days} days.</p>
             )}
-            <p className="form-hint muted">Many artists start around $10/day for a few weeks and adjust once they see what works.</p>
           </div>
 
           <div className={step.id === "creative" ? "wizard-panel" : "wizard-panel wizard-panel--hidden"} aria-hidden={step.id !== "creative"}>
@@ -433,7 +468,7 @@ export function CampaignWizard({
               name="creative_headline"
               value={formValues.creative_headline}
               onChange={event => updateField("creative_headline", event.target.value)}
-              placeholder="New song out now"
+              placeholder={typeDefaults.creativeHeadlinePlaceholder}
             />
             <label htmlFor="creative-text">Primary text</label>
             <textarea
@@ -441,7 +476,7 @@ export function CampaignWizard({
               name="creative_text"
               value={formValues.creative_text}
               onChange={event => updateField("creative_text", event.target.value)}
-              placeholder="Tap listen and tell us what you think."
+              placeholder={typeDefaults.creativeTextPlaceholder}
             />
             <label htmlFor="creative-file">Video or image</label>
             <input
@@ -451,7 +486,6 @@ export function CampaignWizard({
               accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime"
               onChange={event => setCreativeFile(event.target.files?.[0] || null)}
             />
-            <p className="form-hint muted">Short video clips with your music usually perform best. Try a hook from the chorus or a live moment.</p>
           </div>
 
           <div className={step.id === "review" ? "wizard-panel wizard-review" : "wizard-panel wizard-panel--hidden wizard-review"} aria-hidden={step.id !== "review"}>

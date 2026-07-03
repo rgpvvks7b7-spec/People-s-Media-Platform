@@ -1,0 +1,24 @@
+---
+description: Block advertising cookies and ad tracking SDKs on IndieFund
+alwaysApply: true
+---
+
+# Privacy and cookies
+
+IndieFund **does not and will not** use advertising cookies or remarketing pixels.
+
+## Banned (require explicit legal review to add)
+
+- Meta/Facebook Pixel, Google Ads tags, TikTok Pixel, Twitter/X ad tags
+- Criteo, Taboola, Outbrain, or any ad network / remarketing SDK
+
+## Analytics
+
+- First-party server-side analytics (`FanJourneyEvent`) is the default
+- Third-party analytics cookies may only be added via **Iubenda consent** with prior blocking — never advertising
+
+## Legal docs
+
+- Setup: `legal/IUBENDA_SETUP.md`
+- Banner config: `legal/IUBENDA_BANNER_CONFIG.md`
+- Guardrails: `legal/README.md`

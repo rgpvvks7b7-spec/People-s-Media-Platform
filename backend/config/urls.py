@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/promotions/', include('promotions.urls')),
     path('api/campaigns/', include('campaigns.urls')),
     path('api/moderation/', include('moderation.urls')),
+    path('api/originlock/', include('originlock.urls')),
 ]
 if settings.DEBUG or settings.SERVE_LOCAL_MEDIA:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

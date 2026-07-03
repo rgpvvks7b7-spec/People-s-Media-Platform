@@ -32,6 +32,23 @@ Demo logins all use `demo12345`:
 - Fan: `demo_fan`
 - Artists: `luna_lane`, `static_harbor`, `mika_north`
 
+### Autonomous Local Show Loop beta
+
+Seed + verify My Scene and gig notifications in one command:
+
+```bash
+cd backend
+.venv/bin/python manage.py beta_scene_loop --seed
+```
+
+Or from the repo root:
+
+```bash
+bash scripts/beta_scene_loop.sh
+```
+
+Then log in as `demo_fan` and open [My Scene](http://localhost:5173/?page=my-scene). The command prints pass/fail checks and deep links.
+
 Start the backend:
 
 ```bash

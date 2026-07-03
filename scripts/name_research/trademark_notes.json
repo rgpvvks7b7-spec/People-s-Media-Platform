@@ -1,0 +1,68 @@
+{
+  "disclaimer": "Preliminary screening only — not legal advice. Engage AU technology lawyer before filing.",
+  "searched": ["IP Australia quick search", "Web search for existing companies", "USPTO via web references"],
+  "findings": [
+    {
+      "name": "catalynk",
+      "risk": "high",
+      "notes": "Existing Catalynk Limited NZ (catalynk.co, consulting since 2003). UK AI healthcare startup (catalynk.app). Domain held by HugeDomains.com."
+    },
+    {
+      "name": "amplynk",
+      "risk": "medium",
+      "notes": "Similar to Amplync (amplync.com, video conferencing) and Amplink (link shortener, San Jose 2024)."
+    },
+    {
+      "name": "ownlynk",
+      "risk": "medium",
+      "notes": "Phonetically similar to Owlynk (owlynk.com, Korean robotics/autonomous driving). No exact AU TM found."
+    },
+    {
+      "name": "kindlelynk",
+      "risk": "high",
+      "notes": "Amazon Kindle trademark — avoid."
+    },
+    {
+      "name": "signallynk",
+      "risk": "medium",
+      "notes": "SignalLink used in telecom/security; compound name is distinct but category overlap."
+    },
+    {
+      "name": "launchlynk",
+      "risk": "low",
+      "notes": "No major conflicts in creator/music SaaS."
+    },
+    {
+      "name": "rallylynk",
+      "risk": "low",
+      "notes": "No major conflicts found."
+    },
+    {
+      "name": "bloomlynk",
+      "risk": "low",
+      "notes": "No major conflicts found."
+    },
+    {
+      "name": "thrivelynk",
+      "risk": "low",
+      "notes": "No major conflicts found."
+    },
+    {
+      "name": "stagenect",
+      "risk": "low",
+      "notes": "Distinct coinage; good trademark potential."
+    },
+    {
+      "name": "creatnect",
+      "risk": "low",
+      "notes": "Distinct coinage."
+    },
+    {
+      "name": "scenelynk",
+      "risk": "low",
+      "notes": "Aligns with My Scene feature; no major conflicts."
+    }
+  ],
+  "recommended_classes_au": [9, 41, 42],
+  "recommended_classes_us": ["009", "041", "042"]
+}

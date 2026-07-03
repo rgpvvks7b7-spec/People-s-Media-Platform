@@ -1,5 +1,27 @@
 {
-  "scripts": {"dev": "vite", "build": "vite build", "preview": "vite preview"},
-  "dependencies": {"@vitejs/plugin-react": "latest", "vite": "latest", "react": "latest", "react-dom": "latest"},
-  "devDependencies": {}
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:beta": "playwright test e2e/beta.spec.js",
+    "test:beta:ui": "playwright test e2e/beta.spec.js --ui",
+    "test:beta:report": "playwright show-report playwright-report",
+    "test:e2e:smoke": "playwright test --config playwright.smoke.config.js",
+    "test:e2e:qa": "playwright test --config playwright.qa.config.js",
+    "test:e2e:checkout": "playwright test --config playwright.checkout.config.js",
+    "test:e2e:prelaunch": "playwright test --config playwright.prelaunch.config.js",
+    "test:e2e:auth": "playwright test --config playwright.auth.config.js",
+    "open:cursor": "bash scripts/open-cursor-tabs.sh",
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.0"
+  }
 }

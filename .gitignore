@@ -21,7 +21,12 @@ backend/staticfiles/
 # Node / React
 frontend/node_modules/
 frontend/dist/
-frontend/.vite/
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/beta-screenshots/
 
 # Aider
 .aider*
+!.aider.conf.yml
+!.aiderignore

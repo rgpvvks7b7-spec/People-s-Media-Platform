@@ -1,0 +1,3007 @@
+{
+  "top_available": [
+    {
+      "name": "anchornect",
+      "domain": "anchornect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "apexnect",
+      "domain": "apexnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "bloomlynk",
+      "domain": "bloomlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "bloomnect",
+      "domain": "bloomnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "boldlynk",
+      "domain": "boldlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "boldnect",
+      "domain": "boldnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "boostnect",
+      "domain": "boostnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "bravelynk",
+      "domain": "bravelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "bravenect",
+      "domain": "bravenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "brightnect",
+      "domain": "brightnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "catalymesh",
+      "domain": "catalymesh.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "catalynect",
+      "domain": "catalynect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "createlynk",
+      "domain": "createlynk.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "creatlynk",
+      "domain": "creatlynk.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "creatorlynk",
+      "domain": "creatorlynk.com",
+      "category": "audience_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.0,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "dashnect",
+      "domain": "dashnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "elevalynk",
+      "domain": "elevalynk.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "elevlynk",
+      "domain": "elevlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "elevmesh",
+      "domain": "elevmesh.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "elevnect",
+      "domain": "elevnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flamelynk",
+      "domain": "flamelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flamemesh",
+      "domain": "flamemesh.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flamenect",
+      "domain": "flamenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flourlynk",
+      "domain": "flourlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flourmesh",
+      "domain": "flourmesh.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flournect",
+      "domain": "flournect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "forgenect",
+      "domain": "forgenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "fuelnect",
+      "domain": "fuelnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "giglynk",
+      "domain": "giglynk.com",
+      "category": "audience_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "glowlynk",
+      "domain": "glowlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "glownect",
+      "domain": "glownect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "harborlynk",
+      "domain": "harborlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "harbornect",
+      "domain": "harbornect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "ignitelynk",
+      "domain": "ignitelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "ignitenect",
+      "domain": "ignitenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "launchlynk",
+      "domain": "launchlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "launchnect",
+      "domain": "launchnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "liftnect",
+      "domain": "liftnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "livelynk",
+      "domain": "livelynk.com",
+      "category": "audience_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "lynkstage",
+      "domain": "lynkstage.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "nectlynk",
+      "domain": "nectlynk.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.2,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "nestnect",
+      "domain": "nestnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "orbitnect",
+      "domain": "orbitnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "ownlynk",
+      "domain": "ownlynk.com",
+      "category": "audience_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "peaklynk",
+      "domain": "peaklynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "peaknect",
+      "domain": "peaknect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "primelynk",
+      "domain": "primelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "primenect",
+      "domain": "primenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "pulsenect",
+      "domain": "pulsenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "pushnect",
+      "domain": "pushnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "rallylynk",
+      "domain": "rallylynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.2,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "rallymesh",
+      "domain": "rallymesh.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "rallynect",
+      "domain": "rallynect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.4,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "rapidnect",
+      "domain": "rapidnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "risenect",
+      "domain": "risenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "rootnect",
+      "domain": "rootnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "scalelynk",
+      "domain": "scalelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "scenelynk",
+      "domain": "scenelynk.com",
+      "category": "audience_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "shinelynk",
+      "domain": "shinelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "shinenect",
+      "domain": "shinenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "signallynk",
+      "domain": "signallynk.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.2,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "soarlynk",
+      "domain": "soarlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "soarnect",
+      "domain": "soarnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "sparklynk",
+      "domain": "sparklynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "surgelynk",
+      "domain": "surgelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "surgenect",
+      "domain": "surgenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "swiftnect",
+      "domain": "swiftnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "thrivelynk",
+      "domain": "thrivelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "thrivenect",
+      "domain": "thrivenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "truenect",
+      "domain": "truenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "unitylynk",
+      "domain": "unitylynk.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "venuelynk",
+      "domain": "venuelynk.com",
+      "category": "audience_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "vividlynk",
+      "domain": "vividlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "vividnect",
+      "domain": "vividnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "lynkecho",
+      "domain": "lynkecho.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.95,
+      "available": true
+    },
+    {
+      "name": "lynkfan",
+      "domain": "lynkfan.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.95,
+      "available": true
+    },
+    {
+      "name": "lynkfirst",
+      "domain": "lynkfirst.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.95,
+      "available": true
+    },
+    {
+      "name": "lynkgig",
+      "domain": "lynkgig.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.95,
+      "available": true
+    },
+    {
+      "name": "lynkgrow",
+      "domain": "lynkgrow.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.95,
+      "available": true
+    },
+    {
+      "name": "lynkhome",
+      "domain": "lynkhome.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.95,
+      "available": true
+    },
+    {
+      "name": "lynkown",
+      "domain": "lynkown.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.95,
+      "available": true
+    },
+    {
+      "name": "lynkshow",
+      "domain": "lynkshow.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.95,
+      "available": true
+    },
+    {
+      "name": "lynkunity",
+      "domain": "lynkunity.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.95,
+      "available": true
+    },
+    {
+      "name": "lynkvenue",
+      "domain": "lynkvenue.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.95,
+      "available": true
+    },
+    {
+      "name": "anchordock",
+      "domain": "anchordock.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "anchorjoin",
+      "domain": "anchorjoin.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "anchorline",
+      "domain": "anchorline.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "apexgather",
+      "domain": "apexgather.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "apexknit",
+      "domain": "apexknit.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "apextie",
+      "domain": "apextie.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "beaconjoin",
+      "domain": "beaconjoin.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "beaconknit",
+      "domain": "beaconknit.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "beaconsync",
+      "domain": "beaconsync.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "beacontie",
+      "domain": "beacontie.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "beaconweb",
+      "domain": "beaconweb.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "boldgather",
+      "domain": "boldgather.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "boldjoin",
+      "domain": "boldjoin.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "boldknit",
+      "domain": "boldknit.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "boldwave",
+      "domain": "boldwave.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    },
+    {
+      "name": "boostjoin",
+      "domain": "boostjoin.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 4.945,
+      "available": true
+    }
+  ],
+  "top_all_including_taken": [
+    {
+      "name": "anchornect",
+      "domain": "anchornect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "apexnect",
+      "domain": "apexnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "bloomlynk",
+      "domain": "bloomlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "bloomnect",
+      "domain": "bloomnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "boldlynk",
+      "domain": "boldlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "boldnect",
+      "domain": "boldnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "boostnect",
+      "domain": "boostnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "bravelynk",
+      "domain": "bravelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "bravenect",
+      "domain": "bravenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "brightnect",
+      "domain": "brightnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "catalymesh",
+      "domain": "catalymesh.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "catalynect",
+      "domain": "catalynect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "createlynk",
+      "domain": "createlynk.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "creatlynk",
+      "domain": "creatlynk.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "creatorlynk",
+      "domain": "creatorlynk.com",
+      "category": "audience_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.0,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "dashnect",
+      "domain": "dashnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "elevalynk",
+      "domain": "elevalynk.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "elevlynk",
+      "domain": "elevlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "elevmesh",
+      "domain": "elevmesh.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "elevnect",
+      "domain": "elevnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flamelynk",
+      "domain": "flamelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flamemesh",
+      "domain": "flamemesh.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flamenect",
+      "domain": "flamenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flourlynk",
+      "domain": "flourlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flourmesh",
+      "domain": "flourmesh.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 5.0,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "flournect",
+      "domain": "flournect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "forgenect",
+      "domain": "forgenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "fuelnect",
+      "domain": "fuelnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "giglynk",
+      "domain": "giglynk.com",
+      "category": "audience_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "glowlynk",
+      "domain": "glowlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "glownect",
+      "domain": "glownect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "harborlynk",
+      "domain": "harborlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "harbornect",
+      "domain": "harbornect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "ignitelynk",
+      "domain": "ignitelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "ignitenect",
+      "domain": "ignitenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "launchlynk",
+      "domain": "launchlynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "launchnect",
+      "domain": "launchnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 3.2,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "liftnect",
+      "domain": "liftnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "livelynk",
+      "domain": "livelynk.com",
+      "category": "audience_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "lynkstage",
+      "domain": "lynkstage.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 3.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "nectlynk",
+      "domain": "nectlynk.com",
+      "category": "blend",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.2,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "nestnect",
+      "domain": "nestnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "orbitnect",
+      "domain": "orbitnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "ownlynk",
+      "domain": "ownlynk.com",
+      "category": "audience_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 5.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 5.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "peaklynk",
+      "domain": "peaklynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "peaknect",
+      "domain": "peaknect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "primelynk",
+      "domain": "primelynk.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.5,
+        "premium": 4.0,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.0,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "primenect",
+      "domain": "primenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "pulsenect",
+      "domain": "pulsenect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    },
+    {
+      "name": "pushnect",
+      "domain": "pushnect.com",
+      "category": "growth_connection",
+      "growth_link": true,
+      "dns_status": "likely_available",
+      "parking_detected": "False",
+      "scores": {
+        "pronounce": 5.0,
+        "spell": 4.7,
+        "premium": 4.2,
+        "not_music_locked": 5.0,
+        "com_available": 5.0,
+        "memorable": 4.0,
+        "trademark_low_risk": 4.5,
+        "social": 3.5
+      },
+      "weighted_score": 5.0,
+      "available": true
+    }
+  ],
+  "available_count": 757
+}

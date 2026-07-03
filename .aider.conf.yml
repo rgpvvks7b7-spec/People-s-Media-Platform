@@ -1,0 +1,22 @@
+model: ollama/qwen2.5-coder:14b
+show-model-warnings: false
+git: true
+gitignore: true
+add-gitignore-files: false
+subtree-only: true
+auto-commits: false
+dirty-commits: false
+attribute-co-authored-by: true
+map-tokens: 4096
+map-refresh: auto
+restore-chat-history: false
+show-diffs: true
+test-cmd: backend/.venv/bin/python backend/manage.py test
+lint-cmd:
+  - python: backend/.venv/bin/python backend/manage.py check
+  - javascript: npm --prefix frontend run build
+read:
+  - README.md
+  - PROJECT_BLUEPRINT.md
+  - DEPLOYMENT.md
+  - STRIPE_SETUP.md

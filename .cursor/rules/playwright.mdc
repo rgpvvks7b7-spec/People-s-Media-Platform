@@ -1,0 +1,25 @@
+---
+description: Always follow Playwright E2E standards for tests, config, helpers, and testable UI
+alwaysApply: true
+---
+
+# Playwright (always on)
+
+Read and follow `.cursor/skills/playwright/SKILL.md` in this repo for every task.
+
+**Required whenever you touch:**
+- `frontend/e2e/**`, `playwright.config.*`, or Playwright helpers
+- User-facing flows (auth, booking, calendar, spaces, checkout, forms)
+
+**Non-negotiables:**
+- Role-based locators first (`getByRole`, `getByLabel`, `getByText`); avoid `page.locator`
+- Use `getByTestId` only when `data-testid` exists or roles are insufficient
+- Fixtures, `beforeEach`/`afterEach`, web-first `expect` assertions; no hardcoded timeouts
+- DRY helpers in `e2e/helpers/` with JSDoc; config in `playwright.config.*` only
+- Stable parallel-safe tests; critical paths only; no comments in generated test code
+
+**UI changes:** add accessible names (labels, button text, headings) so e2e tests need no brittle selectors.
+
+**After test or flow changes:** run the narrowest Playwright scope that covers the change.
+
+Full standards: `.cursor/skills/playwright/SKILL.md` · Examples: `.cursor/skills/playwright/examples.md`

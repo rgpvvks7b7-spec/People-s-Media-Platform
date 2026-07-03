@@ -1,0 +1,802 @@
+[
+  {
+    "name": "ownlynk",
+    "domain": "ownlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "sparklynk",
+    "domain": "sparklynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "registered",
+    "registrar": "Squarespace Domains II LLC",
+    "rdap_confirmed": true
+  },
+  {
+    "name": "launchlynk",
+    "domain": "launchlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "rallylynk",
+    "domain": "rallylynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "bloomlynk",
+    "domain": "bloomlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "thrivelynk",
+    "domain": "thrivelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "ignitelynk",
+    "domain": "ignitelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "elevlynk",
+    "domain": "elevlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "flourlynk",
+    "domain": "flourlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "signallynk",
+    "domain": "signallynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "unitylynk",
+    "domain": "unitylynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "livelynk",
+    "domain": "livelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "registered",
+    "registrar": "Gandi SAS",
+    "rdap_confirmed": true
+  },
+  {
+    "name": "harborlynk",
+    "domain": "harborlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "scenelynk",
+    "domain": "scenelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "venuelynk",
+    "domain": "venuelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "kindlelynk",
+    "domain": "kindlelynk.com",
+    "dns_status": "",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "creatorlynk",
+    "domain": "creatorlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "staglynk",
+    "domain": "staglynk.com",
+    "dns_status": "",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "giglynk",
+    "domain": "giglynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "audiolynk",
+    "domain": "audiolynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "creatlynk",
+    "domain": "creatlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "createlynk",
+    "domain": "createlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "stagenect",
+    "domain": "stagenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "fanmesh",
+    "domain": "fanmesh.com",
+    "dns_status": "likely_available",
+    "whois_status": "registered",
+    "registrar": "IHS Telekom, Inc.",
+    "rdap_confirmed": true
+  },
+  {
+    "name": "creatnect",
+    "domain": "creatnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "fannecta",
+    "domain": "fannecta.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "artnecta",
+    "domain": "artnecta.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "creatnecta",
+    "domain": "creatnecta.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "stagnecta",
+    "domain": "stagnecta.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "venuenecta",
+    "domain": "venuenecta.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkstage",
+    "domain": "lynkstage.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "supportlynk",
+    "domain": "supportlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "nectlynk",
+    "domain": "nectlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "catalynk",
+    "domain": "catalynk.com",
+    "dns_status": "taken_parked",
+    "whois_status": "registered",
+    "registrar": "TurnCommerce, Inc. DBA NameBright.com",
+    "rdap_confirmed": true
+  },
+  {
+    "name": "amplynk",
+    "domain": "amplynk.com",
+    "dns_status": "taken",
+    "whois_status": "registered",
+    "registrar": "XServer, Inc.",
+    "rdap_confirmed": true
+  },
+  {
+    "name": "anchornect",
+    "domain": "anchornect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "apexnect",
+    "domain": "apexnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "bloomnect",
+    "domain": "bloomnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "boldlynk",
+    "domain": "boldlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "registered",
+    "registrar": "The Registrar Company B.V.",
+    "rdap_confirmed": true
+  },
+  {
+    "name": "boldnect",
+    "domain": "boldnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "boostnect",
+    "domain": "boostnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "bravelynk",
+    "domain": "bravelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "bravenect",
+    "domain": "bravenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "brightnect",
+    "domain": "brightnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "catalymesh",
+    "domain": "catalymesh.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "catalynect",
+    "domain": "catalynect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "dashnect",
+    "domain": "dashnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "elevalynk",
+    "domain": "elevalynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "elevmesh",
+    "domain": "elevmesh.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "elevnect",
+    "domain": "elevnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "flamelynk",
+    "domain": "flamelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "flamemesh",
+    "domain": "flamemesh.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "flamenect",
+    "domain": "flamenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "flourmesh",
+    "domain": "flourmesh.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "flournect",
+    "domain": "flournect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "forgenect",
+    "domain": "forgenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "fuelnect",
+    "domain": "fuelnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "glowlynk",
+    "domain": "glowlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "registered",
+    "registrar": "GoDaddy.com, LLC",
+    "rdap_confirmed": true
+  },
+  {
+    "name": "glownect",
+    "domain": "glownect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "harbornect",
+    "domain": "harbornect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "ignitenect",
+    "domain": "ignitenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "launchnect",
+    "domain": "launchnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "liftnect",
+    "domain": "liftnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "nestnect",
+    "domain": "nestnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "orbitnect",
+    "domain": "orbitnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "peaklynk",
+    "domain": "peaklynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "peaknect",
+    "domain": "peaknect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "primelynk",
+    "domain": "primelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "registered",
+    "registrar": "Wix.com Ltd.",
+    "rdap_confirmed": true
+  },
+  {
+    "name": "primenect",
+    "domain": "primenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "pulsenect",
+    "domain": "pulsenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "pushnect",
+    "domain": "pushnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "rallymesh",
+    "domain": "rallymesh.com",
+    "dns_status": "likely_available",
+    "whois_status": "registered",
+    "registrar": "NameCheap, Inc.",
+    "rdap_confirmed": true
+  },
+  {
+    "name": "rallynect",
+    "domain": "rallynect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "rapidnect",
+    "domain": "rapidnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "risenect",
+    "domain": "risenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "rootnect",
+    "domain": "rootnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "scalelynk",
+    "domain": "scalelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "shinelynk",
+    "domain": "shinelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "shinenect",
+    "domain": "shinenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "soarlynk",
+    "domain": "soarlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "soarnect",
+    "domain": "soarnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "surgelynk",
+    "domain": "surgelynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "surgenect",
+    "domain": "surgenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "swiftnect",
+    "domain": "swiftnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "thrivenect",
+    "domain": "thrivenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "truenect",
+    "domain": "truenect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "vividlynk",
+    "domain": "vividlynk.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "vividnect",
+    "domain": "vividnect.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkecho",
+    "domain": "lynkecho.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkfan",
+    "domain": "lynkfan.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkfirst",
+    "domain": "lynkfirst.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkgig",
+    "domain": "lynkgig.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkgrow",
+    "domain": "lynkgrow.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkhome",
+    "domain": "lynkhome.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkown",
+    "domain": "lynkown.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkshow",
+    "domain": "lynkshow.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkunity",
+    "domain": "lynkunity.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "lynkvenue",
+    "domain": "lynkvenue.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  },
+  {
+    "name": "anchordock",
+    "domain": "anchordock.com",
+    "dns_status": "likely_available",
+    "whois_status": "registered",
+    "registrar": "GoDaddy.com, LLC",
+    "rdap_confirmed": true
+  },
+  {
+    "name": "anchorjoin",
+    "domain": "anchorjoin.com",
+    "dns_status": "likely_available",
+    "whois_status": "available",
+    "registrar": "",
+    "rdap_confirmed": false
+  }
+]

@@ -234,6 +234,9 @@ button.indiefund-brand {
   --accent-soft: rgba(255, 229, 0, 0.12);
   --border: rgba(255, 45, 149, 0.38);
   --radius: 6px;
+  --nav-icon-active-bg: var(--accent-pink);
+  --shop-tab-active-bg: var(--accent-pink);
+  --tab-active-bg: var(--accent-pink);
   --theme-atmosphere: radial-gradient(circle at 12% 18%, rgba(0, 212, 255, 0.12), transparent 34%),
     radial-gradient(circle at 88% 12%, rgba(255, 45, 149, 0.1), transparent 30%);
 }
@@ -478,7 +481,7 @@ button.indiefund-brand {
   box-shadow: 0 0 20px rgba(244, 114, 182, 0.35);
 }
 
-.theme-neon-club .tabs .tab.active,
+.theme-neon-club .tabs:not(.tabs--sub) .tab.active,
 .theme-neon-club .profile-account-nav .nav-pill.active {
   text-shadow: 0 0 10px rgba(34, 211, 238, 0.45);
 }
@@ -849,18 +852,64 @@ body {
   color: var(--muted);
 }
 
-.app-shell[class*="theme-"] .app-nav-item:hover,
-.app-shell[class*="theme-"] .app-nav-item.active {
-  color: var(--text);
+.app-shell[class*="theme-"] .side-nav .app-nav-item {
+  color: var(--muted);
 }
 
-.app-shell[class*="theme-"] .app-nav-item.active {
+.app-shell[class*="theme-"] .side-nav .app-nav-item:hover,
+.app-shell[class*="theme-"] .side-nav .app-nav-item.active,
+.app-shell[class*="theme-"] .side-nav .app-nav-item:active {
+  color: var(--side-nav-label-active, #f4f4f5);
+}
+
+.app-shell[class*="theme-"] .side-nav .app-nav-item.active {
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
-.app-shell[class*="theme-"] .app-nav-item.active .app-nav-icon {
-  background: var(--accent);
+.app-shell[class*="theme-"] .side-nav .app-nav-item.active .app-nav-icon,
+.app-shell[class*="theme-"] .side-nav .app-nav-item.active:active .app-nav-icon,
+.app-shell[class*="theme-"] .side-nav .app-nav-item.active .app-nav-icon span,
+.app-shell[class*="theme-"] .side-nav .app-nav-item:active:not(.active) .app-nav-icon {
+  background: var(--nav-icon-active-bg, var(--accent));
+  color: #fff;
+}
+
+.app-shell[class*="theme-"] .side-nav .app-nav-item.active .app-nav-copy span,
+.app-shell[class*="theme-"] .side-nav .app-nav-item.active:active .app-nav-copy span,
+.app-shell[class*="theme-"] .side-nav .app-nav-item:active:not(.active) .app-nav-copy span {
+  color: inherit;
+}
+
+.app-shell[class*="theme-"] .side-nav .app-nav-item.active .app-nav-copy small {
+  color: color-mix(in srgb, var(--side-nav-label-active, #f4f4f5) 68%, var(--muted));
+}
+
+.app-shell.theme-clean-label,
+.app-shell.theme-accessible-light,
+.app-shell.theme-host-accessible-light {
+  --side-nav-label-active: var(--text);
+}
+
+.app-shell[class*="theme-"] .bottom-nav .app-nav-item:hover,
+.app-shell[class*="theme-"] .bottom-nav .app-nav-item.active,
+.app-shell[class*="theme-"] .bottom-nav .app-nav-item:active {
   color: var(--text);
+}
+
+.app-shell[class*="theme-"] .bottom-nav .app-nav-item.active {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.app-shell[class*="theme-"] .bottom-nav .app-nav-item.active .app-nav-icon,
+.app-shell[class*="theme-"] .bottom-nav .app-nav-item.active:active .app-nav-icon,
+.app-shell[class*="theme-"] .bottom-nav .app-nav-item.active .app-nav-icon span,
+.app-shell[class*="theme-"] .bottom-nav .app-nav-item:active:not(.active) .app-nav-icon {
+  background: var(--nav-icon-active-bg, var(--accent));
+  color: #fff;
+}
+
+.app-shell[class*="theme-"] .bottom-nav .app-nav-item.active .app-nav-copy small {
+  color: var(--muted);
 }
 
 .app-shell[class*="theme-"] .bottom-nav {
@@ -948,13 +997,14 @@ body {
   color: var(--muted);
 }
 
-.artist-profile-shell[class*="theme-"] .tabs .tab.active,
-.app-shell[class*="theme-"] .tabs .tab.active,
+.artist-profile-shell[class*="theme-"] .tabs:not(.tabs--sub) .tab.active,
+.app-shell[class*="theme-"] .tabs:not(.tabs--sub) .tab.active,
 .app-shell[class*="theme-"] .listen-tab-row .nav-pill.active,
 .app-shell[class*="theme-"] .discovery-mode-row .nav-pill.active,
 .fan-profile-shell[class*="theme-"] .profile-account-nav .nav-pill.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
+  background: var(--tab-active-bg, var(--accent));
+  color: #fff;
+  border-bottom-color: transparent;
 }
 
 .artist-profile-shell[class*="theme-"] .profile-hero .eyebrow,
@@ -1003,7 +1053,23 @@ body {
 }
 
 .theme-tribute-alien-pop .profile-account-nav .nav-pill.active,
-.theme-tribute-alien-pop .tabs .tab.active,
+.theme-tribute-alien-pop .tabs:not(.tabs--sub) .tab.active {
+  color: #fff;
+  background: var(--accent-pink, #ff2d95);
+  border-bottom-color: transparent;
+  text-shadow: 0 0 12px rgba(255, 45, 149, 0.35);
+}
+
+.theme-tribute-alien-pop .shop-tab.is-active,
+.theme-tribute-alien-pop .shop-tab.is-active:active,
+.app-shell.theme-tribute-alien-pop .shop-tab.is-active,
+.artist-profile-shell.theme-tribute-alien-pop .shop-tab.is-active {
+  background: var(--shop-tab-active-bg, var(--accent-pink, #ff2d95));
+  color: #fff;
+  border-color: rgba(255, 45, 149, 0.65);
+  box-shadow: 0 0 14px rgba(255, 45, 149, 0.22);
+}
+
 .theme-tribute-alien-pop .section-head .eyebrow,
 .theme-tribute-alien-pop .profile-hero .eyebrow {
   color: var(--accent-pink, #ff2d95);
@@ -1626,6 +1692,7 @@ main {
   gap: 10px;
   align-items: center;
   text-align: left;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .app-nav-item:hover,
@@ -1634,13 +1701,33 @@ main {
   color: white;
 }
 
+.app-nav-item:active {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.app-nav-item:active .app-nav-icon {
+  background: rgba(168, 85, 247, 0.85);
+  color: #fff;
+}
+
 .app-nav-item.active {
   border: 1px solid rgba(168,85,247,0.45);
 }
 
-.app-nav-item.active .app-nav-icon {
-  background: #a855f7;
-  color: white;
+.app-nav-item.active .app-nav-icon,
+.app-nav-item.active:active .app-nav-icon {
+  background: var(--nav-icon-active-bg, #a855f7);
+  color: #fff;
+}
+
+.app-nav-item.active .app-nav-copy small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.app-nav-item.active:active .app-nav-icon {
+  background: #9333ea;
+  color: #fff;
 }
 
 .app-nav-icon {
@@ -2778,12 +2865,31 @@ strong .artist-name-link,
   border-radius: 999px;
   font-size: 13px;
   font-weight: 800;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.discovery-mode-pill.active {
-  background: rgba(168,85,247,0.24);
-  color: #f4f4f5;
+.discovery-mode-pill.active,
+.discovery-mode-pill.active:active {
+  background: #a855f7;
+  color: #fff;
   box-shadow: inset 0 0 0 1px rgba(168,85,247,0.35);
+}
+
+.discovery-mode-pill:active:not(.active) {
+  color: #f4f4f5;
+  background: rgba(168,85,247,0.16);
+}
+
+.app-shell[class*="theme-"] .discovery-mode-pill.active,
+.app-shell[class*="theme-"] .discovery-mode-pill.active:active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 70%, black);
+}
+
+.app-shell[class*="theme-"] .discovery-mode-pill:active:not(.active) {
+  background: var(--accent-soft);
+  color: var(--text);
 }
 
 .review-panel-song {
@@ -5371,6 +5477,110 @@ h3 .artist-name-link.click-title:focus-visible {
     linear-gradient(135deg, #18181b, #09090b 60%, #22c55e);
   background-position: center;
   background-size: cover;
+  overflow: hidden;
+}
+
+.profile-banner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 0.9s ease;
+  pointer-events: none;
+}
+
+.profile-banner--reel-fading .profile-banner-video {
+  opacity: 0;
+}
+
+.profile-banner--reel-done .profile-banner-video {
+  visibility: hidden;
+}
+
+.profile-banner--video-active {
+  background-color: #09090b;
+  background-blend-mode: normal;
+}
+
+.profile-banner--owner {
+  min-height: 230px;
+}
+
+.profile-banner-owner-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(9, 9, 11, 0.35), rgba(9, 9, 11, 0.72));
+}
+
+.profile-banner--owner.profile-banner--video-active .profile-banner-owner-panel {
+  place-content: end center;
+  padding-bottom: 16px;
+  background: linear-gradient(180deg, transparent 45%, rgba(9, 9, 11, 0.88));
+}
+
+.profile-banner-owner-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 900;
+  color: #fafafa;
+}
+
+.profile-banner-owner-hint {
+  margin: 0;
+  max-width: 360px;
+  font-size: 12px;
+  color: rgba(244, 244, 245, 0.82);
+}
+
+.profile-banner-owner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-banner-owner-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #e4e4e7;
+}
+
+.profile-banner-owner-duration select {
+  min-width: 108px;
+}
+
+.profile-hero--banner-only {
+  margin-bottom: 18px;
+}
+
+.profile-hero--banner-only .profile-banner {
+  border-radius: 34px 34px 0 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .profile-info {
@@ -5651,11 +5861,13 @@ h3 .artist-name-link.click-title:focus-visible {
   color: #a1a1aa;
   text-transform: capitalize;
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.tab.active {
+.tab.active,
+.tab.active:active {
   background: #a855f7;
-  color: white;
+  color: #fff;
 }
 
 .tab-panel {
@@ -5794,6 +6006,20 @@ h3 .artist-name-link.click-title:focus-visible {
   .bottom-nav .app-nav-item.active {
     background: rgba(168,85,247,0.15);
     box-shadow: inset 0 -2px 0 #a855f7;
+  }
+
+  .bottom-nav .app-nav-item.active .app-nav-icon,
+  .bottom-nav .app-nav-item.active:active .app-nav-icon,
+  .bottom-nav .app-nav-item:active:not(.active) .app-nav-icon {
+    background: var(--nav-icon-active-bg, #a855f7);
+    color: #fff;
+  }
+
+  .app-shell[class*="theme-"] .bottom-nav .app-nav-item.active .app-nav-icon,
+  .app-shell[class*="theme-"] .bottom-nav .app-nav-item.active:active .app-nav-icon,
+  .app-shell[class*="theme-"] .bottom-nav .app-nav-item:active:not(.active) .app-nav-icon {
+    background: var(--nav-icon-active-bg, var(--accent));
+    color: #fff;
   }
 
   .bottom-nav .app-nav-icon {
@@ -6154,6 +6380,31 @@ h3 .artist-name-link.click-title:focus-visible {
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 24px;
   padding: 18px;
+}
+
+.product-card--highlight {
+  border-color: rgba(124, 92, 255, 0.75);
+  box-shadow: 0 0 0 1px rgba(124, 92, 255, 0.35);
+}
+
+.product-title-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.25);
+}
+
+.product-title-link:hover {
+  text-decoration-color: rgba(196, 181, 253, 0.9);
+}
+
+.product-copy-link {
+  margin-top: 8px;
 }
 
 .product-card img {
@@ -6675,15 +6926,106 @@ h3 .artist-name-link.click-title:focus-visible {
   inset: 0;
   background: linear-gradient(180deg, transparent 35%, var(--side-hero-glow) 100%);
   pointer-events: none;
+  z-index: 2;
 }
 
 .artist-profile-shell .profile-banner {
   position: relative;
 }
 
-.artist-profile-shell .tabs .tab.active {
-  color: var(--side-accent);
-  border-bottom-color: var(--side-accent);
+.tabs.tabs--sub.shop-tabs .tab {
+  color: #d4d4d8;
+}
+
+.app-shell[class*="theme-"] .tabs.tabs--sub.shop-tabs .tab {
+  color: var(--text);
+}
+
+.artist-profile-shell .tabs.tabs--sub.shop-tabs .tab.active,
+.artist-profile-shell .tabs.tabs--sub.shop-tabs .tab.active:active,
+.app-shell[class*="theme-"] .tabs.tabs--sub.shop-tabs .tab.active,
+.app-shell[class*="theme-"] .tabs.tabs--sub.shop-tabs .tab.active:active {
+  background: var(--shop-tab-active-bg, var(--side-accent, #a855f7));
+  border: 1px solid color-mix(in srgb, var(--shop-tab-active-bg, var(--side-accent, #a855f7)) 70%, white);
+  border-bottom-color: color-mix(in srgb, var(--shop-tab-active-bg, var(--side-accent, #a855f7)) 70%, white);
+  color: #fff;
+}
+
+.tabs.tabs--sub.shop-tabs .tab:active:not(.active),
+.app-shell[class*="theme-"] .tabs.tabs--sub.shop-tabs .tab:active:not(.active) {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.shop-tabs {
+  margin: 12px 0 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.shop-tab {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1px solid transparent;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e4e4e7;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shop-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.shop-tab:active {
+  background: rgba(168, 85, 247, 0.35);
+  color: #fff;
+}
+
+.shop-tab.is-active,
+.shop-tab.is-active:active {
+  background: #a855f7;
+  border-color: rgba(192, 132, 252, 0.55);
+  color: #fff;
+}
+
+.app-shell[class*="theme-"] .shop-tab.is-active,
+.app-shell[class*="theme-"] .shop-tab.is-active:active,
+.artist-profile-shell[class*="theme-"] .shop-tab.is-active,
+.artist-profile-shell[class*="theme-"] .shop-tab.is-active:active {
+  background: var(--shop-tab-active-bg, var(--accent, #a855f7));
+  border-color: color-mix(in srgb, var(--shop-tab-active-bg, var(--accent, #a855f7)) 65%, white);
+  color: #fff;
+}
+
+.artist-profile-shell .tab-panel,
+.app-shell[class*="theme-"] .artist-profile-shell .tab-panel {
+  color: var(--text, #f4f4f5);
+}
+
+.artist-profile-shell .tab-panel h2,
+.artist-profile-shell .tab-panel h3,
+.artist-profile-shell .empty-state h3 {
+  color: var(--text, #f4f4f5);
+}
+
+.artist-profile-shell .empty-state p {
+  color: var(--muted, #a1a1aa);
+}
+
+.artist-profile-shell .tabs:not(.tabs--sub) .tab.active,
+.artist-profile-shell .tabs:not(.tabs--sub) .tab.active:active {
+  color: #fff;
+  background: var(--side-accent, #a855f7);
+  border-bottom-color: transparent;
 }
 
 .artist-profile-shell .profile-hero .eyebrow {
@@ -7620,6 +7962,83 @@ h3 .artist-name-link.click-title:focus-visible {
 .ai-badges span {
   background: rgba(14, 165, 233, 0.14);
   color: #7dd3fc;
+}
+
+.origin-lock-badges span {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+  text-transform: none;
+}
+
+.origin-lock-pending {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.origin-lock-pending-label {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(234, 179, 8, 0.16);
+  color: #fde68a;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.finalize-release-sheet {
+  max-width: 520px;
+  text-align: left;
+}
+
+.finalize-summary {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+  padding: 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.finalize-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+}
+
+.finalize-summary dt {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 700;
+}
+
+.finalize-summary dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+}
+
+.finalize-form {
+  display: grid;
+  gap: 8px;
+}
+
+.finalize-confirm-text {
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(168, 85, 247, 0.1);
+  color: #e9d5ff;
+  font-size: 0.9rem;
+}
+
+.finalize-blocked {
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(234, 179, 8, 0.14);
+  color: #fde68a;
+  font-weight: 700;
 }
 
 .challenge-board {
@@ -9446,6 +9865,39 @@ html.platform-ios .legal-footer--dock {
   display: block;
   margin-top: 12px;
   margin-bottom: 6px;
+}
+
+.campaign-step-tip {
+  margin: 12px 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(124, 92, 255, 0.25);
+  background: rgba(124, 92, 255, 0.08);
+}
+
+.campaign-step-tip-label {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+
+.campaign-step-tip-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.campaign-choice-card.suggested {
+  border-color: rgba(124, 92, 255, 0.35);
+}
+
+.campaign-suggested-tag {
+  display: inline-block;
+  width: fit-content;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(124, 92, 255, 0.18);
+  color: #ddd6fe;
 }
 
 .status-pill {
