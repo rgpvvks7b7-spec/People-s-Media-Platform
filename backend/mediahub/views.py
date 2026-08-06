@@ -133,6 +133,8 @@ def resolve_track_audio_url(track, request, access):
 
 
 def serialize_track(track, request, approval=_UNSET):
+    from artistcalendar.drops import drop_access_message, drop_lock_state
+
     if approval is _UNSET:
         approval = get_approval_for(track)
 
@@ -142,6 +144,12 @@ def serialize_track(track, request, approval=_UNSET):
 
     can_access = (not track.is_subscriber_only) or has_access(request.user, track.artist, track.profession)
     can_preview = bool(track.is_subscriber_only and track.preview_enabled and track.audio_file)
+    drop_state = drop_lock_state(track, request.user)
+    drop_message = ""
+    if drop_state and not drop_state["unlocked"]:
+        can_access = False
+        can_preview = bool(track.preview_enabled and track.audio_file)
+        drop_message = drop_access_message(drop_state)
     stream_allowed = track.public_stream_enabled or is_owner
     audio_url = resolve_track_audio_url(track, request, "full") if stream_allowed else None
     preview_url = resolve_track_audio_url(track, request, "preview") if stream_allowed else None
@@ -166,7 +174,10 @@ def serialize_track(track, request, approval=_UNSET):
         "can_access": can_access,
         "can_preview": can_preview and not can_access and show_files,
         "can_add_to_playlist": can_access and released,
-        "access_message": "" if can_access else f"Subscribe to unlock full track. Preview available for {track.preview_seconds}s.",
+        "access_message": "" if can_access else (
+            drop_message or f"Subscribe to unlock full track. Preview available for {track.preview_seconds}s."
+        ),
+        "drop": drop_state,
         "audio_file": audio_url if (can_access and show_files) else None,
         "preview_audio_file": preview_url if (can_preview and not can_access and show_files) else None,
         "cover_art": resolve_track_cover_url(track, request),
@@ -676,9 +687,17 @@ def stream_track(request, track_id):
     if not track.public_stream_enabled and not is_owner:
         return Response({"error": "Streaming is disabled for this track."}, status=status.HTTP_403_FORBIDDEN)
 
+    from artistcalendar.drops import drop_access_message, drop_lock_state
+
+    drop_state = drop_lock_state(track, request.user)
+    drop_locked = bool(drop_state and not drop_state["unlocked"])
+
     if access == "preview":
-        if not track.is_subscriber_only or not track.preview_enabled:
+        preview_offered = (track.is_subscriber_only or drop_locked) and track.preview_enabled
+        if not preview_offered:
             return Response({"error": "Preview not available"}, status=status.HTTP_403_FORBIDDEN)
+    elif drop_locked:
+        return Response({"error": drop_access_message(drop_state)}, status=status.HTTP_403_FORBIDDEN)
     elif track.is_subscriber_only and not has_access(request.user, track.artist, track.profession):
         if not (request.user.is_authenticated and request.user == track.artist):
             return Response({"error": "Subscription required"}, status=status.HTTP_403_FORBIDDEN)
