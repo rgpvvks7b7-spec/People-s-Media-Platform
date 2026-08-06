@@ -9951,3 +9951,54 @@ html.platform-ios .legal-footer--dock {
   cursor: pointer;
 }
 
+.fan-crm-page {
+  display: grid;
+  gap: 16px;
+}
+
+.fan-crm-segments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fan-crm-composer {
+  display: grid;
+  gap: 8px;
+  max-width: 560px;
+}
+
+.fan-crm-composer textarea {
+  min-height: 96px;
+}
+
+.fan-crm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.fan-crm-table th,
+.fan-crm-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  vertical-align: top;
+}
+
+.fan-crm-table td .support-badge {
+  margin-right: 6px;
+}
+
+.fan-crm-table td p {
+  margin: 2px 0 0;
+}
+
+@media (max-width: 720px) {
+  .fan-crm-table th:nth-child(5),
+  .fan-crm-table td:nth-child(5),
+  .fan-crm-table th:nth-child(6),
+  .fan-crm-table td:nth-child(6) {
+    display: none;
+  }
+}
