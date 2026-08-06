@@ -210,6 +210,65 @@ export function SupportConfirmSheet({
   );
 }
 
+const SIGNUP_GATE_COPY = {
+  follow: {
+    title: name => (name ? `Follow ${name} for free` : "Follow artists for free"),
+    body: "Create a free fan account to follow artists, build your feed, and hear about drops, shows and listening parties first.",
+  },
+  discover: {
+    title: () => "Make discovery yours",
+    body: "Create a free fan account so discovery learns your taste and keeps surfacing artists you'll actually love.",
+  },
+  support: {
+    title: name => (name ? `Support ${name} directly` : "Support artists directly"),
+    body: "Create a free fan account to support artists from $1/month or send tips — the vast majority of every dollar goes straight to the artist.",
+  },
+  engage: {
+    title: () => "Join the conversation",
+    body: "Create a free fan account to like posts, comment, and be part of the artist's scene.",
+  },
+  shop: {
+    title: name => (name ? `Buy directly from ${name}` : "Buy directly from artists"),
+    body: "Create a free fan account to buy music, merch and tickets directly — artists keep more than on any big platform.",
+  },
+  tickets: {
+    title: () => "See shows near you",
+    body: "Create a free fan account to browse local gigs, buy tickets, and check in at the door.",
+  },
+  default: {
+    title: () => "Create your free fan account",
+    body: "Follow artists, unlock full tracks, buy direct, and join live listening parties — free, no ads, no tracking.",
+  },
+};
+
+export function SignupGateSheet({ gate, onCancel, onLogin, onSignup }) {
+  if (!gate) return null;
+  const copy = SIGNUP_GATE_COPY[gate.type] || SIGNUP_GATE_COPY.default;
+
+  return (
+    <div className="modal-backdrop" role="presentation" onClick={onCancel}>
+      <section
+        className="support-sheet signup-gate-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="signup-gate-title"
+        onClick={event => event.stopPropagation()}
+      >
+        <button className="sheet-close" onClick={onCancel} aria-label="Not now">
+          ×
+        </button>
+        <h2 id="signup-gate-title">{copy.title(gate.artistName)}</h2>
+        <p className="muted">{copy.body}</p>
+        <p className="signup-gate-promise">Free forever · No ads · We pick up where you left off</p>
+        <div className="sheet-actions signup-gate-actions">
+          <button className="primary" onClick={onSignup}>Create free fan account</button>
+          <button className="secondary" onClick={onLogin}>I already have an account</button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export function ProductTypePicker({ onClose, onSelect, filter }) {
   const allCategories = [
     {

@@ -9951,3 +9951,22 @@ html.platform-ios .legal-footer--dock {
   cursor: pointer;
 }
 
+.signup-gate-sheet {
+  text-align: center;
+}
+
+.signup-gate-promise {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 6px 0 0;
+}
+
+.signup-gate-actions {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signup-gate-actions .primary,
+.signup-gate-actions .secondary {
+  width: 100%;
+}
