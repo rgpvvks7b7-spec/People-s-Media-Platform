@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 
 from django.db.models import F
@@ -73,9 +74,51 @@ def link_ticket_product(booking, product):
         return booking
     booking.ticket_product = product
     booking.linked_event_id = product.id
-    booking.save(update_fields=["ticket_product", "linked_event_id", "updated_at"])
+    update_fields = ["ticket_product", "linked_event_id", "updated_at"]
+    if booking.tickets_on_sale_at is None:
+        booking.tickets_on_sale_at = timezone.now()
+        update_fields.append("tickets_on_sale_at")
+    booking.save(update_fields=update_fields)
     product.save()
     return booking
+
+
+def presale_ends_at(booking):
+    if booking.supporter_presale_hours <= 0 or booking.tickets_on_sale_at is None:
+        return None
+    return booking.tickets_on_sale_at + timedelta(hours=booking.supporter_presale_hours)
+
+
+def ticket_presale_state(booking, user=None):
+    """Presale window state for a booking's tickets.
+
+    While the window is open, only the artist's active supporters (any
+    profession) can buy; everyone else sees when general sale opens.
+    """
+    ends_at = presale_ends_at(booking)
+    now = timezone.now()
+    active = bool(ends_at and now < ends_at and booking.starts_at > now)
+
+    is_supporter = False
+    if user is not None and getattr(user, "is_authenticated", False):
+        if user.id == booking.artist_id:
+            is_supporter = True
+        else:
+            from subscriptions.models import FanSubscription
+
+            is_supporter = FanSubscription.objects.filter(
+                fan=user,
+                artist_id=booking.artist_id,
+                active=True,
+            ).exists()
+
+    return {
+        "supporter_presale_hours": booking.supporter_presale_hours,
+        "presale_active": active,
+        "presale_ends_at": ends_at if active else None,
+        "is_supporter": is_supporter,
+        "can_buy_now": (not active) or is_supporter,
+    }
 
 
 def booking_ticket_price(booking):
