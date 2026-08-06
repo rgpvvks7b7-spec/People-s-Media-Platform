@@ -5,7 +5,6 @@ from decimal import Decimal
 from django.conf import settings
 
 from config.platform_fees import (
-    MARKETPLACE_PLATFORM_RATE,
     SUPPORT_PLATFORM_RATE,
     TIP_PLATFORM_RATE,
     split_amount,
@@ -28,11 +27,6 @@ def demo_mode_allowed():
         return False
     force_stripe = os.getenv("FORCE_STRIPE_CHECKOUT", "").strip().lower() in {"1", "true", "yes", "on"}
     return not force_stripe
-
-
-def application_fee_cents(amount, platform_rate):
-    _, platform_fee = split_amount(amount, platform_rate)
-    return int(platform_fee * Decimal("100"))
 
 
 def connect_account_for_artist(artist):
@@ -62,12 +56,11 @@ def checkout_payment_intent_data_with_fees(application_fee, connect_account_id):
     return data
 
 
-def subscription_connect_params(amount, connect_account_id):
-    fee_cents = application_fee_cents(amount, SUPPORT_PLATFORM_RATE)
+def subscription_connect_params(amount, connect_account_id, platform_rate=SUPPORT_PLATFORM_RATE):
     params = {}
     if connect_account_id:
         params["transfer_data"] = {"destination": connect_account_id}
-        params["application_fee_percent"] = float(SUPPORT_PLATFORM_RATE * Decimal("100"))
+        params["application_fee_percent"] = float(platform_rate * Decimal("100"))
     return params
 
 

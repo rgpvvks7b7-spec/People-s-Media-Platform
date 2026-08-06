@@ -5,9 +5,17 @@ from django.test import SimpleTestCase
 from config.platform_fees import (
     MARKETPLACE_PLATFORM_RATE,
     TICKET_PLATFORM_RATE,
+    TIP_PLATFORM_RATE,
     fee_schedule,
+    marketplace_rate_for_artist,
     split_ticket_sale,
+    support_rate_for_artist,
 )
+
+
+class _FakeArtist:
+    def __init__(self, plan):
+        self.artist_plan = plan
 
 
 class PlatformFeesTests(SimpleTestCase):
@@ -42,3 +50,32 @@ class PlatformFeesTests(SimpleTestCase):
         self.assertEqual(items["event_tickets"]["platform_percent"], "15%")
         self.assertEqual(items["event_tickets"]["you_keep_percent"], "85%")
         self.assertIn("15%", schedule["live_policy"])
+
+    def test_tips_are_fee_free_on_every_plan(self):
+        self.assertEqual(TIP_PLATFORM_RATE, Decimal("0.00"))
+        schedule = fee_schedule(_FakeArtist("free"))
+        items = {item["id"]: item for item in schedule["items"]}
+        self.assertEqual(items["tips"]["you_keep_percent"], "100%")
+
+    def test_pro_plan_reduces_support_rate(self):
+        self.assertEqual(support_rate_for_artist(_FakeArtist("free")), Decimal("0.10"))
+        self.assertEqual(support_rate_for_artist(_FakeArtist("pro")), Decimal("0.05"))
+        self.assertEqual(support_rate_for_artist(_FakeArtist("studio")), Decimal("0.05"))
+
+    def test_studio_plan_reduces_marketplace_rate(self):
+        self.assertEqual(marketplace_rate_for_artist(_FakeArtist("free")), Decimal("0.15"))
+        self.assertEqual(marketplace_rate_for_artist(_FakeArtist("pro")), Decimal("0.15"))
+        self.assertEqual(marketplace_rate_for_artist(_FakeArtist("studio")), Decimal("0.12"))
+
+    def test_unknown_plan_falls_back_to_free_rates(self):
+        self.assertEqual(support_rate_for_artist(_FakeArtist("")), Decimal("0.10"))
+        self.assertEqual(marketplace_rate_for_artist(None), Decimal("0.15"))
+
+    def test_fee_schedule_reflects_plan_discounts(self):
+        schedule = fee_schedule(_FakeArtist("studio"))
+        items = {item["id"]: item for item in schedule["items"]}
+        self.assertEqual(schedule["plan"], "studio")
+        self.assertEqual(items["support"]["you_keep_percent"], "95%")
+        self.assertEqual(items["marketplace"]["you_keep_percent"], "88%")
+        self.assertEqual(items["commission"]["you_keep_percent"], "88%")
+        self.assertEqual(items["event_tickets"]["you_keep_percent"], "85%")
