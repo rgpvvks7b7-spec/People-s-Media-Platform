@@ -619,6 +619,7 @@ function App() {
   const [showCommissionForm, setShowCommissionForm] = useState(false);
   const [showLiveForm, setShowLiveForm] = useState(false);
   const [showCalendarForm, setShowCalendarForm] = useState(false);
+  const [calendarItemType, setCalendarItemType] = useState("release");
   const calendarDateValuesRef = useRef({ starts_at: "", ends_at: "", hasStartDate: false, hasEndDate: false });
   const spaceBookingDateValuesRef = useRef({ starts_at: "", ends_at: "", hasStartDate: false, hasEndDate: false });
   const spaceBookingPanelRef = useRef(null);
@@ -9891,7 +9892,11 @@ function App() {
                   <div className="two-column-form">
                     <div>
                       <label>Type</label>
-                      <select name="item_type" defaultValue="release">
+                      <select
+                        name="item_type"
+                        value={calendarItemType}
+                        onChange={event => setCalendarItemType(event.target.value)}
+                      >
                         <option value="release">Release</option>
                         <option value="live">Live</option>
                         <option value="gig">Gig</option>
@@ -9911,6 +9916,28 @@ function App() {
 
                   <label>Supporter early access hours</label>
                   <input name="supporter_early_hours" type="number" min="0" max="720" defaultValue="0" />
+
+                  {calendarItemType === "release" && (
+                    <>
+                      <label>Attach a track (locks it until the drop)</label>
+                      <select name="music_upload_id" defaultValue="">
+                        <option value="">No track — date only</option>
+                        {music
+                          .filter(track => track.artist_username === currentUser?.username)
+                          .map(track => (
+                            <option key={track.id} value={track.id}>{track.title}</option>
+                          ))}
+                      </select>
+                      <p className="muted form-hint">
+                        An attached track stays locked until the drop moment. Supporters unlock it early
+                        by the hours you set above. Fans can still hear the preview teaser.
+                      </p>
+                      <label className="check-row">
+                        <input name="announce_drop" type="checkbox" value="true" />
+                        Announce this drop to your supporters now
+                      </label>
+                    </>
+                  )}
 
                   <div className="action-grid">
                     <button className="primary" type="submit">Save Date</button>
