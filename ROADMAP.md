@@ -160,6 +160,9 @@ Aligns with [BUG_REPORT.md](./BUG_REPORT.md) gaps.
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
+| 2026-08-06 | Fee restructure: tips 10% → 0%; Artist Pro drops subscription take 10% → 5%; Studio additionally drops marketplace take 15% → 12% | Ko-fi set the market at 0% tips; flat-fee-plus-reduced-take (Patreon Pro, Ko-fi Gold pattern) retains high-earning artists whose effective percentage cost otherwise grows with success. Pro breaks even ~$250/mo subscription gross, so plans sell themselves |
+| 2026-08-06 | Live: reposition `livehub` as listening parties + chat around drops; no video broadcast (WebRTC/RTMP/CDN) for launch | Session/chat exists; camera preview never broadcast. Drop-day listening parties (Stationhead/Levellr pattern) match the drop mechanic at a fraction of the infrastructure cost. Revisit video post-launch |
+| 2026-08-06 | Ads Manager stays a planner — never executes external campaigns or fires ad pixels | Privacy policy bans ad/remarketing pixels (`legal/README.md`); planning-only is the honest, differentiated scope |
 | 2026-06-28 | Pre-launch strategy: no artist beta QA; early creator signup then fan launch | [PRELAUNCH_STRATEGY.md](./PRELAUNCH_STRATEGY.md) |
 | 2026-06-23 | Gate beta expansion on P0 bug fixes | QA shows auth + mobile broken despite Phase 5 “complete” |
 | 2026-06-23 | Prioritize checkout E2E before new monetization features | Revenue paths shipped but unverified |
