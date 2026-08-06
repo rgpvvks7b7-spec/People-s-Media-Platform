@@ -29,8 +29,9 @@ IndieFund is a multi-sided marketplace that helps independent artists earn from 
 - **Creator plans** — Artist Pro $12/mo, Studio $29/mo (Studio includes $25/mo promotion credits).
 
 **Platform take rate** (single source of truth: [`backend/config/platform_fees.py`](../backend/config/platform_fees.py))
-- 10% on support/subscriptions and tips.
-- 15% on marketplace sales, event tickets, and commissions.
+- 10% on support/subscriptions (5% on Artist Pro and Studio plans).
+- 0% on tips (all plans).
+- 15% on marketplace sales and commissions (12% on the Studio plan); 15% on event tickets (all plans).
 
 **Payments architecture**
 - Stripe Checkout (purchases), Stripe Connect Express (payouts to artists/hosts), Stripe Billing Portal (subscription management). See [`STRIPE_SETUP.md`](../STRIPE_SETUP.md).

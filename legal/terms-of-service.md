@@ -67,16 +67,16 @@ IndieFund charges a **Platform Fee** on certain transactions. Current rates:
 
 | Transaction type | Platform fee | Creator/host keeps |
 |------------------|-------------|-------------------|
-| Monthly support and subscriptions | 10% | 90% |
-| One-time tips | 10% | 90% |
-| Music and merch sales | 15% | 85% |
-| Custom commissions | 15% | 85% |
+| Monthly support and subscriptions | 10% (5% on Artist Pro and Studio plans) | 90–95% |
+| One-time tips | 0% | 100% |
+| Music and merch sales | 15% (12% on the Studio plan) | 85–88% |
+| Custom commissions | 15% (12% on the Studio plan) | 85–88% |
 
 Fees are calculated on the gross transaction amount before payment processing costs unless otherwise stated. The fee schedule displayed in the Platform is the authoritative reference and may be updated with notice.
 
-**Live shows:** Ticket and door revenue splits follow agreements between artists and venues. IndieFund does not take a cut of food and beverage revenue — that stays with the host.
+**Live shows:** Show tickets carry a 15% Platform Fee on all plans. Ticket and door revenue splits otherwise follow agreements between artists and venues. IndieFund does not take a cut of food and beverage revenue — that stays with the host.
 
-**Artist platform plans:** Artist Pro ($12/month) and Studio ($29/month) are billed separately via Stripe and are not subject to the fan support fee schedule above.
+**Artist platform plans:** Artist Pro ($12/month) and Studio ($29/month) are billed separately via Stripe and are not subject to the fan support fee schedule above. Paid plans reduce the Platform Fee rates as shown in the table; the reduced rate applies to transactions completed while the plan is active.
 
 ### 4.3 Taxes
 

@@ -15,7 +15,7 @@ Help independent artists build sustainable income from real fans — not algorit
 **Primary metrics**
 - Artist: MRR + tips + marketplace revenue; supporter-to-follower ratio; local gig bookings
 - Fan: artists supported (of 50 cap); discovery saves/follows; show attendance
-- Platform: GMV, take rate (10% support/tips · 15% marketplace), Artist Pro / Studio conversion
+- Platform: GMV, take rate (10% support — 5% on paid plans · 0% tips · 15% marketplace — 12% on Studio), Artist Pro / Studio conversion
 
 ---
 

@@ -105,7 +105,7 @@ When unset, the app uses markdown drafts and no consent banner (local dev defaul
 
 - **User types:** fan, artist, host
 - **Payments:** Stripe Checkout, Connect Express, Billing Portal
-- **Platform fees:** 10% on support/tips; 15% on marketplace/commissions
+- **Platform fees:** 10% support (5% on paid plans); 0% tips; 15% marketplace/commissions (12% on Studio); 15% tickets
 - **Content:** music uploads, posts, Instants, live streams, store, commissions, tickets
 - **AI policy:** disclosure required; fully AI-generated music prohibited
 - **Email sharing:** opt-in only, global and per-artist revocation
