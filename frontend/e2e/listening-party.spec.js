@@ -1,9 +1,7 @@
 import { expect, test } from "@playwright/test";
 import {
-  DEMO_PASSWORD,
   createBetaUsers,
   ensureBetaFixtures,
-  loginAccount,
   registerAccount,
   startListeningPartyViaApi,
   uploadTrackViaApi,
@@ -42,14 +40,13 @@ test.describe("Listening parties", () => {
   });
 
   test("fan joins the party, hears the unlocked track and chats", async ({ page }) => {
-    await registerAccount(page, { username: users.fanUser, userType: "fan" });
-    await startListeningPartyViaApi(page, {
+    await startListeningPartyViaApi({
       artistUsername: users.artistUser,
       title: partyTitle,
       trackTitle: users.trackTitle,
     });
 
-    await loginAccount(page, users.fanUser, DEMO_PASSWORD, { force: true });
+    await registerAccount(page, { username: users.fanUser, userType: "fan" });
     await page.goto("/?page=live");
 
     await expect(page.getByRole("heading", { name: "Listening parties" })).toBeVisible();
