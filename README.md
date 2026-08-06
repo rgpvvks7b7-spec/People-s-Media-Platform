@@ -1,13 +1,13 @@
 # Indie Artist Platform Starter
 
-A Django + React starter built around your idea: independent artists, fan subscriptions, artist pages, music uploads, merch, lives, stories, and discovery that feels more like YouTube recommendations than viral TikTok chasing.
+A Django + React starter built around your idea: independent artists, fan subscriptions, artist pages, music uploads, merch, lives, Instants (short-lived updates), and discovery that feels more like YouTube recommendations than viral TikTok chasing.
 
 ## Core idea
 - Fans subscribe to artists for $1 or a custom amount.
 - Fans can subscribe to up to 50 artists by default.
 - After 50 subscriptions, the platform prompts them to extend their limit.
 - Artists have Instagram-style profiles with YouTube-style content depth.
-- Artists can post updates, upload music, sell merch, go live, share stories, and engage with fans.
+- Artists can post updates, upload music, sell merch, go live, share Instants, and engage with fans.
 - Fans get a discovery feed for similar-but-still-unique artists.
 - Artists and fans have separate onboarding paths.
 
