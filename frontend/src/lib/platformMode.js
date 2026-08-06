@@ -11,6 +11,7 @@ export const FAN_GATED_PAGES = new Set([
   "feed",
   "my-music",
   "radio",
+  "live",
 ]);
 
 export function normalizePlatformMode(value) {

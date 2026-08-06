@@ -300,6 +300,32 @@ export async function uploadTrackViaApi(page, { title, audioPath, username, pass
   expect(responseText).toContain("Track uploaded");
 }
 
+/**
+ * Starts a listening party for the artist via the API, optionally attaching
+ * one of their uploaded tracks by title, and returns the created session.
+ */
+export async function startListeningPartyViaApi(page, { artistUsername, title, trackTitle, accessMode = "public", password = DEMO_PASSWORD }) {
+  await loginBackendViaApi(page, artistUsername, password);
+
+  let trackId = null;
+  if (trackTitle) {
+    const mediaResponse = await page.request.get(`${FRONTEND_API}/media/`);
+    expect(mediaResponse.ok(), await mediaResponse.text()).toBeTruthy();
+    const mediaData = await mediaResponse.json();
+    const tracks = Array.isArray(mediaData) ? mediaData : mediaData.results || [];
+    trackId = tracks.find(track => track.title === trackTitle)?.id || null;
+    expect(trackId, `Track ${trackTitle} not found`).toBeTruthy();
+  }
+
+  const response = await postAuthedJson(page, "/live/start/", {
+    title,
+    access_mode: accessMode,
+    track_id: trackId,
+  });
+  expect(response.ok(), await response.text()).toBeTruthy();
+  return (await response.json()).session;
+}
+
 export async function seedStoreCart(page, product = {}) {
   const item = {
     id: product.id ?? 4,

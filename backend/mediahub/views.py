@@ -9,6 +9,7 @@ from config.media_access import build_stream_url, parse_media_stream_token
 from config.throttling import UploadRateThrottle
 from .models import ArtworkUpload, FanPlaylist, FanPlaylistTrack, MusicUpload, SongCoverArt
 from artists.models import ArtistProfile, FanJourneyEvent
+from livehub.services import party_grants_full_access
 from subscriptions.models import FanSubscription
 from originlock.services import (
     approvals_for,
@@ -673,13 +674,17 @@ def stream_track(request, track_id):
     if not released and not is_owner:
         return Response({"error": "This release has not been finalised yet."}, status=status.HTTP_403_FORBIDDEN)
 
-    if not track.public_stream_enabled and not is_owner:
+    # A live listening party unlocks its featured track for everyone allowed
+    # in the room, for the duration of the party.
+    party_access = access == "full" and party_grants_full_access(track, request.user)
+
+    if not track.public_stream_enabled and not is_owner and not party_access:
         return Response({"error": "Streaming is disabled for this track."}, status=status.HTTP_403_FORBIDDEN)
 
     if access == "preview":
         if not track.is_subscriber_only or not track.preview_enabled:
             return Response({"error": "Preview not available"}, status=status.HTTP_403_FORBIDDEN)
-    elif track.is_subscriber_only and not has_access(request.user, track.artist, track.profession):
+    elif track.is_subscriber_only and not party_access and not has_access(request.user, track.artist, track.profession):
         if not (request.user.is_authenticated and request.user == track.artist):
             return Response({"error": "Subscription required"}, status=status.HTTP_403_FORBIDDEN)
 
