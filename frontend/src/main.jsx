@@ -131,7 +131,7 @@ function resolveGuestPage(page, tabParam = "", viewParam = "") {
   return "home";
 }
 
-function resolveAccountPage(page, user, tabParam = "", viewParam = "") {
+function resolveAccountPage(page, user, tabParam = "", viewParam = "", { allowSpaces = false } = {}) {
   if (page && LEGAL_PAGE_IDS.has(page)) return page;
   if (page === "radio") return "my-music";
   const listenRoute = resolveListenRoute(page, tabParam, viewParam);
@@ -142,7 +142,9 @@ function resolveAccountPage(page, user, tabParam = "", viewParam = "") {
     return resolved;
   }
   if (!resolved) return "home";
-  if (user && !user.is_artist && resolved === "spaces") return "my-scene";
+  // Fans normally land on My Scene instead of Spaces, but venue deep links
+  // (?listing=) and explicit artist booking flows need the Spaces page.
+  if (user && !user.is_artist && resolved === "spaces" && !allowSpaces) return "my-scene";
   return resolved;
 }
 const CART_STORAGE_KEY = "indiefund_store_cart";
@@ -1701,7 +1703,8 @@ function App() {
     setMySceneShowId(params.get("show") || "");
 
     if (listingId) {
-      applyPageRoute("spaces", tab, view);
+      setSelectedArtist(null);
+      setActivePage("spaces");
       openSpaceListingById(listingId);
       return;
     }
@@ -1759,10 +1762,16 @@ function App() {
       const supportStatus = params.get("support");
       const purchaseStatus = params.get("purchase");
       const artistUsername = params.get("artist");
+      const listingId = params.get("listing");
       setMySceneShowId(params.get("show") || "");
 
-      if (user) {
-        const resolvedPage = resolveAccountPage(page, user, tab, view);
+      if (listingId) {
+        setActivePage("spaces");
+        openSpaceListingById(listingId);
+      } else if (user) {
+        const resolvedPage = resolveAccountPage(page, user, tab, view, {
+          allowSpaces: Boolean(listingId),
+        });
         const allowedPages = user.is_host ? HOST_PAGES : FAN_PAGES;
         const listenRoute = resolveListenRoute(page, tab, view);
         if (resolvedPage && LEGAL_PAGE_IDS.has(resolvedPage)) {
@@ -1875,6 +1884,11 @@ function App() {
     if (isUserLoading) return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("artist")) return;
+    if (params.get("listing")) {
+      setActivePage("spaces");
+      openSpaceListingById(params.get("listing"));
+      return;
+    }
     applyPageRoute(
       params.get("page"),
       params.get("tab") || "",
@@ -5095,7 +5109,8 @@ function App() {
     if (currentUser?.is_host) {
       resolvedPage = resolveAccountPage(page, currentUser, options.tab || "", options.view || "");
     } else if (currentUser && !currentUser.is_artist && !currentUser.is_host && page === "spaces") {
-      resolvedPage = "my-scene";
+      const hasVenueDeepLink = Boolean(new URLSearchParams(window.location.search).get("listing"));
+      resolvedPage = (options.allowSpaces || hasVenueDeepLink) ? "spaces" : "my-scene";
     } else if (page === "radio") {
       resolvedPage = "my-music";
     } else if (page === "saved") {
@@ -6126,12 +6141,12 @@ function App() {
 
   async function openSpaceListingById(listingId) {
     if (!listingId) return;
+    setActivePage("spaces");
     const existing = spaceListings.find(item => String(item.id) === String(listingId));
     if (existing) {
       openSpaceListingDetail(existing);
       return;
     }
-    goToPage("spaces");
     const data = await fetchJson(`/spaces/listings/${listingId}/`, null);
     if (data?.listing) {
       setSpaceListings(current => (
@@ -8895,37 +8910,41 @@ function App() {
           );
         })()}
 
-        <SpaceListingDetailModal
-          listing={selectedSpaceListing}
-          onClose={() => {
-            setSelectedSpaceListing(null);
-            const params = new URLSearchParams(window.location.search);
-            if (params.has("listing")) {
-              params.delete("listing");
-              const query = params.toString();
-              window.history.replaceState({}, "", query ? `${window.location.pathname}?${query}` : window.location.pathname);
-            }
-          }}
-          splitLabels={SPACE_SPLIT_LABELS}
-          photoTypeLabels={SPACE_PHOTO_TYPE_LABELS}
-          formatAvailabilityWindows={formatAvailabilityWindows}
-          footer={selectedSpaceListing ? renderSpaceListingDetailFooter(selectedSpaceListing) : null}
-          onToggleFollow={
-            selectedSpaceListing && !currentUser?.is_host
-              ? () => toggleSpaceListingFollow(selectedSpaceListing)
-              : null
-          }
-          onCopyPublicLink={
-            selectedSpaceListing
-              ? () => copyText(
-                  `${window.location.origin}${window.location.pathname}?page=spaces&listing=${selectedSpaceListing.id}`,
-                  "Venue link copied.",
-                )
-              : null
-          }
-        />
-
       </>
+    );
+  }
+
+  function renderSpaceListingDetailModal() {
+    return (
+      <SpaceListingDetailModal
+        listing={selectedSpaceListing}
+        onClose={() => {
+          setSelectedSpaceListing(null);
+          const params = new URLSearchParams(window.location.search);
+          if (params.has("listing")) {
+            params.delete("listing");
+            const query = params.toString();
+            window.history.replaceState({}, "", query ? `${window.location.pathname}?${query}` : window.location.pathname);
+          }
+        }}
+        splitLabels={SPACE_SPLIT_LABELS}
+        photoTypeLabels={SPACE_PHOTO_TYPE_LABELS}
+        formatAvailabilityWindows={formatAvailabilityWindows}
+        footer={selectedSpaceListing ? renderSpaceListingDetailFooter(selectedSpaceListing) : null}
+        onToggleFollow={
+          selectedSpaceListing && !currentUser?.is_host
+            ? () => toggleSpaceListingFollow(selectedSpaceListing)
+            : null
+        }
+        onCopyPublicLink={
+          selectedSpaceListing
+            ? () => copyText(
+                `${window.location.origin}${window.location.pathname}?page=spaces&listing=${selectedSpaceListing.id}`,
+                "Venue link copied.",
+              )
+            : null
+        }
+      />
     );
   }
 
@@ -11519,6 +11538,7 @@ function App() {
       )}
 
       {activePage === "spaces" && renderSpacesPage()}
+      {renderSpaceListingDetailModal()}
 
       {activePage === "my-scene" && (
         <MyScenePage

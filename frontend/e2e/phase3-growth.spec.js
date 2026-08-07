@@ -1,11 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, request as playwrightRequest, test } from "@playwright/test";
 import {
   API,
   DEMO_PASSWORD,
   createBetaUsers,
   loginAccount,
   registerAccount,
-  registerViaApi,
 } from "./helpers/beta.js";
 
 test.describe.configure({ mode: "serial" });
@@ -15,32 +14,66 @@ const users = createBetaUsers(`p3_${stamp}`);
 const hostUser = `p3_host_${stamp}`;
 const roomName = `Phase3 Room ${stamp}`;
 
-async function createLiveListing(page, { hostUsername, name }) {
-  await loginAccount(page, hostUsername, DEMO_PASSWORD, { force: true });
-  await page.request.post(`${API}/spaces/host-profile/`, {
-    data: {
-      business_name: "Phase3 Venue",
-      contact_email: `${hostUsername}@example.com`,
-      address: "12 Test Lane",
-      city: "Melbourne",
-    },
-  });
-  const response = await page.request.post(`${API}/spaces/listings/`, {
-    multipart: {
-      name,
-      description: "A live room for independent artists.",
-      address: "12 Test Lane",
-      city: "Melbourne",
-      capacity: "40",
-      available_windows: JSON.stringify([{ day: "fri", start: "19:00", end: "23:00" }]),
-      split_type: "door_percent",
-      host_cut_percent: "20",
-      booking_mode: "request",
-      status: "live",
-    },
-  });
-  expect(response.ok(), await response.text()).toBeTruthy();
-  return (await response.json()).listing;
+async function csrfHeaders(api) {
+  await api.get(`${API}/accounts/current-user/`);
+  const token = (await api.storageState()).cookies.find(cookie => cookie.name === "csrftoken")?.value;
+  return token ? { "X-CSRFToken": token } : {};
+}
+
+/**
+ * Creates a live venue listing via an isolated API context so host auth never
+ * contaminates the browser session used by the fan under test.
+ */
+async function createLiveListingViaApi({ hostUsername, name }) {
+  const api = await playwrightRequest.newContext({ baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:5173" });
+  try {
+    await api.post(`${API}/accounts/register/`, {
+      headers: { "Content-Type": "application/json", ...(await csrfHeaders(api)) },
+      data: {
+        username: hostUsername,
+        password: DEMO_PASSWORD,
+        user_type: "host",
+        display_name: "Phase3 Host",
+        email: `${hostUsername}@example.com`,
+        terms_accepted: true,
+        discovery_location: "Melbourne",
+      },
+    });
+    await api.post(`${API}/accounts/login/`, {
+      headers: { "Content-Type": "application/json", ...(await csrfHeaders(api)) },
+      data: { username: hostUsername, password: DEMO_PASSWORD },
+    });
+    const profileResponse = await api.post(`${API}/spaces/host-profile/`, {
+      headers: { "Content-Type": "application/json", ...(await csrfHeaders(api)) },
+      data: {
+        business_name: "Phase3 Venue",
+        contact_email: `${hostUsername}@example.com`,
+        address: "12 Test Lane",
+        city: "Melbourne",
+      },
+    });
+    expect(profileResponse.ok(), await profileResponse.text()).toBeTruthy();
+
+    const response = await api.post(`${API}/spaces/listings/`, {
+      headers: await csrfHeaders(api),
+      multipart: {
+        name,
+        description: "A live room for independent artists.",
+        address: "12 Test Lane",
+        city: "Melbourne",
+        capacity: "40",
+        available_windows: JSON.stringify([{ day: "fri", start: "19:00", end: "23:00" }]),
+        split_type: "door_percent",
+        host_cut_percent: "20",
+        booking_mode: "request",
+        status: "live",
+      },
+    });
+    expect(response.ok(), await response.text()).toBeTruthy();
+    return (await response.json()).listing;
+  } finally {
+    await api.dispose();
+  }
 }
 
 test.describe("Phase 3 growth surfaces", () => {
@@ -71,10 +104,9 @@ test.describe("Phase 3 growth surfaces", () => {
   });
 
   test("fan can open a public venue page and follow it", async ({ page }) => {
-    await registerViaApi(page, { username: hostUser, userType: "host" });
-    const listing = await createLiveListing(page, { hostUsername: hostUser, name: roomName });
-
+    const listing = await createLiveListingViaApi({ hostUsername: hostUser, name: roomName });
     await registerAccount(page, { username: users.fanUser, userType: "fan" });
+    await loginAccount(page, users.fanUser, DEMO_PASSWORD, { force: true });
     await page.goto(`/?page=spaces&listing=${listing.id}`);
 
     await expect(page.getByRole("heading", { name: roomName })).toBeVisible();
