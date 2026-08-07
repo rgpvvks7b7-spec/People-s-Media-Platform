@@ -2,9 +2,10 @@
 
 **Platform:** IndieFund Indie Artist Platform  
 **Maintained by:** Product  
-**Last updated:** 2026-06-28  
+**Last updated:** 2026-08-07  
 **Beta status:** Phases 1–5 complete · Pre-launch hardening in progress · not production-ready  
-**Launch plan:** [PRELAUNCH_STRATEGY.md](./PRELAUNCH_STRATEGY.md)
+**Launch plan:** [PRELAUNCH_STRATEGY.md](./PRELAUNCH_STRATEGY.md)  
+**Next product arc:** [STRATEGIC_ORDER_EMAIL_LIST.md](./STRATEGIC_ORDER_EMAIL_LIST.md) (mailing list studio → templates; Phase 5 landed)
 
 ---
 
@@ -69,7 +70,7 @@ Fixed before any new beta invites or marketing push.
 #### Artist growth
 9. ~~**Challenge board surfacing**~~ — ✅ daily/weekly Engagement board always on artist Home (Phase 4)
 10. ~~**Invite funnel analytics**~~ — ✅ invite follow→subscribe rates + funnel steps on artist Home (Phase 5)
-11. **Local draw playbook** — guided flow: set city → book Spaces gig → promote to local fans
+11. **Local draw playbook** — Step 5 of [email toolkit arc](./STRATEGIC_ORDER_EMAIL_LIST.md)
 12. **Pro insights expansion** — “fans also support”, journey funnel, mailing list growth (partially built)
 
 #### Fan engagement
@@ -80,12 +81,25 @@ Fixed before any new beta invites or marketing push.
 16b. ~~**Ticket stub collection**~~ — ✅ Profile → My tickets Upcoming / Collection (Phase 4)
 
 #### Monetization
-17. **Support tier templates** — one-click tier setup for new artists ($1 / $5 / custom)
+17. ~~**Support tier templates**~~ — ✅ starter pack + templates polish (merged)
 18. ~~**Tip prompts at peak moments**~~ — ✅ full listen, post-check-in, party end tip sheet (Phase 5)
 19. ~~**Discovery credit redemption UX**~~ — ✅ cart/store toggle + tip apply; redeem-preview caps (Phase 2 cleanup)
 20. ~~**Commission inbox**~~ — ✅ Artist Pro gate + Home/Arts upgrade teaser (Phase 5)
 20b. ~~**Public fee calculator**~~ — ✅ `/?page=pricing` + `GET /api/accounts/fee-schedule/` (Phase 2 cleanup)
 20c. ~~**50-subscription limit extension**~~ — ✅ enforce + demo extend endpoint + Profile slots UI (Phase 2 cleanup)
+
+#### Next arc — Artist email toolkit (ordered)
+
+Full plan: [STRATEGIC_ORDER_EMAIL_LIST.md](./STRATEGIC_ORDER_EMAIL_LIST.md).
+
+| Step | Item |
+|------|------|
+| 0 | ~~Merge PR #15 (Phase 5)~~ — ✅ |
+| 1 | Mailing list studio (browse + export nudge) |
+| 2 | Template studio (copy-paste compliant drafts) |
+| 3 | Moment → draft hooks (drop / gig / thanks) |
+| 4 | CRM bridge (`mailing_list` → draft/export) |
+| 5 | Local draw playbook using list + show draft |
 
 ### P3 — Scale & production (Sprint 4+)
 
@@ -153,6 +167,7 @@ Aligns with [BUG_REPORT.md](./BUG_REPORT.md) gaps.
 | [FIX_LOG.md](./FIX_LOG.md) | Resolved fixes + verification |
 | [BETA_PHASES.md](./BETA_PHASES.md) | Completed beta scope |
 | [PROJECT_BLUEPRINT.md](./PROJECT_BLUEPRINT.md) | Original product rules |
+| [STRATEGIC_ORDER_EMAIL_LIST.md](./STRATEGIC_ORDER_EMAIL_LIST.md) | Next arc: Phase 5 merge → mailing list toolkit |
 | [STRIPE_SETUP.md](./STRIPE_SETUP.md) | Payments configuration |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Production checklist |
 
@@ -169,12 +184,17 @@ Separate from [PRELAUNCH_STRATEGY.md](./PRELAUNCH_STRATEGY.md) Phase 4 (legal/em
 | Recurring show series (Spaces) | ✅ | `SpaceBooking.series_id` + multi-date booking create (max 12) |
 | Protected masters / DRM transcoding | ❌ Descope | Keep Origin Lock + signed stream access; no master vault/transcode pipeline for launch |
 
+## Next strategic arc (after product Phase 5)
+
+Ordered plan: [STRATEGIC_ORDER_EMAIL_LIST.md](./STRATEGIC_ORDER_EMAIL_LIST.md) — Phase 5 landed; next is mailing list studio → copy-paste templates → moment hooks → CRM bridge → local draw. **No platform-sent fan email / ESP in this arc.**
+
 ---
 
 ## Decision log
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
+| 2026-08-07 | Next product arc is Artist email toolkit (list studio + copy-paste templates), not ESP send; starts by merging PR #15 | Artists already export opted-in emails; highest leverage is browse + compliant drafts. Platform send needs lawyer/controller review (`LAWYER_BRIEF.md` §3.3) |
 | 2026-08-07 | Protected masters descope: do not build master vault, fingerprint matching, or DRM transcoding for launch; Origin Lock + anti-scraping signed media remain the protection layer | `master_file` / `acoustic_fingerprint` fields are placeholders; stream gating already covers listener access. Transcoding/CDN DRM is a large infra bet with weak artist demand vs series, stubs, and challenges |
 | 2026-08-07 | Spaces recurring series v1: shared `series_id` across multi-date booking requests (cap 12) | Artists often pitch residencies; one request with N dates is enough before calendar recurrence UI |
 | 2026-08-06 | Fee restructure: tips 10% → 0%; Artist Pro drops subscription take 10% → 5%; Studio additionally drops marketplace take 15% → 12% | Ko-fi set the market at 0% tips; flat-fee-plus-reduced-take (Patreon Pro, Ko-fi Gold pattern) retains high-earning artists whose effective percentage cost otherwise grows with success. Pro breaks even ~$250/mo subscription gross, so plans sell themselves |
