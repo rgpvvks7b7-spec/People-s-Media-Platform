@@ -113,12 +113,13 @@ test.describe("Phase 4 post-launch bets", () => {
     const listing = await createLiveListingViaApi({ hostUsername: hostUser, name: roomName });
     await loginAccount(page, users.artistUser, DEMO_PASSWORD, { force: true });
     await page.goto("/?page=spaces");
-    await expect(page.getByRole("heading", { name: roomName })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("heading", { name: roomName }).first()).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: "Request booking" }).first().click();
-    await expect(page.getByRole("heading", { name: roomName })).toBeVisible();
-    await expect(page.getByLabel("Book a series (up to 12 dates)")).toBeVisible();
-    await page.getByLabel("Book a series (up to 12 dates)").check();
-    await expect(page.getByLabel("Book a series (up to 12 dates)")).toBeChecked();
+    await expect(page.getByText("Request a show")).toBeVisible();
+    const seriesToggle = page.getByLabel("Book a series (up to 12 dates)");
+    await expect(seriesToggle).toBeVisible();
+    await seriesToggle.check();
+    await expect(seriesToggle).toBeChecked();
     expect(listing.id).toBeTruthy();
   });
 });
