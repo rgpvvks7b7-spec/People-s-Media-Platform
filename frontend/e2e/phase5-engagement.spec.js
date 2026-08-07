@@ -13,6 +13,12 @@ test.describe.configure({ mode: "serial" });
 const stamp = Date.now();
 const users = createBetaUsers(`p5_${stamp}`);
 
+async function csrfHeaders(api) {
+  await api.get(`${API}/accounts/current-user/`);
+  const token = (await api.storageState()).cookies.find(cookie => cookie.name === "csrftoken")?.value;
+  return token ? { "X-CSRFToken": token } : {};
+}
+
 /**
  * Stops a listening party with an isolated API context so the browser fan
  * session is never overwritten by the host login.
@@ -23,9 +29,12 @@ async function stopListeningPartyViaApi({ artistUsername, sessionId }) {
   });
   try {
     await api.post(`${API}/accounts/login/`, {
+      headers: { "Content-Type": "application/json", ...(await csrfHeaders(api)) },
       data: { username: artistUsername, password: DEMO_PASSWORD },
     });
-    const response = await api.post(`${API}/live/${sessionId}/stop/`);
+    const response = await api.post(`${API}/live/${sessionId}/stop/`, {
+      headers: await csrfHeaders(api),
+    });
     expect(response.ok(), await response.text()).toBeTruthy();
   } finally {
     await api.dispose();
@@ -64,7 +73,13 @@ test.describe("Phase 5 engagement loop", () => {
     await loginAccount(page, artsUser, DEMO_PASSWORD, { force: true });
     await page.goto(`/?artist=${artsUser}`);
 
-    await expect(page.getByRole("heading", { name: /inbox/i })).toBeVisible();
+    const cookieOk = page.getByRole("button", { name: "OK" });
+    if (await cookieOk.isVisible().catch(() => false)) {
+      await cookieOk.click();
+    }
+
+    await page.getByRole("button", { name: "More" }).click();
+    await page.getByRole("button", { name: "Settings" }).click();
     await expect(page.getByRole("heading", { name: "Artist Pro unlocks your commission inbox" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Upgrade to Artist Pro" })).toBeVisible();
   });
