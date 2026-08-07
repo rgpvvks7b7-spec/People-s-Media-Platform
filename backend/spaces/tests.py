@@ -171,6 +171,9 @@ class SpacesApiTests(TestCase):
         self.assertEqual(earnings.data["completed_bookings"], 1)
         self.assertEqual(earnings.data["attendance_checked_in"], 38)
         self.assertIn("F&B stays with the venue", earnings.data["policy"])
+        self.assertIn("pending_ticket_earnings", earnings.data)
+        self.assertIn("Ticket door share", earnings.data["ticket_share_note"])
+        self.assertFalse(earnings.data["payouts_ready"])
 
     def test_draw_profile_returns_aggregates_without_fan_emails(self):
         FanSubscription.objects.create(fan=self.fan, artist=self.artist, active=True, monthly_amount="5.00")

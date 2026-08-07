@@ -134,7 +134,7 @@ function resolveGuestPage(page, tabParam = "", viewParam = "") {
   return "home";
 }
 
-function resolveAccountPage(page, user, tabParam = "", viewParam = "") {
+function resolveAccountPage(page, user, tabParam = "", viewParam = "", { allowSpaces = false } = {}) {
   if (page && LEGAL_PAGE_IDS.has(page)) return page;
   if (page === "radio") return "my-music";
   const listenRoute = resolveListenRoute(page, tabParam, viewParam);
@@ -145,7 +145,9 @@ function resolveAccountPage(page, user, tabParam = "", viewParam = "") {
     return resolved;
   }
   if (!resolved) return "home";
-  if (user && !user.is_artist && resolved === "spaces") return "my-scene";
+  // Fans normally land on My Scene instead of Spaces, but venue deep links
+  // (?listing=) and explicit artist booking flows need the Spaces page.
+  if (user && !user.is_artist && resolved === "spaces" && !allowSpaces) return "my-scene";
   return resolved;
 }
 const CART_STORAGE_KEY = "indiefund_store_cart";
@@ -1785,7 +1787,15 @@ function App() {
     const view = params.get("view") || "";
     const section = params.get("section") || "";
     const artistUsername = params.get("artist");
+    const listingId = params.get("listing");
     setMySceneShowId(params.get("show") || "");
+
+    if (listingId) {
+      setSelectedArtist(null);
+      setActivePage("spaces");
+      openSpaceListingById(listingId);
+      return;
+    }
 
     if (artistUsername && artists.length) {
       const artist = artists.find(item => item.owner_username === artistUsername);
@@ -1840,10 +1850,16 @@ function App() {
       const supportStatus = params.get("support");
       const purchaseStatus = params.get("purchase");
       const artistUsername = params.get("artist");
+      const listingId = params.get("listing");
       setMySceneShowId(params.get("show") || "");
 
-      if (user) {
-        const resolvedPage = resolveAccountPage(page, user, tab, view);
+      if (listingId) {
+        setActivePage("spaces");
+        openSpaceListingById(listingId);
+      } else if (user) {
+        const resolvedPage = resolveAccountPage(page, user, tab, view, {
+          allowSpaces: Boolean(listingId),
+        });
         const allowedPages = user.is_host ? HOST_PAGES : FAN_PAGES;
         const listenRoute = resolveListenRoute(page, tab, view);
         if (resolvedPage && LEGAL_PAGE_IDS.has(resolvedPage)) {
@@ -1956,6 +1972,11 @@ function App() {
     if (isUserLoading) return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("artist")) return;
+    if (params.get("listing")) {
+      setActivePage("spaces");
+      openSpaceListingById(params.get("listing"));
+      return;
+    }
     applyPageRoute(
       params.get("page"),
       params.get("tab") || "",
@@ -5154,7 +5175,8 @@ function App() {
     if (currentUser?.is_host) {
       resolvedPage = resolveAccountPage(page, currentUser, options.tab || "", options.view || "");
     } else if (currentUser && !currentUser.is_artist && !currentUser.is_host && page === "spaces") {
-      resolvedPage = "my-scene";
+      const hasVenueDeepLink = Boolean(new URLSearchParams(window.location.search).get("listing"));
+      resolvedPage = (options.allowSpaces || hasVenueDeepLink) ? "spaces" : "my-scene";
     } else if (page === "radio") {
       resolvedPage = "my-music";
     } else if (page === "saved") {
@@ -5697,7 +5719,8 @@ function App() {
     const artistLink = getArtistPublicUrl();
     const instagramLink = getArtistPublicUrl("instagram");
     const shareTemplate = `I'm on IndieFund - subscribe for exclusive content: ${artistLink}`;
-    const embedSnippet = `<a data-embed-from="indiefund" href="${artistLink}">Support ${currentUser.display_name || currentUser.username} on IndieFund</a>`;
+    const embedUrl = `${window.location.origin}/api/artists/public/${encodeURIComponent(currentUser.username)}/embed/`;
+    const embedSnippet = `<iframe src="${embedUrl}" title="Support ${currentUser.display_name || currentUser.username} on IndieFund" width="360" height="168" style="border:0;border-radius:18px;overflow:hidden;max-width:100%" loading="lazy"></iframe>`;
     const hasSupporters = Number(fans.active_subscribers || 0) > 0;
     const hasMailingList = Number(fans.mailing_list_size || 0) > 0;
     const studioSnapshot = getOwnerStudioSnapshot();
@@ -6195,6 +6218,55 @@ function App() {
 
   function openSpaceListingDetail(listing) {
     setSelectedSpaceListing(listing);
+    if (listing?.id) {
+      const params = new URLSearchParams(window.location.search);
+      params.set("page", "spaces");
+      params.set("listing", String(listing.id));
+      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+    }
+  }
+
+  async function openSpaceListingById(listingId) {
+    if (!listingId) return;
+    setActivePage("spaces");
+    const existing = spaceListings.find(item => String(item.id) === String(listingId));
+    if (existing) {
+      openSpaceListingDetail(existing);
+      return;
+    }
+    const data = await fetchJson(`/spaces/listings/${listingId}/`, null);
+    if (data?.listing) {
+      setSpaceListings(current => (
+        current.some(item => item.id === data.listing.id) ? current : [data.listing, ...current]
+      ));
+      openSpaceListingDetail(data.listing);
+    }
+  }
+
+  async function toggleSpaceListingFollow(listing) {
+    if (!listing?.id) return;
+    if (!currentUser) {
+      goToPage("profile");
+      setMessage("Log in to follow venues.");
+      return;
+    }
+    const endpoint = listing.viewer_following
+      ? `/spaces/listings/${listing.id}/unfollow/`
+      : `/spaces/listings/${listing.id}/follow/`;
+    const res = await apiFetch(endpoint, { method: "POST" });
+    const data = await res.json();
+    if (!res.ok) {
+      setMessage(data.error || "Unable to update venue follow.");
+      return;
+    }
+    const nextListing = data.listing || {
+      ...listing,
+      viewer_following: !listing.viewer_following,
+      follower_count: Math.max(0, (listing.follower_count || 0) + (listing.viewer_following ? -1 : 1)),
+    };
+    setSelectedSpaceListing(nextListing);
+    setSpaceListings(current => current.map(item => (item.id === nextListing.id ? { ...item, ...nextListing } : item)));
+    setMessage(data.message || (nextListing.viewer_following ? "Venue saved." : "Venue removed from saved."));
   }
 
   function handleSpaceCardClick(event, listing) {
@@ -6316,7 +6388,7 @@ function App() {
 
         <SetupChecklistPanel
           title="Three steps to your local scene"
-          subtitle="Save artists you like, build a playlist, then support one to unlock gig alerts and Shows near me."
+          subtitle="Save artists you like and set your city — you'll get gig alerts when they announce a show near you. Support unlocks ticket presales and deeper perks."
           items={checklistItems}
           checklistHidden={setupChecklistDismissed}
           onDismiss={dismissSetupChecklist}
@@ -8706,6 +8778,10 @@ function App() {
         {currentUser?.is_host && (
           <section className="spaces-host-summary" aria-label="Host summary">
             <div className="spaces-host-summary-item">
+              <span>Pending ticket share</span>
+              <strong>${Number(spaceEarnings?.pending_ticket_earnings || 0).toFixed(2)}</strong>
+            </div>
+            <div className="spaces-host-summary-item">
               <span>Completed bookings</span>
               <strong>{spaceEarnings?.completed_bookings || 0}</strong>
             </div>
@@ -8726,8 +8802,15 @@ function App() {
               </strong>
             </div>
             <p className="spaces-host-summary-note">
-              {spaceEarnings?.policy || "IndieFund does not take a cut of food and beverage revenue. F&B stays with the venue."}
+              {spaceEarnings?.ticket_share_note
+                || spaceEarnings?.policy
+                || "IndieFund does not take a cut of food and beverage revenue. F&B stays with the venue."}
             </p>
+            {spaceEarnings && !spaceEarnings.payouts_ready && Number(spaceEarnings.pending_ticket_earnings || 0) > 0 && (
+              <p className="spaces-host-summary-note">
+                Ticket share is accruing. Host payouts via Stripe Connect land in a later release — your ledger is already tracking every sale.
+              </p>
+            )}
           </section>
         )}
 
@@ -8948,16 +9031,41 @@ function App() {
           );
         })()}
 
-        <SpaceListingDetailModal
-          listing={selectedSpaceListing}
-          onClose={() => setSelectedSpaceListing(null)}
-          splitLabels={SPACE_SPLIT_LABELS}
-          photoTypeLabels={SPACE_PHOTO_TYPE_LABELS}
-          formatAvailabilityWindows={formatAvailabilityWindows}
-          footer={selectedSpaceListing ? renderSpaceListingDetailFooter(selectedSpaceListing) : null}
-        />
-
       </>
+    );
+  }
+
+  function renderSpaceListingDetailModal() {
+    return (
+      <SpaceListingDetailModal
+        listing={selectedSpaceListing}
+        onClose={() => {
+          setSelectedSpaceListing(null);
+          const params = new URLSearchParams(window.location.search);
+          if (params.has("listing")) {
+            params.delete("listing");
+            const query = params.toString();
+            window.history.replaceState({}, "", query ? `${window.location.pathname}?${query}` : window.location.pathname);
+          }
+        }}
+        splitLabels={SPACE_SPLIT_LABELS}
+        photoTypeLabels={SPACE_PHOTO_TYPE_LABELS}
+        formatAvailabilityWindows={formatAvailabilityWindows}
+        footer={selectedSpaceListing ? renderSpaceListingDetailFooter(selectedSpaceListing) : null}
+        onToggleFollow={
+          selectedSpaceListing && !currentUser?.is_host
+            ? () => toggleSpaceListingFollow(selectedSpaceListing)
+            : null
+        }
+        onCopyPublicLink={
+          selectedSpaceListing
+            ? () => copyText(
+                `${window.location.origin}${window.location.pathname}?page=spaces&listing=${selectedSpaceListing.id}`,
+                "Venue link copied.",
+              )
+            : null
+        }
+      />
     );
   }
 
@@ -11587,6 +11695,7 @@ function App() {
       )}
 
       {activePage === "spaces" && renderSpacesPage()}
+      {renderSpaceListingDetailModal()}
 
       {activePage === "live" && (
         <ListeningPartyPage

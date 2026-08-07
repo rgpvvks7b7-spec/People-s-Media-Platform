@@ -5,7 +5,10 @@ from . import views
 urlpatterns = [
     path("host-profile/", views.host_profile, name="spaces-host-profile"),
     path("listings/", views.listings, name="spaces-listings"),
+    path("listings/followed/", views.followed_listings, name="spaces-listings-followed"),
     path("listings/<int:listing_id>/", views.listing_detail, name="spaces-listing-detail"),
+    path("listings/<int:listing_id>/follow/", views.listing_follow, name="spaces-listing-follow"),
+    path("listings/<int:listing_id>/unfollow/", views.listing_unfollow, name="spaces-listing-unfollow"),
     path("listings/<int:listing_id>/photos/<int:photo_id>/", views.listing_photo_detail, name="spaces-listing-photo-detail"),
     path("bookings/", views.bookings, name="spaces-bookings"),
     path("bookings/clear/", views.clear_bookings, name="spaces-bookings-clear"),
