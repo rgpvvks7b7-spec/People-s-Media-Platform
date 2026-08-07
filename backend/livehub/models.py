@@ -20,6 +20,15 @@ class LiveSession(models.Model):
     artist = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="live_sessions")
     title = models.CharField(max_length=160)
     description = models.TextField(blank=True)
+    # Featured track for a listening party. While the session is live, the
+    # full track unlocks for everyone allowed in the room.
+    track = models.ForeignKey(
+        "mediahub.MusicUpload",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="listening_parties",
+    )
     access_mode = models.CharField(max_length=40, choices=ACCESS_MODES, default=PREVIEW_30)
     is_live = models.BooleanField(default=True)
     viewer_count = models.PositiveIntegerField(default=0)

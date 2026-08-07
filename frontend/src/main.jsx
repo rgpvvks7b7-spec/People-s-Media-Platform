@@ -15,6 +15,7 @@ import { FanFeedUpdateCard } from "./components/FanFeedUpdateCard.jsx";
 import { ArtistThemeSettings } from "./components/ArtistThemeSettings.jsx";
 import { ArtistVisitorBanner } from "./components/ArtistVisitorBanner.jsx";
 import { LiveTab } from "./components/LiveTab.jsx";
+import { ListeningPartyPage } from "./components/ListeningPartyPage.jsx";
 import { MyScenePage } from "./components/MyScene.jsx";
 import { TicketStubIconButton, TicketStubNavIcon, TicketStubSheet } from "./components/TicketStubSheet.jsx";
 import { CalendarItemDateFields } from "./components/CalendarItemDateFields.jsx";
@@ -75,10 +76,10 @@ function resolveApiBase() {
 }
 
 const API = resolveApiBase();
-const FAN_PAGES = new Set(["home", "feed", "listen", "discover", "music", "my-music", "my-scene", "stores", "spaces", "notifications", "profile", "promote", "ads-manager", "faq", "prelaunch"]);
+const FAN_PAGES = new Set(["home", "feed", "listen", "discover", "music", "my-music", "my-scene", "stores", "spaces", "live", "notifications", "profile", "promote", "ads-manager", "faq", "prelaunch"]);
 const FAN_ARTIST_RAIL_PAGES = new Set(["home", "feed", "my-scene", "listen", "my-music", "stores"]);
 const HOST_PAGES = new Set(["spaces", "notifications", "profile", "faq"]);
-const GUEST_SHELL_PAGES = new Set(["listen", "discover", "music", "profile", "spaces", "my-scene", "stores", "faq", "prelaunch", "early-access", ...LEGAL_PAGE_IDS]);
+const GUEST_SHELL_PAGES = new Set(["listen", "discover", "music", "profile", "spaces", "my-scene", "stores", "live", "faq", "prelaunch", "early-access", ...LEGAL_PAGE_IDS]);
 const SUPPORT_EMAIL = "support@indiefund.app";
 
 function resolveListenRoute(page, tabParam = "", viewParam = "") {
@@ -624,12 +625,10 @@ function App() {
   const calendarDateValuesRef = useRef({ starts_at: "", ends_at: "", hasStartDate: false, hasEndDate: false });
   const spaceBookingDateValuesRef = useRef({ starts_at: "", ends_at: "", hasStartDate: false, hasEndDate: false });
   const spaceBookingPanelRef = useRef(null);
-  const [cameraDevices, setCameraDevices] = useState([]);
-  const [selectedCameraId, setSelectedCameraId] = useState("");
-  const [cameraStatus, setCameraStatus] = useState("");
   const [isLive, setIsLive] = useState(false);
   const [activeLiveSession, setActiveLiveSession] = useState(null);
   const [liveSessions, setLiveSessions] = useState([]);
+  const [livePartyFocusId, setLivePartyFocusId] = useState(null);
   const [calendarItems, setCalendarItems] = useState([]);
   const [spaceListings, setSpaceListings] = useState([]);
   const [hostMarketListings, setHostMarketListings] = useState([]);
@@ -652,12 +651,6 @@ function App() {
   const [spaceReviewSaving, setSpaceReviewSaving] = useState(false);
   const [showTicketStubSheet, setShowTicketStubSheet] = useState(false);
   const [artistLocalDraw, setArtistLocalDraw] = useState({});
-  const [liveChatMessage, setLiveChatMessage] = useState("");
-  const [liveChatMessages, setLiveChatMessages] = useState([
-    { id: 1, name: "demo_fan", role: "Supporter", body: "Sound is good from here." },
-    { id: 2, name: "artist1", role: "Artist", body: "Testing the live room and camera preview." },
-  ]);
-  const livePreviewRef = useRef(null);
   const [previewAsFan, setPreviewAsFan] = useState(false);
   const [highlightedProductId, setHighlightedProductId] = useState("");
   const [showPreviewBeforeShare, setShowPreviewBeforeShare] = useState(false);
@@ -827,7 +820,15 @@ function App() {
     if (productData) setProducts(productData);
     if (subDataResult) setSubData(subDataResult);
     if (tierData) setSupportTiers(tierData.results || []);
-    if (liveData) setLiveSessions(liveData.results || []);
+    if (liveData) {
+      const sessions = liveData.results || [];
+      setLiveSessions(sessions);
+      if (currentUser?.is_artist) {
+        const ownSession = sessions.find(session => session.artist_username === currentUser.username) || null;
+        setActiveLiveSession(ownSession);
+        setIsLive(Boolean(ownSession));
+      }
+    }
     if (calendarData) setCalendarItems(calendarData.results || []);
     if (spaceListingData) setSpaceListings(spaceListingData.results || []);
     if (spaceBookingData) setSpaceBookings(spaceBookingData.results || []);
@@ -3819,123 +3820,30 @@ function App() {
     loadData();
   }
 
-  async function sendLiveChatMessage(event) {
-    event.preventDefault();
-
-    const body = liveChatMessage.trim();
-    if (!body) return;
-
-    if (activeLiveSession?.id) {
-      const res = await apiFetch(`/live/${activeLiveSession.id}/chat/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setMessage(data.error || "Unable to send chat message.");
-        return;
-      }
-
-      setLiveChatMessages(messages => [
-        ...messages,
-        {
-          id: data.message.id,
-          name: data.message.author_username,
-          role: data.message.author_role,
-          body: data.message.body,
-        },
-      ]);
-      setLiveChatMessage("");
-      return;
-    }
-
-    setLiveChatMessages(messages => [
-      ...messages,
-      {
-        id: Date.now(),
-        name: currentUser?.username || "guest",
-        role: currentUser?.is_artist ? "Artist" : "Fan",
-        body,
-      },
-    ]);
-    setLiveChatMessage("");
-  }
-
-  async function enableLiveCamera(deviceId = selectedCameraId) {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setCameraStatus("Camera access is not supported in this browser.");
-      return;
-    }
-
-    try {
-      if (livePreviewRef.current?.srcObject) {
-        livePreviewRef.current.srcObject.getTracks().forEach(track => track.stop());
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: deviceId ? { deviceId: { exact: deviceId } } : true,
-        audio: true,
-      });
-
-      if (livePreviewRef.current) {
-        livePreviewRef.current.srcObject = stream;
-      }
-
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoInputs = devices.filter(device => device.kind === "videoinput");
-      setCameraDevices(videoInputs);
-
-      if (!deviceId && videoInputs[0]?.deviceId) {
-        setSelectedCameraId(videoInputs[0].deviceId);
-      }
-
-      setCameraStatus("Camera enabled for preview.");
-    } catch (error) {
-      setCameraStatus("Unable to access camera. Check browser permissions.");
-    }
-  }
-
-  function stopLiveCamera() {
-    if (livePreviewRef.current?.srcObject) {
-      livePreviewRef.current.srcObject.getTracks().forEach(track => track.stop());
-      livePreviewRef.current.srcObject = null;
-    }
-  }
-
   async function startLiveSession() {
-    if (!livePreviewRef.current?.srcObject) {
-      await enableLiveCamera();
-    }
-
-    const title = document.querySelector("[name='live_title']")?.value || "Live session";
+    const title = document.querySelector("[name='live_title']")?.value || "";
     const description = document.querySelector("[name='live_description']")?.value || "";
-    const accessMode = document.querySelector("[name='live_access_mode']")?.value || "preview_30";
+    const accessMode = document.querySelector("[name='live_access_mode']")?.value || "public";
+    const trackId = document.querySelector("[name='live_track_id']")?.value || "";
     const res = await apiFetch("/live/start/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description, access_mode: accessMode }),
+      body: JSON.stringify({ title, description, access_mode: accessMode, track_id: trackId || null }),
     });
     const data = await res.json();
 
     if (!res.ok) {
-      setMessage(data.error || "Unable to start live session.");
+      setMessage(data.error || "Unable to start the listening party.");
       return;
     }
 
     setActiveLiveSession(data.session);
-    setLiveChatMessages((data.session.messages || []).map(chat => ({
-      id: chat.id,
-      name: chat.author_username,
-      role: chat.author_role,
-      body: chat.body,
-    })));
     setIsLive(true);
+    setShowLiveForm(false);
+    setMessage(data.message || "Listening party started.");
     loadData();
     loadArtistDashboard();
     loadNotifications();
-    setCameraStatus("Live now. Your camera preview is active.");
   }
 
   async function stopLiveSession() {
@@ -3944,7 +3852,7 @@ function App() {
       const data = await res.json();
 
       if (!res.ok) {
-        setMessage(data.error || "Unable to stop live session.");
+        setMessage(data.error || "Unable to stop the listening party.");
         return;
       }
     }
@@ -3952,15 +3860,17 @@ function App() {
     setIsLive(false);
     setActiveLiveSession(null);
     loadData();
-    stopLiveCamera();
-    setCameraStatus("Live stopped. Camera turned off.");
+  }
+
+  function openPartyRoom() {
+    if (activeLiveSession?.id) {
+      setLivePartyFocusId(activeLiveSession.id);
+      goToPage("live");
+    }
   }
 
   function closeLiveForm() {
     setShowLiveForm(false);
-    setIsLive(false);
-    stopLiveCamera();
-    setCameraStatus("");
   }
 
   function isPurchasableProduct(product) {
@@ -6636,6 +6546,7 @@ function App() {
         { id: "stores", kind: "page", page: "stores", icon: "$", label: "Stores", detail: "Merch & music", onClick: () => goToPage("stores") },
       ] : []),
       { id: "listen", kind: "page", page: "listen", icon: "L", label: "Listen", detail: "Discover & latest", onClick: () => goToPage("listen") },
+      { id: "live", kind: "page", page: "live", icon: "◉", label: "Live", detail: "Listening parties", onClick: () => goToPage("live") },
       { id: "my-music", kind: "page", page: "my-music", icon: "♫", label: "My Playlists", detail: `${myMusicTrackCount} saved tracks`, onClick: () => goToPage("my-music") },
       ...(currentUser?.is_artist || currentUser?.is_host ? [spacesNavItem] : []),
       ...(!currentUser?.is_artist ? [
@@ -6665,7 +6576,10 @@ function App() {
       { id: "home", kind: "page", page: "home", icon: "H", label: "Home", detail: "IndieFund", onClick: () => { setSelectedArtist(null); window.history.pushState({}, "", window.location.pathname); setActivePage("home"); } },
       ...(isPrelaunchMode(platformMode)
         ? [{ id: "signup", kind: "page", page: "profile", icon: "→", label: "Early signup", detail: "Artist or host", onClick: () => openCreatorSignup("artist") }]
-        : [{ id: "listen", kind: "page", page: "listen", icon: "L", label: "Listen", detail: "Discover & latest", onClick: () => goToPage("listen") }]),
+        : [
+            { id: "listen", kind: "page", page: "listen", icon: "L", label: "Listen", detail: "Discover & latest", onClick: () => goToPage("listen") },
+            { id: "live", kind: "page", page: "live", icon: "◉", label: "Live", detail: "Listening parties", onClick: () => goToPage("live") },
+          ]),
       { id: "faq", kind: "page", page: "faq", icon: "?", label: "FAQ", detail: "How it works", onClick: () => goToPage("faq") },
       { id: "login", kind: "page", page: "profile", icon: "→", label: isPrelaunchMode(platformMode) ? "Log in" : "Sign up", detail: isPrelaunchMode(platformMode) ? "Creator account" : "Free fan account", onClick: () => goToPage("profile") },
     ]);
@@ -10951,22 +10865,14 @@ function App() {
 
           {currentTab === "lives" && (
             <LiveTab
-              cameraDevices={cameraDevices}
-              cameraStatus={cameraStatus}
-              enableLiveCamera={enableLiveCamera}
+              activeLiveSession={activeLiveSession}
               isLive={isLive}
               isOwner={isOwner}
-              liveChatMessage={liveChatMessage}
-              liveChatMessages={liveChatMessages}
-              livePreviewRef={livePreviewRef}
+              myTracks={music.filter(track => track.artist_username === currentUser?.username)}
               onCloseLiveForm={closeLiveForm}
-              onSendLiveChatMessage={sendLiveChatMessage}
+              onOpenPartyRoom={openPartyRoom}
               onStartLiveSession={startLiveSession}
               onStopLiveSession={stopLiveSession}
-              renderArtistName={renderArtistName}
-              selectedCameraId={selectedCameraId}
-              setLiveChatMessage={setLiveChatMessage}
-              setSelectedCameraId={setSelectedCameraId}
               setShowLiveForm={setShowLiveForm}
               showLiveForm={showLiveForm}
             />
@@ -11479,6 +11385,17 @@ function App() {
       )}
 
       {activePage === "spaces" && renderSpacesPage()}
+
+      {activePage === "live" && (
+        <ListeningPartyPage
+          apiFetch={apiFetch}
+          currentUser={currentUser}
+          focusSessionId={livePartyFocusId}
+          onClearFocusSession={() => setLivePartyFocusId(null)}
+          onOpenArtist={openArtistByUsername}
+          onRequireAccount={() => goToPage("profile")}
+        />
+      )}
 
       {activePage === "my-scene" && (
         <MyScenePage

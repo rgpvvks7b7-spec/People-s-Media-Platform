@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { expect } from "@playwright/test";
+import { expect, request as playwrightRequest } from "@playwright/test";
 import { ensureBetaFixtures } from "../fixtures/create-test-audio.js";
 
 const FRONTEND = (process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:5173").replace(/\/$/, "");
@@ -298,6 +298,50 @@ export async function uploadTrackViaApi(page, { title, audioPath, username, pass
   const responseText = await response.text();
   expect(response.ok(), responseText).toBeTruthy();
   expect(responseText).toContain("Track uploaded");
+}
+
+async function isolatedCsrfHeaders(api) {
+  await api.get(`${FRONTEND_API}/accounts/current-user/`);
+  const csrfToken = (await api.storageState()).cookies.find(cookie => cookie.name === "csrftoken")?.value;
+  return csrfToken ? { "X-CSRFToken": csrfToken } : {};
+}
+
+/**
+ * Starts a listening party for the artist via the API, optionally attaching
+ * one of their uploaded tracks by title, and returns the created session.
+ *
+ * Uses an isolated request context so the artist login never touches the
+ * browser page's session cookie (switching users while the app has requests
+ * in flight makes stale-session responses delete the fresh session cookie).
+ */
+export async function startListeningPartyViaApi({ artistUsername, title, trackTitle, accessMode = "public", password = DEMO_PASSWORD }) {
+  const api = await playwrightRequest.newContext({ baseURL: FRONTEND });
+  try {
+    const loginResponse = await api.post(`${FRONTEND_API}/accounts/login/`, {
+      headers: { "Content-Type": "application/json", ...(await isolatedCsrfHeaders(api)) },
+      data: { username: artistUsername, password },
+    });
+    expect(loginResponse.ok(), await loginResponse.text()).toBeTruthy();
+
+    let trackId = null;
+    if (trackTitle) {
+      const mediaResponse = await api.get(`${FRONTEND_API}/media/`);
+      expect(mediaResponse.ok(), await mediaResponse.text()).toBeTruthy();
+      const mediaData = await mediaResponse.json();
+      const tracks = Array.isArray(mediaData) ? mediaData : mediaData.results || [];
+      trackId = tracks.find(track => track.title === trackTitle)?.id || null;
+      expect(trackId, `Track ${trackTitle} not found`).toBeTruthy();
+    }
+
+    const response = await api.post(`${FRONTEND_API}/live/start/`, {
+      headers: { "Content-Type": "application/json", ...(await isolatedCsrfHeaders(api)) },
+      data: { title, access_mode: accessMode, track_id: trackId },
+    });
+    expect(response.ok(), await response.text()).toBeTruthy();
+    return (await response.json()).session;
+  } finally {
+    await api.dispose();
+  }
 }
 
 export async function seedStoreCart(page, product = {}) {
