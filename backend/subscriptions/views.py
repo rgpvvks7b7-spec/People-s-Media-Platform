@@ -11,7 +11,7 @@ from artists.contact_utils import request_bool, revoke_artist_fan_contact, sync_
 from artists.journey import log_fan_journey_event
 from artists.models import ArtistFanContact, FanJourneyEvent
 from artists.models import ArtistProfile
-from config.platform_fees import SUPPORT_PLATFORM_RATE, split_amount
+from config.platform_fees import split_amount, support_rate_for_artist
 from config.platform_mode import fan_experience_guard
 from config.throttling import CheckoutRateThrottle
 from config.billing_guard import billing_allowed
@@ -115,7 +115,7 @@ def get_tier_and_amount(request, artist, profession):
 
 
 def serialize_tier(tier):
-    artist_share, platform_fee = split_amount(tier.monthly_amount, SUPPORT_PLATFORM_RATE)
+    artist_share, platform_fee = split_amount(tier.monthly_amount, support_rate_for_artist(tier.artist))
     return {
         "id": tier.id,
         "artist_id": tier.artist.id,
@@ -579,7 +579,9 @@ def create_checkout_session(request):
             "referral_source": referral_source,
         },
     }
-    subscription_data.update(subscription_connect_params(monthly_amount, connect_account_id))
+    subscription_data.update(
+        subscription_connect_params(monthly_amount, connect_account_id, support_rate_for_artist(artist))
+    )
 
     try:
         checkout_session = build_checkout_session(

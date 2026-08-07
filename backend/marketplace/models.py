@@ -2,8 +2,8 @@ from django.conf import settings
 from django.db import models
 from artists.models import ArtistProfile
 from config.platform_fees import (
-    COMMISSION_PLATFORM_RATE,
-    MARKETPLACE_PLATFORM_RATE,
+    commission_rate_for_artist,
+    marketplace_rate_for_artist,
     split_amount,
     split_ticket_sale,
 )
@@ -126,7 +126,7 @@ class Product(models.Model):
             self.platform_fee = platform_fee
             self.host_share = host_share
         else:
-            self.artist_share, self.platform_fee = split_amount(self.price, MARKETPLACE_PLATFORM_RATE)
+            self.artist_share, self.platform_fee = split_amount(self.price, marketplace_rate_for_artist(self.artist))
             self.host_share = 0
         super().save(*args, **kwargs)
 
@@ -180,6 +180,6 @@ class CommissionRequest(models.Model):
         if self.quoted_price is not None:
             self.quoted_artist_share, self.quoted_platform_fee = split_amount(
                 self.quoted_price,
-                COMMISSION_PLATFORM_RATE,
+                commission_rate_for_artist(self.artist),
             )
         super().save(*args, **kwargs)

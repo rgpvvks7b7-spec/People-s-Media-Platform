@@ -415,7 +415,7 @@ class DemoSupportFallbackTests(APITestCase):
         self.assertEqual(response.status_code, 201)
         tip = OneTimeTip.objects.get(fan=self.fan, artist=self.artist, profession="visual_art")
         self.assertEqual(str(tip.amount), "5.00")
-        self.assertEqual(str(tip.artist_share), "4.50")
+        self.assertEqual(str(tip.artist_share), "5.00")
         self.assertEqual(tip.message, "This print series is beautiful.")
 
         list_response = self.client.get(

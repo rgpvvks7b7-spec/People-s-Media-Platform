@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import models
 from artists.models import ArtistProfile
-from config.platform_fees import SUPPORT_PLATFORM_RATE, TIP_PLATFORM_RATE, split_amount
+from config.platform_fees import TIP_PLATFORM_RATE, split_amount, support_rate_for_artist
 
 
 class SupportTier(models.Model):
@@ -64,7 +64,7 @@ class FanSubscription(models.Model):
         if self.monthly_amount < Decimal("1.00"):
             self.monthly_amount = Decimal("1.00")
 
-        self.artist_share, self.platform_fee = split_amount(self.monthly_amount, SUPPORT_PLATFORM_RATE)
+        self.artist_share, self.platform_fee = split_amount(self.monthly_amount, support_rate_for_artist(self.artist))
 
         super().save(*args, **kwargs)
 

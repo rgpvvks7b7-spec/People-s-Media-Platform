@@ -27,7 +27,7 @@ Aim for 3–5 active cities (e.g. Melbourne, Sydney, Brisbane) so Discover and M
 
 - Walk through upload → post → Connect → share link
 - Set first support tier ($1 / $5 / custom)
-- Explain fee schedule (10% support, 15% marketplace)
+- Explain fee schedule (10% support — 5% on paid plans, 0% tips, 15% marketplace — 12% on Studio)
 
 ## Public launch
 

@@ -11,7 +11,7 @@ from .purchase_flow import complete_product_purchase, fan_already_purchased_prod
 from artists.models import ArtistProfile
 from artists.journey import log_fan_journey_event
 from artists.models import FanJourneyEvent
-from config.platform_fees import MARKETPLACE_PLATFORM_RATE, TICKET_PLATFORM_RATE, split_amount
+from config.platform_fees import TICKET_PLATFORM_RATE, marketplace_rate_for_artist, split_amount
 from config.platform_mode import fan_experience_guard
 from config.billing_guard import billing_allowed
 from config.stripe_checkout import (
@@ -722,7 +722,7 @@ def handle_purchase_checkout(request):
         }
         if connect_account_id:
             _, platform_fee, host_share = ticket_sale_split(product)
-            platform_rate = TICKET_PLATFORM_RATE if product.product_type == Product.EVENT_TICKET else MARKETPLACE_PLATFORM_RATE
+            platform_rate = TICKET_PLATFORM_RATE if product.product_type == Product.EVENT_TICKET else marketplace_rate_for_artist(product.artist)
             session_kwargs["payment_intent_data"] = checkout_payment_intent_data(
                 product.price,
                 platform_rate,

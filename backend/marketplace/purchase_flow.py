@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from config.platform_fees import MARKETPLACE_PLATFORM_RATE, split_amount, split_ticket_sale
+from config.platform_fees import marketplace_rate_for_artist, split_amount, split_ticket_sale
 from artists.journey import log_fan_journey_event
 from artists.models import FanJourneyEvent
 from notifications.services import notify_artist_sale, notify_fan_purchase
@@ -17,7 +17,7 @@ def fan_already_purchased_product(fan, product_id):
 
 def ticket_sale_split(product):
     if product.product_type != Product.EVENT_TICKET:
-        artist_share, platform_fee = split_amount(product.price, MARKETPLACE_PLATFORM_RATE)
+        artist_share, platform_fee = split_amount(product.price, marketplace_rate_for_artist(product.artist))
         return artist_share, platform_fee, 0
 
     from spaces.services import ticket_listing_for_product

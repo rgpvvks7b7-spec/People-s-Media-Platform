@@ -61,14 +61,15 @@ This licence ends when you remove content or close your account, except for back
 
 When fans support you through IndieFund, the following Platform Fees apply:
 
-| Revenue stream | Platform fee | You receive |
-|----------------|-------------|-------------|
-| Monthly support and subscriptions | 10% | 90% |
-| One-time tips | 10% | 90% |
-| Music and merch sales | 15% | 85% |
-| Custom commissions | 15% | 85% |
+| Revenue stream | Free plan | Artist Pro | Studio |
+|----------------|-----------|------------|--------|
+| Monthly support and subscriptions | 10% | 5% | 5% |
+| One-time tips | 0% | 0% | 0% |
+| Music and merch sales | 15% | 15% | 12% |
+| Custom commissions | 15% | 15% | 12% |
+| Show tickets | 15% | 15% | 15% |
 
-Fees are calculated on the gross amount paid by the fan before Stripe processing costs unless otherwise stated. The in-app fee schedule is the authoritative reference.
+Fees are calculated on the gross amount paid by the fan before Stripe processing costs unless otherwise stated. The in-app fee schedule is the authoritative reference. Reduced plan rates apply to transactions completed while the plan is active.
 
 ### 3.2 Live events
 

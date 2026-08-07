@@ -632,7 +632,7 @@ def artist_dashboard(request):
     from .connect import fetch_connect_status
 
     return Response({
-        "fee_schedule": fee_schedule(),
+        "fee_schedule": fee_schedule(request.user),
         "payouts": fetch_connect_status(request.user.artist_profile),
         "revenue": {
             "mrr": serialize_money(mrr_amount, mrr_artist_share, mrr_platform_fee),

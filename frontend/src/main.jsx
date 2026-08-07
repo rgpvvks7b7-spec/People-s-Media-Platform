@@ -5822,6 +5822,7 @@ function App() {
                       </li>
                     ))}
                   </ul>
+                  {schedule.plan_note && <p className="muted form-hint">{schedule.plan_note}</p>}
                   <p className="muted form-hint">{schedule.live_policy}</p>
                 </div>
               )}
@@ -11564,7 +11565,7 @@ function App() {
             </article>
             <article className="feature-card">
               <h3>What fees does IndieFund charge?</h3>
-              <p className="muted">10% on support and tips, 15% on marketplace sales and show tickets. Venue door splits on ticketed shows are handled automatically when your space uses a door-percent deal. See your artist dashboard for the full fee schedule.</p>
+              <p className="muted">10% on support (5% on paid plans), 0% on tips, 15% on marketplace sales (12% on Studio) and show tickets. Venue door splits on ticketed shows are handled automatically when your space uses a door-percent deal. See your artist dashboard for the full fee schedule.</p>
             </article>
             <article className="feature-card">
               <h3>How do show tickets work?</h3>
