@@ -142,6 +142,7 @@ export function ProfilePage({
   onRefreshBetaSummary,
   onResolveBetaFeedback,
   onExportMailingList,
+  onOpenMailingList,
   onFanEmailSharingChange,
   onLogout,
   onUploadProfileMedia,
@@ -333,11 +334,18 @@ export function ProfilePage({
                 <p className="eyebrow">Mailing list</p>
                 <h3>{mailingList?.count || 0} contacts</h3>
                 <p>+{mailingList?.added_this_month || 0} this month from opted-in supporters.</p>
-                {mailingList?.can_export ? (
-                  <button className="secondary compact" onClick={onExportMailingList}>Export CSV</button>
-                ) : (
-                  <p className="muted">Artist Pro unlocks CSV export.</p>
-                )}
+                <div className="action-grid">
+                  {typeof onOpenMailingList === "function" && (
+                    <button className="primary compact" type="button" onClick={onOpenMailingList}>
+                      Open mailing list
+                    </button>
+                  )}
+                  {mailingList?.can_export ? (
+                    <button className="secondary compact" type="button" onClick={onExportMailingList}>Export CSV</button>
+                  ) : (
+                    <p className="muted">Artist Pro unlocks CSV export.</p>
+                  )}
+                </div>
               </div>
             </>
           )}

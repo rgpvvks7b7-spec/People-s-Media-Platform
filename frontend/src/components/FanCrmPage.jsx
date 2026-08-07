@@ -23,7 +23,14 @@ function segmentBadges(row) {
   ));
 }
 
-export function FanCrmPage({ apiFetch }) {
+export function FanCrmPage({
+  apiFetch,
+  mailingListCount = 0,
+  canExportMailingList = false,
+  onExportMailingList,
+  onOpenMailingDraft,
+  onUpgradePlan,
+}) {
   const [segment, setSegment] = useState("all");
   const [fans, setFans] = useState([]);
   const [counts, setCounts] = useState({});
@@ -108,11 +115,35 @@ export function FanCrmPage({ apiFetch }) {
 
       {sendResult && <p className="muted" role="status">{sendResult}</p>}
 
+      {segment === "mailing_list" && (
+        <section className="feature-card mailing-crm-bridge">
+          <p className="eyebrow">Mailing list</p>
+          <h3>{mailingListCount || counts.mailing_list || 0} opted-in contacts</h3>
+          <p className="muted form-hint">
+            In-app broadcast stays on IndieFund. Email drafts are copy-paste for your own inbox or ESP.
+          </p>
+          <div className="action-grid">
+            {canExportMailingList ? (
+              <button className="primary compact" type="button" onClick={onExportMailingList}>
+                Export CSV
+              </button>
+            ) : (
+              <button className="secondary compact" type="button" onClick={() => onUpgradePlan?.("pro")}>
+                Upgrade for CSV
+              </button>
+            )}
+            <button className="secondary compact" type="button" onClick={() => onOpenMailingDraft?.("thank_you")}>
+              Copy email draft
+            </button>
+          </div>
+        </section>
+      )}
+
       {composerOpen && (
         <section className="feature-card">
           <h3>Message your fans</h3>
           <p className="muted form-hint">
-            Delivered as an in-app and push notification. One broadcast per 24 hours — make it count.
+            In-app and push only — not email. One broadcast per 24 hours — make it count.
           </p>
           <form className="fan-crm-composer" onSubmit={sendBroadcast}>
             <label htmlFor="fan-broadcast-segment">Send to</label>

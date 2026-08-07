@@ -6,6 +6,7 @@ import { NotificationsPage, ProfilePage } from "./components/AccountPages.jsx";
 import { PromotePage } from "./components/PromotePage.jsx";
 import { AdsManagerPage } from "./components/AdsManagerPage.jsx";
 import { FanCrmPage } from "./components/FanCrmPage.jsx";
+import { MailingListStudio } from "./components/MailingListStudio.jsx";
 import { AccountActions, AppShell } from "./components/AppShell.jsx";
 import { AuthPanel } from "./components/AuthPanel.jsx";
 import { IndieFundLogo } from "./components/IndieFundLogo.jsx";
@@ -78,7 +79,7 @@ function resolveApiBase() {
 }
 
 const API = resolveApiBase();
-const FAN_PAGES = new Set(["home", "feed", "listen", "discover", "music", "my-music", "my-scene", "stores", "spaces", "live", "notifications", "profile", "promote", "ads-manager", "faq", "pricing", "prelaunch"]);
+const FAN_PAGES = new Set(["home", "feed", "listen", "discover", "music", "my-music", "my-scene", "stores", "spaces", "live", "notifications", "profile", "promote", "ads-manager", "fans", "mailing-list", "faq", "pricing", "prelaunch"]);
 const FAN_ARTIST_RAIL_PAGES = new Set(["home", "feed", "my-scene", "listen", "my-music", "stores"]);
 const HOST_PAGES = new Set(["spaces", "notifications", "profile", "faq", "pricing"]);
 const GUEST_SHELL_PAGES = new Set(["listen", "discover", "music", "profile", "spaces", "my-scene", "stores", "live", "faq", "pricing", "prelaunch", "early-access", ...LEGAL_PAGE_IDS]);
@@ -693,6 +694,9 @@ function App() {
   const [selectedSupportTierId, setSelectedSupportTierId] = useState("");
   const [selectedSupportEmailShare, setSelectedSupportEmailShare] = useState(false);
   const [mailingList, setMailingList] = useState(null);
+  const [mailingListTemplate, setMailingListTemplate] = useState("new_release");
+  const [mailingListContext, setMailingListContext] = useState({});
+  const [emailDraftPrompt, setEmailDraftPrompt] = useState(null);
   const [fanEmailSharing, setFanEmailSharing] = useState([]);
   const [artistDashboard, setArtistDashboard] = useState(null);
   const [connectStatus, setConnectStatus] = useState(null);
@@ -2860,6 +2864,19 @@ function App() {
     window.location.href = `${API}/artists/mailing-list/?export=csv`;
   }
 
+  function goToMailingList(options = {}) {
+    if (options.template) setMailingListTemplate(options.template);
+    if (options.context) setMailingListContext(options.context);
+    else if (!options.keepContext) setMailingListContext({});
+    setEmailDraftPrompt(null);
+    goToPage("mailing-list");
+  }
+
+  function offerEmailDraft(prompt) {
+    if (!currentUser?.is_artist || !prompt?.template) return;
+    setEmailDraftPrompt(prompt);
+  }
+
   function getArtistPublicUrl(ref = "", artist = selectedArtist, profession = activeProfession) {
     const username = artist?.owner_username || currentUser?.username || "";
     const resolvedProfession = artist ? resolveArtistProfession(artist, profession) : profession;
@@ -3687,6 +3704,24 @@ function App() {
         const booking = data.booking || findSpaceBooking(bookingId);
         openSpaceReviewModal(bookingId, currentUser, booking?.artist_name || "the artist");
       }
+      if (currentUser?.is_artist && nextStatus === "confirmed") {
+        const booking = data.booking || findSpaceBooking(bookingId);
+        offerEmailDraft({
+          template: "local_show",
+          context: {
+            venueName: booking?.listing?.name || booking?.venue_name || "",
+            city: booking?.listing?.city || booking?.city || "",
+            showDate: booking?.starts_at ? new Date(booking.starts_at).toLocaleString() : "",
+          },
+          label: "Email your list about this gig",
+        });
+      }
+      if (currentUser?.is_artist && nextStatus === "completed") {
+        offerEmailDraft({
+          template: "thank_you",
+          label: "Email your list a thank-you",
+        });
+      }
       return true;
     }
 
@@ -4302,6 +4337,13 @@ function App() {
         content_title: data.title,
         file_name: data.title,
         ai_usage_status: aiDisclosureLevel,
+      });
+    }
+    if (res.ok) {
+      offerEmailDraft({
+        template: "new_release",
+        context: { trackTitle: data.title || formData.get("title") || "" },
+        label: "Email your list about this release",
       });
     }
     loadData();
@@ -6190,11 +6232,11 @@ function App() {
               </div>
             )}
             <div className="action-grid">
-              <button className="secondary" onClick={() => goToPage("profile")}>Full list</button>
+              <button className="secondary" type="button" onClick={() => goToMailingList()}>Open mailing list</button>
               {mailingList?.can_export ? (
-                <button className="primary" onClick={exportMailingList}>Export CSV</button>
+                <button className="primary" type="button" onClick={exportMailingList}>Export CSV</button>
               ) : (
-                <button className="secondary" onClick={() => goToPage("profile")}>Upgrade for CSV</button>
+                <button className="secondary" type="button" onClick={() => upgradeArtistPlan("pro")}>Upgrade for CSV</button>
               )}
             </div>
           </div>
@@ -7018,6 +7060,7 @@ function App() {
     const artistNav = currentUser?.is_artist ? [
       { id: "create", kind: "studio", tab: "feed", activeTabs: ["feed", "live", "more"], icon: "+", label: "Create", detail: "Post or drop", onClick: () => openStudioTab("feed", { createPost: true }) },
       { id: "fans", kind: "page", page: "fans", icon: "♥", label: "Fans", detail: "CRM & messages", onClick: () => goToPage("fans") },
+      { id: "mailing-list", kind: "page", page: "mailing-list", icon: "@", label: "Mailing list", detail: "Contacts & drafts", onClick: () => goToMailingList() },
       { id: "promote", kind: "page", page: "promote", icon: "P", label: "Promote", detail: "Discovery ads", onClick: () => goToPage("promote") },
       { id: "ads-manager", kind: "page", page: "ads-manager", icon: "A", label: "Ads Manager", detail: "Growth campaigns", onClick: () => goToPage("ads-manager") },
       { id: "store", kind: "studio", tab: "shop", shopTab: "merch", activeTabs: ["shop"], icon: "$", label: "Merch", detail: "Merch store", onClick: () => openStudioTab("merch") },
@@ -8862,12 +8905,37 @@ function App() {
                         Notify Local Supporters
                       </button>
                     )}
+                    {booking.status === "confirmed" && (
+                      <button
+                        className="secondary compact"
+                        type="button"
+                        onClick={() => goToMailingList({
+                          template: "local_show",
+                          context: {
+                            venueName: booking.listing?.name || "",
+                            city: booking.listing?.city || "",
+                            showDate: booking.starts_at ? new Date(booking.starts_at).toLocaleString() : "",
+                          },
+                        })}
+                      >
+                        Email your list
+                      </button>
+                    )}
                     {booking.status === "completed" && (
                       <button
                         className="secondary compact"
                         onClick={() => openSpaceReviewModal(booking.id, currentUser, booking.listing?.name)}
                       >
                         Review venue
+                      </button>
+                    )}
+                    {booking.status === "completed" && (
+                      <button
+                        className="secondary compact"
+                        type="button"
+                        onClick={() => goToMailingList({ template: "thank_you" })}
+                      >
+                        Email thank-you
                       </button>
                     )}
                   </div>
@@ -11660,6 +11728,26 @@ function App() {
       />
 
       {message && <div className="notice">{message}</div>}
+      {emailDraftPrompt && (
+        <div className="notice email-draft-prompt" role="status">
+          <span>{emailDraftPrompt.label || "Email your mailing list"}</span>
+          <div className="action-grid">
+            <button
+              className="primary compact"
+              type="button"
+              onClick={() => goToMailingList({
+                template: emailDraftPrompt.template,
+                context: emailDraftPrompt.context || {},
+              })}
+            >
+              Email your list
+            </button>
+            <button className="secondary compact" type="button" onClick={() => setEmailDraftPrompt(null)}>
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
 
       {activePage === "prelaunch" && (
         <PrelaunchFanGate
@@ -12130,7 +12218,29 @@ function App() {
       )}
 
       {activePage === "fans" && currentUser?.is_artist && (
-        <FanCrmPage apiFetch={apiFetch} />
+        <FanCrmPage
+          apiFetch={apiFetch}
+          mailingListCount={mailingList?.count || 0}
+          canExportMailingList={Boolean(mailingList?.can_export)}
+          onExportMailingList={exportMailingList}
+          onOpenMailingDraft={(template = "thank_you") => goToMailingList({ template })}
+          onUpgradePlan={upgradeArtistPlan}
+        />
+      )}
+
+      {activePage === "mailing-list" && currentUser?.is_artist && (
+        <MailingListStudio
+          apiFetch={apiFetch}
+          currentUser={currentUser}
+          initialTemplate={mailingListTemplate}
+          initialContext={mailingListContext}
+          onExportCsv={exportMailingList}
+          onUpgradePlan={upgradeArtistPlan}
+          onOpenProfile={() => goToPage("profile")}
+          onOpenSpaces={() => goToPage("spaces", true, { allowSpaces: true })}
+          onBroadcastLocal={() => goToPage("fans")}
+          origin={window.location.origin}
+        />
       )}
 
       {activePage === "ads-manager" && currentUser?.is_artist && (
@@ -12210,6 +12320,7 @@ function App() {
           onRefreshBetaSummary={loadBetaFeedbackSummary}
           onResolveBetaFeedback={resolveBetaFeedback}
           onExportMailingList={exportMailingList}
+          onOpenMailingList={() => goToMailingList()}
           onFanEmailSharingChange={saveFanEmailSharing}
           onLogout={handleLogout}
           onUploadProfileMedia={uploadProfileMedia}

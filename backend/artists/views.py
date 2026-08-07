@@ -285,6 +285,10 @@ def mailing_list(request):
     if request.user.user_type != User.ARTIST:
         return Response({"error": "Artist account required"}, status=status.HTTP_403_FORBIDDEN)
 
+    from subscriptions.models import FanSubscription, OneTimeTip
+    from spaces.models import SpaceBooking
+    from spaces.local_draw import local_supporter_counts, resolve_local_city
+
     contacts = (
         ArtistFanContact.objects
         .select_related("fan", "artist")
@@ -292,18 +296,48 @@ def mailing_list(request):
         .order_by("-shared_at")
     )
     this_month = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    rows = [serialize_mailing_contact(contact) for contact in contacts]
+    recent_cutoff = timezone.now() - timezone.timedelta(days=30)
+    tip_fan_ids = set(
+        OneTimeTip.objects.filter(artist=request.user).values_list("fan_id", flat=True)
+    )
     can_export = request.user.artist_plan in {"pro", "studio"}
+    list_filter = (request.query_params.get("filter") or "all").strip().lower()
+
+    source_mix = {
+        "signup_opt_in": contacts.filter(source=ArtistFanContact.SIGNUP_OPT_IN).count(),
+        "support_prompt": contacts.filter(source=ArtistFanContact.SUPPORT_PROMPT).count(),
+        "manual": contacts.filter(source=ArtistFanContact.MANUAL).count(),
+    }
+
+    filtered = contacts
+    if list_filter == "supporters":
+        supporter_ids = FanSubscription.objects.filter(
+            artist=request.user, active=True
+        ).values_list("fan_id", flat=True)
+        filtered = filtered.filter(fan_id__in=supporter_ids)
+    elif list_filter == "tips":
+        filtered = filtered.filter(fan_id__in=tip_fan_ids)
+    elif list_filter == "recent":
+        filtered = filtered.filter(shared_at__gte=recent_cutoff)
+
+    rows = []
+    for contact in filtered:
+        row = serialize_mailing_contact(contact)
+        row["has_tipped"] = contact.fan_id in tip_fan_ids
+        if not can_export:
+            row["email"] = row["masked_email"]
+        rows.append(row)
 
     if request.query_params.get("export") == "csv":
         if not can_export:
             return Response({"error": "Artist Pro is required for mailing list CSV export."}, status=status.HTTP_403_FORBIDDEN)
 
+        export_rows = [serialize_mailing_contact(contact) for contact in contacts]
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = 'attachment; filename="indiefund-mailing-list.csv"'
         writer = csv.writer(response)
         writer.writerow(["email", "fan_username", "support_tier", "location", "date_added", "active_subscription", "source"])
-        for row in rows:
+        for row in export_rows:
             writer.writerow([
                 row["email"],
                 row["fan_username"],
@@ -315,11 +349,46 @@ def mailing_list(request):
             ])
         return response
 
+    profile = getattr(request.user, "artist_profile", None)
+    city = resolve_local_city(profile.city if profile else "")
+    local = local_supporter_counts(request.user, city)
+    next_gig = (
+        SpaceBooking.objects
+        .select_related("listing")
+        .filter(artist=request.user, status=SpaceBooking.CONFIRMED, starts_at__gte=timezone.now())
+        .order_by("starts_at")
+        .first()
+    )
+    next_gig_payload = None
+    if next_gig:
+        next_gig_payload = {
+            "booking_id": next_gig.id,
+            "venue_name": next_gig.listing.name,
+            "city": next_gig.listing.city,
+            "starts_at": next_gig.starts_at,
+            "public_url": f"/?page=my-scene&show={next_gig.id}",
+        }
+
     return Response({
-        "count": len(rows),
+        "count": contacts.count(),
+        "filtered_count": len(rows),
+        "filter": list_filter if list_filter in {"all", "supporters", "tips", "recent"} else "all",
         "added_this_month": contacts.filter(shared_at__gte=this_month).count(),
+        "added_last_30d": contacts.filter(shared_at__gte=recent_cutoff).count(),
         "can_export": can_export,
+        "export_nudge": (not can_export) and contacts.count() >= 10,
+        "source_mix": source_mix,
         "results": rows,
+        "template_context": {
+            "stage_name": profile.stage_name if profile else request.user.username,
+            "city": city,
+            "public_url": f"/?artist={request.user.username}",
+            "next_gig": next_gig_payload,
+            "local_supporters": local.get("local_supporters", 0),
+            "local_mailing_contacts": local.get("notifyable_local_supporters_count", 0),
+            "profile_city_set": bool(city),
+            "has_upcoming_gig": bool(next_gig_payload),
+        },
     })
 
 

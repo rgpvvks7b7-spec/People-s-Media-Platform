@@ -8983,6 +8983,80 @@ h3 .artist-name-link.click-title:focus-visible {
   gap: 20px;
 }
 
+.mailing-list-studio {
+  display: grid;
+  gap: 20px;
+}
+
+.mailing-list-growth .artist-stat-grid {
+  margin: 0;
+}
+
+.mailing-export-nudge,
+.mailing-crm-bridge,
+.email-template-studio,
+.local-draw-playbook {
+  display: grid;
+  gap: 12px;
+}
+
+.email-template-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.email-template-studio textarea {
+  min-height: 220px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.local-draw-steps {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: local-draw;
+}
+
+.local-draw-steps li {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  counter-increment: local-draw;
+}
+
+.local-draw-steps li::before {
+  content: counter(local-draw);
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(167, 139, 250, 0.2);
+  color: #e9d5ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.local-draw-steps li.is-done {
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.email-draft-prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .tip-prompt-sheet,
 .post-show-loop-sheet {
   display: grid;
