@@ -1,4 +1,5 @@
 from decimal import Decimal
+from uuid import uuid4
 
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
@@ -27,6 +28,7 @@ User = get_user_model()
 MAX_SPACE_PHOTOS = 8
 MAX_IMAGE_SIZE = 8 * 1024 * 1024
 ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+SERIES_MAX_DATES = 12
 
 
 def request_bool(data, field, default=False):
@@ -86,6 +88,37 @@ def parse_booking_material(request):
         return None, None, "Material link must be a valid http or https URL."
     material_credit = str(request.data.get("material_credit") or "").strip()[:200]
     return material_url, material_credit, ""
+
+
+def parse_booking_date_slots(request):
+    """Return list of (starts_at, ends_at) pairs for a single show or series."""
+    raw_dates = request.data.get("dates")
+    slots = []
+
+    if isinstance(raw_dates, list) and raw_dates:
+        if len(raw_dates) > SERIES_MAX_DATES:
+            return None, f"A series can include at most {SERIES_MAX_DATES} dates."
+        for index, entry in enumerate(raw_dates):
+            if not isinstance(entry, dict):
+                return None, "Each series date must include starts_at and ends_at."
+            starts_at, starts_error = parse_datetime_value(entry.get("starts_at"), f"dates[{index}].starts_at")
+            ends_at, ends_error = parse_datetime_value(entry.get("ends_at"), f"dates[{index}].ends_at")
+            if starts_error or ends_error:
+                return None, starts_error or ends_error
+            slots.append((starts_at, ends_at))
+    else:
+        starts_at, starts_error = parse_datetime_value(request.data.get("starts_at"), "starts_at")
+        ends_at, ends_error = parse_datetime_value(request.data.get("ends_at"), "ends_at")
+        if starts_error or ends_error:
+            return None, starts_error or ends_error
+        slots.append((starts_at, ends_at))
+
+    for starts_at, ends_at in slots:
+        if ends_at <= starts_at:
+            return None, "ends_at must be after starts_at."
+
+    slots.sort(key=lambda pair: pair[0])
+    return slots, ""
 
 
 def parse_available_windows(value):
@@ -259,6 +292,7 @@ def serialize_booking(booking, request):
         "material_credit": booking.material_credit,
         "status": booking.status,
         "linked_event_id": booking.linked_event_id,
+        "series_id": str(booking.series_id) if booking.series_id else None,
         "ticket_product_id": booking.ticket_product_id,
         "ticket_title": ticket_product.title if ticket_product else "",
         "ticket_price": str(ticket_product.price) if ticket_product else None,
@@ -577,16 +611,14 @@ def bookings(request):
     except SpaceListing.DoesNotExist:
         return Response({"error": "Space listing not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    starts_at, starts_error = parse_datetime_value(request.data.get("starts_at"), "starts_at")
-    ends_at, ends_error = parse_datetime_value(request.data.get("ends_at"), "ends_at")
-    if starts_error or ends_error:
-        return Response({"error": starts_error or ends_error}, status=status.HTTP_400_BAD_REQUEST)
-    if ends_at <= starts_at:
-        return Response({"error": "ends_at must be after starts_at."}, status=status.HTTP_400_BAD_REQUEST)
+    slots, slots_error = parse_booking_date_slots(request)
+    if slots_error:
+        return Response({"error": slots_error}, status=status.HTTP_400_BAD_REQUEST)
 
-    window_error = validate_booking_window(listing, starts_at, ends_at)
-    if window_error:
-        return Response({"error": window_error}, status=status.HTTP_400_BAD_REQUEST)
+    for starts_at, ends_at in slots:
+        window_error = validate_booking_window(listing, starts_at, ends_at)
+        if window_error:
+            return Response({"error": window_error}, status=status.HTTP_400_BAD_REQUEST)
 
     material_url, material_credit, material_error = parse_booking_material(request)
     if material_error:
@@ -601,52 +633,85 @@ def bookings(request):
             ),
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    booking = SpaceBooking.objects.create(
-        listing=listing,
-        artist=request.user,
-        starts_at=starts_at,
-        ends_at=ends_at,
-        expected_audience=parse_int(request.data.get("expected_audience"), default=0, minimum=0, maximum=2000),
-        pitch=(request.data.get("pitch") or "").strip(),
-        material_url=material_url,
-        material_credit=material_credit,
-        ticket_price=parse_decimal(request.data.get("ticket_price"), default="15.00"),
-        supporter_presale_hours=parse_int(
-            request.data.get("supporter_presale_hours"), default=0, minimum=0, maximum=24 * 30,
-        ),
-        status=SpaceBooking.CONFIRMED if listing.booking_mode == SpaceListing.INSTANT_BOOK else SpaceBooking.REQUESTED,
-        linked_event_id=request.data.get("linked_event_id") or None,
+    series_id = uuid4() if len(slots) > 1 else None
+    expected_audience = parse_int(request.data.get("expected_audience"), default=0, minimum=0, maximum=2000)
+    pitch = (request.data.get("pitch") or "").strip()
+    ticket_price = parse_decimal(request.data.get("ticket_price"), default="15.00")
+    supporter_presale_hours = parse_int(
+        request.data.get("supporter_presale_hours"), default=0, minimum=0, maximum=24 * 30,
     )
+    booking_status = SpaceBooking.CONFIRMED if listing.booking_mode == SpaceListing.INSTANT_BOOK else SpaceBooking.REQUESTED
+    linked_event_id = request.data.get("linked_event_id") or None
     ticket_product_id = request.data.get("ticket_product_id")
+    publish_to_calendar = request_bool(request.data, "publish_to_calendar", True)
+    calendar_visibility = request.data.get("calendar_visibility") or "public"
+
+    linked_product = None
     if ticket_product_id:
         try:
-            product = Product.objects.get(id=ticket_product_id, artist=request.user, is_active=True)
-            link_ticket_product(booking, product)
+            linked_product = Product.objects.get(id=ticket_product_id, artist=request.user, is_active=True)
         except Product.DoesNotExist:
-            pass
-    elif booking.status == SpaceBooking.CONFIRMED:
-        from .services import ensure_booking_ticket_product
-        ensure_booking_ticket_product(booking)
-        booking.refresh_from_db()
+            linked_product = None
 
-    if booking.status == SpaceBooking.CONFIRMED and request_bool(request.data, "publish_to_calendar", True):
-        on_booking_confirmed(
-            booking,
-            publish_to_calendar=True,
-            calendar_visibility=request.data.get("calendar_visibility") or "public",
+    created = []
+    for starts_at, ends_at in slots:
+        booking = SpaceBooking.objects.create(
+            listing=listing,
+            artist=request.user,
+            starts_at=starts_at,
+            ends_at=ends_at,
+            expected_audience=expected_audience,
+            pitch=pitch,
+            material_url=material_url,
+            material_credit=material_credit,
+            ticket_price=ticket_price,
+            supporter_presale_hours=supporter_presale_hours,
+            status=booking_status,
+            linked_event_id=linked_event_id,
+            series_id=series_id,
         )
-        from notifications.gig_notifications import notify_local_supporters_for_booking
+        if linked_product:
+            link_ticket_product(booking, linked_product)
+        elif booking.status == SpaceBooking.CONFIRMED:
+            from .services import ensure_booking_ticket_product
+            ensure_booking_ticket_product(booking)
+            booking.refresh_from_db()
 
-        notify_local_supporters_for_booking(booking)
+        if booking.status == SpaceBooking.CONFIRMED and publish_to_calendar:
+            on_booking_confirmed(
+                booking,
+                publish_to_calendar=True,
+                calendar_visibility=calendar_visibility,
+            )
+            from notifications.gig_notifications import notify_local_supporters_for_booking
+
+            notify_local_supporters_for_booking(booking)
+        created.append(booking)
+
+    primary = created[0]
+    series_label = f" ({len(created)}-date series)" if series_id else ""
     Notification.objects.create(
         recipient=listing.host,
         actor=request.user,
         notification_type=Notification.SYSTEM,
-        title=f"New booking request: {listing.name}",
-        body=booking.pitch[:240],
+        title=f"New booking request: {listing.name}{series_label}",
+        body=primary.pitch[:240],
         target_url="/?page=spaces",
     )
-    return Response({"message": "Booking requested.", "booking": serialize_booking(booking, request)}, status=status.HTTP_201_CREATED)
+    message = (
+        f"Series requested ({len(created)} dates)."
+        if series_id
+        else "Booking requested."
+    )
+    return Response(
+        {
+            "message": message,
+            "booking": serialize_booking(primary, request),
+            "bookings": [serialize_booking(item, request) for item in created],
+            "series_id": str(series_id) if series_id else None,
+        },
+        status=status.HTTP_201_CREATED,
+    )
 
 
 @api_view(["POST"])

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { ArtistNameLink } from "./ArtistNameLink.jsx";
 import { ProfileSettingsNav } from "./ProfileSettingsNav.jsx";
 import { getSettingsSectionsForUser } from "../lib/profileSettings.js";
@@ -19,6 +19,54 @@ function renderWalletLedger(entries = [], limit = 6) {
         </li>
       ))}
     </ul>
+  );
+}
+
+function formatTicketWhen(ticket) {
+  if (!ticket?.show?.starts_at) return "";
+  return new Date(ticket.show.starts_at).toLocaleString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function TicketStubCard({ ticket, onOpenArtistByUsername, onOpenTicketShow }) {
+  const venue = ticket.show?.venue_name || "Venue";
+  const when = formatTicketWhen(ticket);
+  return (
+    <article className="fan-ticket-stub-card">
+      <div className="fan-ticket-stub-card-main">
+        <p className="eyebrow">Show stub</p>
+        <strong>{ticket.product_title}</strong>
+        <span>
+          <ArtistNameLink
+            username={ticket.artist_username}
+            label={ticket.stage_name}
+            onOpenArtist={onOpenArtistByUsername}
+            stopPropagation
+          />
+          {` @ ${venue}`}
+        </span>
+        {when ? <span className="muted">{when}</span> : null}
+        {ticket.show?.stub_code ? (
+          <p className="ticket-door-code-inline">Stub code <strong>{ticket.show.stub_code}</strong></p>
+        ) : (
+          <p className="ticket-door-code-inline">Checked in at the door</p>
+        )}
+      </div>
+      {ticket.show?.booking_id ? (
+        <button
+          className="secondary compact"
+          type="button"
+          onClick={() => onOpenTicketShow?.(ticket.show.booking_id)}
+        >
+          View show
+        </button>
+      ) : null}
+    </article>
   );
 }
 
@@ -60,18 +108,102 @@ export function ProfileSettingsView({
 }) {
   const sections = getSettingsSectionsForUser(currentUser);
 
+  const [ticketTab, setTicketTab] = useState("upcoming");
+  const ticketGroups = useMemo(() => {
+    const upcoming = [];
+    const attended = [];
+    const past = [];
+    for (const ticket of myTickets || []) {
+      const status = ticket.collection_status
+        || ticket.show?.collection_status
+        || (ticket.checked_in ? "attended" : "upcoming");
+      if (status === "attended") attended.push(ticket);
+      else if (status === "past") past.push(ticket);
+      else upcoming.push(ticket);
+    }
+    return { upcoming, attended, past };
+  }, [myTickets]);
+
   function renderSection() {
     switch (activeSection) {
-      case "tickets":
+      case "tickets": {
+        const activeTickets = ticketTab === "collection"
+          ? [...ticketGroups.attended, ...ticketGroups.past]
+          : ticketGroups.upcoming;
         return (
           <div className="feature-card profile-settings-panel-card">
             <p className="eyebrow">My tickets</p>
-            <h3>{myTickets.length ? `${myTickets.length} upcoming` : "No tickets yet"}</h3>
-            {myTickets.length === 0 ? (
-              <p className="muted">Buy tickets from Shows near me when artists play local venues.</p>
+            <h3>
+              {ticketTab === "collection"
+                ? (ticketGroups.attended.length
+                  ? `${ticketGroups.attended.length} in your collection`
+                  : "No stubs yet")
+                : (ticketGroups.upcoming.length
+                  ? `${ticketGroups.upcoming.length} upcoming`
+                  : "No tickets yet")}
+            </h3>
+            <div className="my-tickets-tabs" role="tablist" aria-label="Ticket views">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={ticketTab === "upcoming"}
+                className={ticketTab === "upcoming" ? "secondary compact is-active" : "secondary compact"}
+                onClick={() => setTicketTab("upcoming")}
+              >
+                Upcoming
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={ticketTab === "collection"}
+                className={ticketTab === "collection" ? "secondary compact is-active" : "secondary compact"}
+                onClick={() => setTicketTab("collection")}
+              >
+                Collection
+              </button>
+            </div>
+            {activeTickets.length === 0 ? (
+              <p className="muted">
+                {ticketTab === "collection"
+                  ? "Shows you check in to become stubs in your collection."
+                  : "Buy tickets from Shows near me when artists play local venues."}
+              </p>
+            ) : ticketTab === "collection" ? (
+              <div className="fan-ticket-stub-list" aria-label="Show stub collection">
+                {ticketGroups.attended.map(ticket => (
+                  <TicketStubCard
+                    key={`stub-${ticket.product_id}`}
+                    ticket={ticket}
+                    onOpenArtistByUsername={onOpenArtistByUsername}
+                    onOpenTicketShow={onOpenTicketShow}
+                  />
+                ))}
+                {ticketGroups.past.length > 0 && (
+                  <>
+                    <p className="muted form-hint">Past tickets without door check-in</p>
+                    {ticketGroups.past.map(ticket => (
+                      <div className="library-row" key={`past-${ticket.product_id}`}>
+                        <div>
+                          <strong>{ticket.product_title}</strong>
+                          <span className="muted">
+                            <ArtistNameLink
+                              username={ticket.artist_username}
+                              label={ticket.stage_name}
+                              onOpenArtist={onOpenArtistByUsername}
+                              stopPropagation
+                            />
+                            {ticket.show?.venue_name ? ` @ ${ticket.show.venue_name}` : ""}
+                            {ticket.show?.starts_at ? ` · ${formatTicketWhen(ticket)}` : ""}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
             ) : (
               <div className="my-tickets-list">
-                {myTickets.map(ticket => (
+                {ticketGroups.upcoming.map(ticket => (
                   <button
                     type="button"
                     key={ticket.product_id}
@@ -87,14 +219,10 @@ export function ProfileSettingsView({
                         stopPropagation
                       />
                       {ticket.show?.venue_name ? ` @ ${ticket.show.venue_name}` : ""}
-                      {ticket.show?.starts_at ? ` · ${new Date(ticket.show.starts_at).toLocaleString()}` : ""}
+                      {ticket.show?.starts_at ? ` · ${formatTicketWhen(ticket)}` : ""}
                     </span>
                     <span>${ticket.amount} · Confirmed</span>
-                    {ticket.checked_in ? (
-                      <span className="ticket-door-code-inline">Checked in at door</span>
-                    ) : (
-                      <span className="ticket-door-code-inline">Tap I'm here at the venue to check in</span>
-                    )}
+                    <span className="ticket-door-code-inline">Tap I'm here at the venue to check in</span>
                   </button>
                 ))}
               </div>
@@ -104,6 +232,7 @@ export function ProfileSettingsView({
             )}
           </div>
         );
+      }
 
       case "library":
         return (

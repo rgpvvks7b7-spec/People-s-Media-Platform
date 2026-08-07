@@ -626,7 +626,14 @@ function App() {
   const [showCalendarForm, setShowCalendarForm] = useState(false);
   const [calendarItemType, setCalendarItemType] = useState("release");
   const calendarDateValuesRef = useRef({ starts_at: "", ends_at: "", hasStartDate: false, hasEndDate: false });
-  const spaceBookingDateValuesRef = useRef({ starts_at: "", ends_at: "", hasStartDate: false, hasEndDate: false });
+  const spaceBookingDateValuesRef = useRef({
+    starts_at: "",
+    ends_at: "",
+    dates: [],
+    series_mode: false,
+    hasStartDate: false,
+    hasEndDate: false,
+  });
   const spaceBookingPanelRef = useRef(null);
   const [isLive, setIsLive] = useState(false);
   const [activeLiveSession, setActiveLiveSession] = useState(null);
@@ -3390,7 +3397,14 @@ function App() {
 
   function openSpaceBookingForm(listingId) {
     setSpaceBookingListingId(listingId);
-    spaceBookingDateValuesRef.current = { starts_at: "", ends_at: "", hasStartDate: false, hasEndDate: false };
+    spaceBookingDateValuesRef.current = {
+      starts_at: "",
+      ends_at: "",
+      dates: [],
+      series_mode: false,
+      hasStartDate: false,
+      hasEndDate: false,
+    };
     requestAnimationFrame(() => {
       spaceBookingPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
@@ -3405,36 +3419,50 @@ function App() {
     }
 
     const listing = spaceListings.find(item => item.id === listingId);
-    const { starts_at: startsAt, ends_at: endsAt, hasStartDate, hasEndDate } = spaceBookingDateValuesRef.current;
-    if (!hasStartDate || !startsAt) {
+    const {
+      starts_at: startsAt,
+      ends_at: endsAt,
+      dates: selectedDates = [],
+      hasStartDate,
+      hasEndDate,
+    } = spaceBookingDateValuesRef.current;
+    const dateSlots = selectedDates.length
+      ? selectedDates
+      : (startsAt && endsAt ? [{ starts_at: startsAt, ends_at: endsAt }] : []);
+
+    if (!hasStartDate || !dateSlots.length) {
       setMessage("Pick an available date from the host schedule.");
       return;
     }
-    if (!hasEndDate || !endsAt) {
+    if (!hasEndDate) {
       setMessage("Pick start and end times within the host window.");
       return;
     }
 
-    const windowError = validateBookingWindow({
-      dateValue: startsAt.split("T")[0],
-      startTime: startsAt.split("T")[1],
-      endTime: endsAt.split("T")[1],
-      availableWindows: listing?.available_windows || [],
-    });
-    if (windowError) {
-      setMessage(windowError);
-      return;
-    }
-
-    if (new Date(endsAt) <= new Date(startsAt)) {
-      setMessage("End time must be after the start time.");
-      return;
+    for (const slot of dateSlots) {
+      const windowError = validateBookingWindow({
+        dateValue: slot.starts_at.split("T")[0],
+        startTime: slot.starts_at.split("T")[1],
+        endTime: slot.ends_at.split("T")[1],
+        availableWindows: listing?.available_windows || [],
+      });
+      if (windowError) {
+        setMessage(windowError);
+        return;
+      }
+      if (new Date(slot.ends_at) <= new Date(slot.starts_at)) {
+        setMessage("End time must be after the start time.");
+        return;
+      }
     }
 
     const payload = Object.fromEntries(new FormData(event.target).entries());
     payload.listing_id = listingId;
-    payload.starts_at = startsAt;
-    payload.ends_at = endsAt;
+    payload.starts_at = dateSlots[0].starts_at;
+    payload.ends_at = dateSlots[0].ends_at;
+    if (dateSlots.length > 1) {
+      payload.dates = dateSlots;
+    }
     payload.publish_to_calendar = true;
 
     const res = await apiFetch("/spaces/bookings/", {
@@ -3453,7 +3481,14 @@ function App() {
 
     if (res.ok) {
       event.target.reset();
-      spaceBookingDateValuesRef.current = { starts_at: "", ends_at: "", hasStartDate: false, hasEndDate: false };
+      spaceBookingDateValuesRef.current = {
+        starts_at: "",
+        ends_at: "",
+        dates: [],
+        series_mode: false,
+        hasStartDate: false,
+        hasEndDate: false,
+      };
       setSpaceBookingListingId(null);
       setMessage(data.message || "Booking requested.");
     } else if (data.error && /local supporter/i.test(data.error)) {
@@ -5779,22 +5814,21 @@ function App() {
         {(() => {
           const launchItems = getArtistLaunchChecklistItems(studioSnapshot);
           const { complete: launchComplete } = getChecklistProgress(launchItems);
-          if (launchComplete) {
-            return (
-              <>
-                <GrowthNextAction action={getArtistGrowthNextAction()} />
-                {renderChallengeBoard()}
-              </>
-            );
-          }
           return (
-            <SetupChecklistPanel
-              title="Launch your page"
-              subtitle="Finish these four steps so fans can find you, hear your work, and subscribe."
-              items={launchItems}
-              checklistHidden={setupChecklistDismissed}
-              onDismiss={dismissSetupChecklist}
-            />
+            <>
+              {!launchComplete ? (
+                <SetupChecklistPanel
+                  title="Launch your page"
+                  subtitle="Finish these four steps so fans can find you, hear your work, and subscribe."
+                  items={launchItems}
+                  checklistHidden={setupChecklistDismissed}
+                  onDismiss={dismissSetupChecklist}
+                />
+              ) : (
+                <GrowthNextAction action={getArtistGrowthNextAction()} />
+              )}
+              {renderChallengeBoard()}
+            </>
           );
         })()}
 
@@ -7578,7 +7612,7 @@ function App() {
     };
 
     return (
-      <section className="challenge-board">
+      <section className="challenge-board" aria-label="Engagement board">
         <div className="tab-title-row">
           <div>
             <p className="eyebrow">Challenges</p>
@@ -8964,7 +8998,7 @@ function App() {
                 <div className="space-panel compact">
                   <p className="eyebrow">Venue availability</p>
                   <SpaceAvailabilityEditor rows={windowsToRows(bookingListing.available_windows)} windows={bookingListing.available_windows} readOnly />
-                  <p className="muted form-hint">Choose one of the host&apos;s open days below, then pick times inside that window.</p>
+                  <p className="muted form-hint">Choose one or more of the host&apos;s open days below, then pick times inside that window.</p>
                 </div>
                 <SpaceBookingDateFields
                   key={`booking-${bookingListing.id}`}
