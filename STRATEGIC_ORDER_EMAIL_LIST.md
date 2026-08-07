@@ -13,7 +13,7 @@
 
 | Step | Name | Outcome | Depends on |
 |------|------|---------|------------|
-| **0** | Land Phase 5 | PR #15 merged to `main` | — |
+| **0** | Land Phase 5 | ~~PR #15 merged to `main`~~ ✅ | — |
 | **1** | Mailing list studio | Browse opted-in contacts + export nudge | Step 0 |
 | **2** | Template studio | Tailored copy-paste email drafts | Step 1 |
 | **3** | Moment → draft hooks | One-click draft after drop / gig / thank-you moments | Step 2 |
