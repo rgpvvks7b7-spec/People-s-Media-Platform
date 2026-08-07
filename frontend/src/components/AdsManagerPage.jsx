@@ -110,7 +110,9 @@ export function AdsManagerPage({
 
       <section className="feature-card ads-manager-note">
         <p className="muted">
-          This planner helps you map external ad campaigns step by step. For in-platform Discovery ads on IndieFund, use{" "}
+          This planner helps you map external ad campaigns step by step. IndieFund never runs external ads for you
+          and never adds tracking pixels — you launch campaigns on the ad platforms yourself and log results here.
+          For in-platform Discovery ads on IndieFund, use{" "}
           <button className="link-button" type="button" onClick={onGoToPromote}>Promote</button>.
         </p>
       </section>
