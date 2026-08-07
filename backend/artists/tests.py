@@ -444,6 +444,44 @@ class ArtistDashboardTests(APITestCase):
         self.assertEqual(response.data["referrals"]["supporters_this_month"][0]["source"], "instagram")
         self.assertEqual(response.data["referrals"]["supporters_this_month"][0]["supporters"], 1)
 
+    def test_artist_dashboard_invite_funnel_conversion_rates(self):
+        FanJourneyEvent.objects.create(
+            fan=self.fan,
+            artist=self.artist,
+            event_type=FanJourneyEvent.FOLLOW,
+            metadata={"referral_source": f"invite_{self.artist.username}"},
+        )
+        FanJourneyEvent.objects.create(
+            fan=self.second_fan,
+            artist=self.artist,
+            event_type=FanJourneyEvent.FOLLOW,
+            metadata={"referral_source": f"invite_{self.artist.username}"},
+        )
+        FanJourneyEvent.objects.create(
+            fan=self.fan,
+            artist=self.artist,
+            event_type=FanJourneyEvent.SUBSCRIBE,
+            metadata={"referral_source": f"invite_{self.artist.username}"},
+        )
+        FanJourneyEvent.objects.create(
+            fan=self.second_fan,
+            artist=self.artist,
+            event_type=FanJourneyEvent.FOLLOW,
+            metadata={"referral_source": "instagram"},
+        )
+        self.client.force_authenticate(self.artist)
+
+        response = self.client.get("/api/artists/dashboard/")
+
+        self.assertEqual(response.status_code, 200)
+        referrals = response.data["referrals"]
+        self.assertEqual(referrals["invite_link_follows"], 2)
+        self.assertEqual(referrals["invite_link_subscribers"], 1)
+        self.assertEqual(referrals["invite_follow_to_subscribe_rate"], 50.0)
+        self.assertEqual(referrals["invite_follows"], 3)
+        self.assertEqual(referrals["funnel"][0]["count"], 2)
+        self.assertEqual(referrals["funnel"][1]["count"], 1)
+
     def test_artist_dashboard_requires_artist_account(self):
         self.client.force_authenticate(self.fan)
 

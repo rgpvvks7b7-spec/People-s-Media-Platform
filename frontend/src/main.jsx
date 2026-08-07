@@ -17,6 +17,7 @@ import { ArtistVisitorBanner } from "./components/ArtistVisitorBanner.jsx";
 import { LiveTab } from "./components/LiveTab.jsx";
 import { ListeningPartyPage } from "./components/ListeningPartyPage.jsx";
 import { MyScenePage } from "./components/MyScene.jsx";
+import { TipPromptSheet } from "./components/TipPromptSheet.jsx";
 import { TicketStubIconButton, TicketStubNavIcon, TicketStubSheet } from "./components/TicketStubSheet.jsx";
 import { CalendarItemDateFields } from "./components/CalendarItemDateFields.jsx";
 import { SpaceBookingDateFields } from "./components/SpaceBookingDateFields.jsx";
@@ -718,6 +719,9 @@ function App() {
     normalizePlatformMode(import.meta.env.VITE_PLATFORM_MODE || PLATFORM_MODE_LIVE)
   );
   const [showTipForm, setShowTipForm] = useState(false);
+  const [tipPrompt, setTipPrompt] = useState(null);
+  const [tipPromptSubmitting, setTipPromptSubmitting] = useState(false);
+  const [tipPromptError, setTipPromptError] = useState("");
   const [activeTab, setActiveTab] = useState("listen");
   const [activeShopTab, setActiveShopTab] = useState("merch");
   const [activeMoreTab, setActiveMoreTab] = useState("settings");
@@ -762,6 +766,70 @@ function App() {
   const pushSupported = typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window;
   const playbackEventKeysRef = useRef(new Set());
 
+  function tipPromptStorageKey(prompt) {
+    if (!prompt?.artistId) return "";
+    return `indiefund_tip_prompt_${prompt.reason || "tip"}_${prompt.artistId}_${prompt.trackId || prompt.bookingId || "x"}`;
+  }
+
+  function openTipPrompt(prompt) {
+    if (!prompt?.artistId || !currentUser) return;
+    if (currentUser.is_artist && String(currentUser.id) === String(prompt.artistId)) return;
+    const storageKey = tipPromptStorageKey(prompt);
+    if (storageKey && localStorage.getItem(storageKey) === "1") return;
+    setTipPromptError("");
+    setTipPrompt(prompt);
+  }
+
+  function dismissTipPrompt({ remember = true } = {}) {
+    if (remember && tipPrompt) {
+      const storageKey = tipPromptStorageKey(tipPrompt);
+      if (storageKey) localStorage.setItem(storageKey, "1");
+    }
+    setTipPrompt(null);
+    setTipPromptError("");
+    setTipPromptSubmitting(false);
+  }
+
+  async function submitTipPrompt({ amount, message, is_public = true }) {
+    if (!tipPrompt?.artistId || tipPromptSubmitting) return;
+    setTipPromptSubmitting(true);
+    setTipPromptError("");
+    try {
+      const res = await apiFetch("/subscriptions/tips/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          artist_id: tipPrompt.artistId,
+          profession: tipPrompt.profession || "music",
+          amount,
+          message,
+          is_public,
+          referral_source: referralSource,
+          tip_source: tipPrompt.reason || "prompt",
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setTipPromptError(data.error || "Unable to send tip.");
+        return;
+      }
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+        return;
+      }
+      setMessage(data.message || "Tip sent.");
+      dismissTipPrompt({ remember: true });
+      loadArtistDashboard();
+      if (selectedArtist?.owner_id === tipPrompt.artistId) {
+        loadTips(selectedArtist, tipPrompt.profession || activeProfession);
+      }
+    } catch {
+      setTipPromptError("Unable to send tip.");
+    } finally {
+      setTipPromptSubmitting(false);
+    }
+  }
+
   function recordMusicPlaybackEvent(track, eventType, secondsPlayed = 0) {
     if (!track?.id || track.is_product) return;
     const key = `${track.id}:${eventType}:${currentUser?.id || "anon"}`;
@@ -778,6 +846,20 @@ function App() {
         source: playbackSource?.label || "player",
       }),
     }).catch(() => {});
+
+    if (eventType === "music_full_play" && currentUser && track.artist_id) {
+      openTipPrompt({
+        artistId: track.artist_id,
+        artistUsername: track.artist_username,
+        artistName: track.stage_name || track.artist_username,
+        profession: track.profession || "music",
+        reason: "full_listen",
+        trackId: track.id,
+        contextLabel: track.title
+          ? `Loved “${track.title}”? Tips go 100% to the artist.`
+          : "Tips go 100% to the artist — IndieFund takes $0.",
+      });
+    }
   }
 
   async function loadData() {
@@ -4872,6 +4954,8 @@ function App() {
     payload.is_public = Boolean(payload.is_public);
     payload.share_email_with_artist = Boolean(payload.share_email_with_artist);
     payload.apply_discovery_credits = Boolean(payload.apply_discovery_credits);
+    payload.referral_source = referralSource;
+    payload.tip_source = "profile";
 
     const res = await apiFetch("/subscriptions/tips/", {
       method: "POST",
@@ -5713,6 +5797,8 @@ function App() {
 
   function renderArtistStudioTools(snapshot) {
     if (!snapshot) return null;
+    const hasCommissionInbox = currentUser?.artist_plan === "pro" || currentUser?.artist_plan === "studio";
+    const newCommissionCount = snapshot.commissions.filter(item => item.status === "new").length;
 
     return (
       <>
@@ -5721,43 +5807,62 @@ function App() {
             <div className="tab-title-row">
               <div>
                 <p className="eyebrow">Commissions</p>
-                <h3>{snapshot.professionLabel} requests</h3>
+                <h3>{snapshot.professionLabel} inbox</h3>
               </div>
-              <span className="muted">{snapshot.commissions.length} active request{snapshot.commissions.length === 1 ? "" : "s"}</span>
+              <span className="muted">
+                {snapshot.commissions.length} request{snapshot.commissions.length === 1 ? "" : "s"}
+                {newCommissionCount ? ` · ${newCommissionCount} new` : ""}
+              </span>
             </div>
 
-            {snapshot.commissions.length === 0 && (
-              <div className="empty-state">
-                <h3>No commission requests yet.</h3>
-                <p>Fans can request custom work from your Arts profile.</p>
+            {!hasCommissionInbox ? (
+              <div className="empty-state commission-upgrade-teaser">
+                <h3>Artist Pro unlocks your commission inbox</h3>
+                <p>
+                  {snapshot.commissions.length
+                    ? `${snapshot.commissions.length} custom request${snapshot.commissions.length === 1 ? "" : "s"} waiting. Upgrade to review, quote, and reply.`
+                    : "Fans can request custom work from your Arts profile. Upgrade to Artist Pro to manage them here."}
+                </p>
+                <button className="primary compact" type="button" onClick={() => upgradeArtistPlan("pro")}>
+                  Upgrade to Artist Pro
+                </button>
               </div>
+            ) : (
+              <>
+                {snapshot.commissions.length === 0 && (
+                  <div className="empty-state">
+                    <h3>No commission requests yet.</h3>
+                    <p>Fans can request custom work from your Arts profile.</p>
+                  </div>
+                )}
+
+                <div className="commission-list">
+                  {snapshot.commissions.map(item => (
+                    <article className="commission-card" key={item.id}>
+                      <div>
+                        <p className="eyebrow">{item.status_label} • {item.fan_username}</p>
+                        <h4>{item.title}</h4>
+                        <p>{item.brief}</p>
+                        <div className="post-badges">
+                          {item.budget && <span>Budget: ${item.budget}</span>}
+                          {item.deadline && <span>Deadline: {item.deadline}</span>}
+                          {item.size_format && <span>{item.size_format}</span>}
+                          {item.shipping_required && <span>Shipping</span>}
+                        </div>
+                        {item.reference_notes && <p className="muted">References: {item.reference_notes}</p>}
+                        {item.delivery_notes && <p className="muted">Delivery: {item.delivery_notes}</p>}
+                      </div>
+                      <div className="commission-actions">
+                        <button className="secondary compact" onClick={() => updateCommissionRequest(item.id, "reviewing")}>Reviewing</button>
+                        <button className="primary compact" onClick={() => updateCommissionRequest(item.id, "accepted")}>Accept</button>
+                        <button className="secondary compact" onClick={() => updateCommissionRequest(item.id, "declined")}>Decline</button>
+                        <button className="secondary compact" onClick={() => updateCommissionRequest(item.id, "completed")}>Complete</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </>
             )}
-
-            <div className="commission-list">
-              {snapshot.commissions.map(item => (
-                <article className="commission-card" key={item.id}>
-                  <div>
-                    <p className="eyebrow">{item.status_label} • {item.fan_username}</p>
-                    <h4>{item.title}</h4>
-                    <p>{item.brief}</p>
-                    <div className="post-badges">
-                      {item.budget && <span>Budget: ${item.budget}</span>}
-                      {item.deadline && <span>Deadline: {item.deadline}</span>}
-                      {item.size_format && <span>{item.size_format}</span>}
-                      {item.shipping_required && <span>Shipping</span>}
-                    </div>
-                    {item.reference_notes && <p className="muted">References: {item.reference_notes}</p>}
-                    {item.delivery_notes && <p className="muted">Delivery: {item.delivery_notes}</p>}
-                  </div>
-                  <div className="commission-actions">
-                    <button className="secondary compact" onClick={() => updateCommissionRequest(item.id, "reviewing")}>Reviewing</button>
-                    <button className="primary compact" onClick={() => updateCommissionRequest(item.id, "accepted")}>Accept</button>
-                    <button className="secondary compact" onClick={() => updateCommissionRequest(item.id, "declined")}>Decline</button>
-                    <button className="secondary compact" onClick={() => updateCommissionRequest(item.id, "completed")}>Complete</button>
-                  </div>
-                </article>
-              ))}
-            </div>
           </section>
         )}
       </>
@@ -5914,11 +6019,42 @@ function App() {
             </div>
             <div className="artist-stat-item">
               <p className="eyebrow">Invite funnel</p>
-              <strong className="artist-stat-value">{dashboard?.referrals?.invite_subscribers || 0}</strong>
-              <p className="artist-stat-detail">{dashboard?.referrals?.invite_follows || 0} follows from invite links.</p>
+              <strong className="artist-stat-value">
+                {(dashboard?.referrals?.invite_link_subscribers ?? dashboard?.referrals?.invite_subscribers) || 0}
+              </strong>
+              <p className="artist-stat-detail">
+                {(dashboard?.referrals?.invite_link_follows ?? dashboard?.referrals?.invite_follows) || 0} invite follows
+                {dashboard?.referrals?.invite_follow_to_subscribe_rate != null
+                  ? ` · ${dashboard.referrals.invite_follow_to_subscribe_rate}% convert`
+                  : "."}
+              </p>
             </div>
           </div>
         </section>
+
+        {(dashboard?.referrals?.funnel?.length > 0 || Number(dashboard?.referrals?.invite_link_follows || 0) > 0 || Number(dashboard?.referrals?.invite_follows || 0) > 0) && (
+          <section className="feature-card invite-funnel-panel" aria-labelledby="invite-funnel-heading">
+            <p className="eyebrow">Growth</p>
+            <h3 id="invite-funnel-heading">Invite → follow → subscribe</h3>
+            <p className="muted">
+              Track how your invite links turn into follows and paid support.
+              {Number(dashboard?.referrals?.attributed_follow_to_subscribe_rate || 0) > 0
+                ? ` All attributed traffic converts at ${dashboard.referrals.attributed_follow_to_subscribe_rate}%.`
+                : ""}
+            </p>
+            <ol className="invite-funnel-steps">
+              {(dashboard.referrals.funnel || [
+                { step: "follow", label: "Follows from invites", count: dashboard.referrals.invite_link_follows || dashboard.referrals.invite_follows || 0 },
+                { step: "subscribe", label: "Subscribes from invites", count: dashboard.referrals.invite_link_subscribers || dashboard.referrals.invite_subscribers || 0 },
+              ]).map((step) => (
+                <li key={step.step}>
+                  <strong>{step.count}</strong>
+                  <span>{step.label}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         {(dashboard?.audience_cities?.length > 0 || dashboard?.engaging_content?.length > 0) && (
           <section className="dashboard-two-column">
@@ -6138,6 +6274,26 @@ function App() {
             </div>
           )}
         </section>
+
+        {(() => {
+          const artsCommissions = commissionRequests.filter(item => !isMusicBranchProfession(item.profession));
+          const hasCommissionInbox = currentUser?.artist_plan === "pro" || currentUser?.artist_plan === "studio";
+          if (hasCommissionInbox || artsCommissions.length === 0) return null;
+          const newCount = artsCommissions.filter(item => item.status === "new").length;
+          return (
+            <section className="feature-card commission-home-teaser">
+              <p className="eyebrow">Artist Pro</p>
+              <h3>Commission inbox</h3>
+              <p className="muted">
+                {artsCommissions.length} custom request{artsCommissions.length === 1 ? "" : "s"}
+                {newCount ? ` (${newCount} new)` : ""} waiting on your Arts profile.
+              </p>
+              <button className="primary compact" type="button" onClick={() => upgradeArtistPlan("pro")}>
+                Unlock with Artist Pro
+              </button>
+            </section>
+          );
+        })()}
 
         {artistProInsights && (
           <section className="home-activity">
@@ -11425,6 +11581,16 @@ function App() {
       {renderSupportConfirmSheet()}
       {renderSignupGateSheet()}
       {renderSpaceReviewModal()}
+      <TipPromptSheet
+        open={Boolean(tipPrompt)}
+        artistName={tipPrompt?.artistName || "this artist"}
+        contextLabel={tipPrompt?.contextLabel || ""}
+        reason={tipPrompt?.reason || "tip"}
+        submitting={tipPromptSubmitting}
+        error={tipPromptError}
+        onClose={() => dismissTipPrompt({ remember: true })}
+        onSubmit={submitTipPrompt}
+      />
       {renderExternalLinkConfirm()}
       {renderPlaylistPicker()}
 
@@ -11770,6 +11936,7 @@ function App() {
           onClearFocusSession={() => setLivePartyFocusId(null)}
           onOpenArtist={openArtistByUsername}
           onRequireAccount={() => goToPage("profile")}
+          onTipArtist={openTipPrompt}
         />
       )}
 
@@ -11784,6 +11951,28 @@ function App() {
           onOpenArtistByUsername={openArtistByUsername}
           onOpenArtistFromGig={openArtistFromGig}
           onOpenVenue={(listing) => openSpaceListingById(listing?.id)}
+          onFollowArtistFromShow={async (show) => {
+            if (!show?.artist_id && !show?.artist_username) return false;
+            const artist = {
+              owner_id: show.artist_id,
+              owner_username: show.artist_username,
+              stage_name: show.stage_name,
+            };
+            await sendDiscoverySignal(artist, "save");
+            return true;
+          }}
+          onTipArtistFromShow={(show) => openTipPrompt({
+            artistId: show.artist_id,
+            artistUsername: show.artist_username,
+            artistName: show.stage_name || show.artist_username,
+            profession: "music",
+            reason: "post_checkin",
+            bookingId: show.booking_id,
+            contextLabel: show.venue_name
+              ? `Thanks for checking in at ${show.venue_name}.`
+              : "Thanks for coming out tonight.",
+          })}
+          onReviewShow={(bookingId, label) => openSpaceReviewModal(bookingId, currentUser, label)}
           onPurchaseTicket={(product, show) => purchaseProduct(product, show)}
           ownedTicketProductIds={ownedTicketProductIds()}
           products={products}

@@ -424,6 +424,31 @@ class DemoSupportFallbackTests(APITestCase):
         self.assertEqual(list_response.status_code, 200)
         self.assertEqual(list_response.data["results"][0]["message"], "This print series is beautiful.")
 
+    def test_tip_records_referral_and_source_metadata(self):
+        self.client.force_authenticate(self.fan)
+
+        response = self.client.post(
+            "/api/subscriptions/tips/",
+            {
+                "artist_id": self.artist.id,
+                "profession": "music",
+                "amount": "3.00",
+                "message": "Loved the full listen.",
+                "referral_source": "invite_artist",
+                "tip_source": "full_listen",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        event = FanJourneyEvent.objects.get(
+            fan=self.fan,
+            artist=self.artist,
+            event_type=FanJourneyEvent.TIP,
+        )
+        self.assertEqual(event.metadata.get("referral_source"), "invite_artist")
+        self.assertEqual(event.metadata.get("tip_source"), "full_listen")
+
     def test_tip_rejects_self_and_unoffered_profession(self):
         self.client.force_authenticate(self.artist)
         self_response = self.client.post(

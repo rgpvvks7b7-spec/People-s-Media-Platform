@@ -453,6 +453,17 @@ def update_commission_request(request, commission_id):
     if item.artist != request.user:
         return Response({"error": "Only the artist can update this request"}, status=status.HTTP_403_FORBIDDEN)
 
+    plan = getattr(request.user, "artist_plan", "free") or "free"
+    if plan not in {"pro", "studio"}:
+        return Response(
+            {
+                "error": "Commission inbox is an Artist Pro feature. Upgrade to manage requests.",
+                "upgrade_required": True,
+                "required_plan": "pro",
+            },
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
     next_status = request.data.get("status") or item.status
     if next_status not in dict(CommissionRequest.STATUSES):
         return Response({"error": "Invalid commission status"}, status=status.HTTP_400_BAD_REQUEST)

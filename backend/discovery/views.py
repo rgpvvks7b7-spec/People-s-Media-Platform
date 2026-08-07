@@ -1298,6 +1298,12 @@ def serialize_confirmed_show(booking, request, supported_artist_ids=None):
         ticket["remaining"] = availability["remaining"]
     presale = ticket_presale_state(booking, request.user)
 
+    is_following = False
+    if request.user.is_authenticated:
+        from artists.models import ArtistFollow
+
+        is_following = ArtistFollow.objects.filter(fan=request.user, artist_id=booking.artist_id).exists()
+
     payload = {
         "booking_id": booking.id,
         "starts_at": booking.starts_at,
@@ -1321,6 +1327,7 @@ def serialize_confirmed_show(booking, request, supported_artist_ids=None):
         "ticket": ticket,
         "calendar_item_id": calendar_item.id if calendar_item else None,
         "is_supported": booking.artist_id in supported_artist_ids,
+        "is_following": is_following,
         "ticket_availability": availability,
         "presale": presale,
     }

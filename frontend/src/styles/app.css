@@ -8983,6 +8983,67 @@ h3 .artist-name-link.click-title:focus-visible {
   gap: 20px;
 }
 
+.tip-prompt-sheet,
+.post-show-loop-sheet {
+  display: grid;
+  gap: 14px;
+  width: min(420px, 92vw);
+}
+
+.tip-prompt-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.tip-prompt-presets legend {
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  color: #a1a1aa;
+}
+
+.tip-prompt-presets .active {
+  border-color: rgba(167, 139, 250, 0.55);
+  background: rgba(167, 139, 250, 0.16);
+}
+
+.invite-funnel-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.invite-funnel-steps {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.invite-funnel-steps li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.invite-funnel-steps strong {
+  font-size: 1.4rem;
+}
+
+.commission-upgrade-teaser,
+.commission-home-teaser {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
 .my-scene-followed-venues {
   display: grid;
   gap: 12px;

@@ -159,7 +159,9 @@ def serialize_track(track, request, approval=_UNSET):
     payload = {
         "id": track.id,
         "title": track.title,
+        "artist_id": track.artist_id,
         "artist_username": track.artist.username,
+        "stage_name": getattr(getattr(track.artist, "artist_profile", None), "stage_name", "") or track.artist.username,
         "profession": track.profession,
         "profession_label": ArtistProfile.profession_label(track.profession),
         "genre": track.genre,

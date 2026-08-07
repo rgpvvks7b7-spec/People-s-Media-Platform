@@ -120,6 +120,9 @@ export function MyScenePage({
   onOpenArtistByUsername,
   onOpenArtistFromGig,
   onOpenVenue,
+  onFollowArtistFromShow,
+  onTipArtistFromShow,
+  onReviewShow,
   onPurchaseTicket,
   ownedTicketProductIds = new Set(),
   products = [],
@@ -144,6 +147,8 @@ export function MyScenePage({
   const [checkInSaving, setCheckInSaving] = useState(false);
   const [searchLocation, setSearchLocation] = useState(currentUser?.discovery_location || "");
   const [appliedLocation, setAppliedLocation] = useState(currentUser?.discovery_location || "");
+  const [postShowLoop, setPostShowLoop] = useState(null);
+  const [followBusy, setFollowBusy] = useState(false);
 
   const shows = (activeTab === "supported" ? sceneData.supported_shows : sceneData.all_shows)
     .filter(show => !fanChannelUsername || show.artist_username === fanChannelUsername);
@@ -253,13 +258,31 @@ export function MyScenePage({
         setCheckInError(data.error || "Check-in failed.");
         return;
       }
-      setSelectedShow(prev => prev ? { ...prev, checked_in: true, can_check_in: false } : prev);
+      const nextShow = selectedShow
+        ? { ...selectedShow, checked_in: true, can_check_in: false }
+        : null;
+      setSelectedShow(nextShow);
       setCheckInOpen(false);
       setStubCodeInput("");
+      if (nextShow) setPostShowLoop(nextShow);
     } catch {
       setCheckInError("Check-in failed.");
     } finally {
       setCheckInSaving(false);
+    }
+  }
+
+  async function followFromLoop() {
+    if (!postShowLoop || followBusy) return;
+    setFollowBusy(true);
+    try {
+      const ok = await onFollowArtistFromShow?.(postShowLoop);
+      if (ok !== false) {
+        setPostShowLoop(prev => (prev ? { ...prev, is_following: true } : prev));
+        setSelectedShow(prev => (prev ? { ...prev, is_following: true } : prev));
+      }
+    } finally {
+      setFollowBusy(false);
     }
   }
 
@@ -409,6 +432,7 @@ export function MyScenePage({
 
             {selectedShow.has_ended && <p className="support-badge">This show has ended.</p>}
             {selectedShow.is_supported && <p className="support-badge">You support this artist</p>}
+            {selectedShow.checked_in && <p className="support-badge">You're checked in</p>}
             {selectedShow.venue_address && <p><strong>Address:</strong> {selectedShow.venue_address}</p>}
             {selectedShow.host_business_name && <p><strong>Host:</strong> {selectedShow.host_business_name}</p>}
             {selectedShow.drink_minimum && <p><strong>Drink minimum:</strong> {selectedShow.drink_minimum}</p>}
@@ -420,9 +444,28 @@ export function MyScenePage({
 
             <div className="my-scene-detail-actions">
               {selectedShow.has_ended ? (
-                <p className="muted form-hint">
-                  {ownsSelectedTicket ? "Thanks for coming — this show has wrapped." : "Tickets are closed for this show."}
-                </p>
+                <>
+                  <p className="muted form-hint">
+                    {ownsSelectedTicket ? "Thanks for coming — this show has wrapped." : "Tickets are closed for this show."}
+                  </p>
+                  {ownsSelectedTicket && (
+                    <button
+                      className="primary"
+                      type="button"
+                      onClick={() => onReviewShow?.(selectedShow.booking_id, selectedShow.stage_name)}
+                    >
+                      Leave a review
+                    </button>
+                  )}
+                  {!selectedShow.is_following && !selectedShow.is_supported && (
+                    <button className="secondary" type="button" onClick={() => onFollowArtistFromShow?.(selectedShow)}>
+                      Follow {selectedShow.stage_name}
+                    </button>
+                  )}
+                  <button className="secondary" type="button" onClick={() => onTipArtistFromShow?.(selectedShow)}>
+                    Tip {selectedShow.stage_name}
+                  </button>
+                </>
               ) : ticketProduct && !ownsSelectedTicket && !ticketSoldOut && presaleLockedForFan(selectedShow) ? (
                 <>
                   <p className="support-badge">
@@ -447,7 +490,12 @@ export function MyScenePage({
                 <>
                   <p className="support-badge">You have a ticket for this show.</p>
                   {selectedShow.checked_in ? (
-                    <p className="muted form-hint">You are checked in. Enjoy the show.</p>
+                    <>
+                      <p className="muted form-hint">You are checked in. Enjoy the show.</p>
+                      <button className="secondary" type="button" onClick={() => setPostShowLoop(selectedShow)}>
+                        After the door
+                      </button>
+                    </>
                   ) : selectedShow.can_check_in ? (
                     <button className="primary" type="button" onClick={() => setCheckInOpen(true)}>
                       I'm here
@@ -499,6 +547,66 @@ export function MyScenePage({
               {checkInSaving ? "Checking in…" : "Check in"}
             </button>
           </form>
+        </div>
+      )}
+
+      {postShowLoop && (
+        <div className="modal-backdrop" role="presentation" onClick={() => setPostShowLoop(null)}>
+          <section
+            className="support-sheet post-show-loop-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="post-show-loop-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button className="sheet-close" type="button" onClick={() => setPostShowLoop(null)} aria-label="Close after-show steps">
+              ×
+            </button>
+            <div className="tab-title-row">
+              <div>
+                <p className="eyebrow">You're in</p>
+                <h3 id="post-show-loop-title">Keep the night going</h3>
+                <p className="muted">
+                  Checked in at {postShowLoop.venue_name}. Follow, tip, or review {postShowLoop.stage_name}.
+                </p>
+              </div>
+            </div>
+            <div className="my-scene-detail-actions">
+              {!postShowLoop.is_following && !postShowLoop.is_supported && (
+                <button className="primary" type="button" onClick={followFromLoop} disabled={followBusy}>
+                  {followBusy ? "Following…" : `Follow ${postShowLoop.stage_name}`}
+                </button>
+              )}
+              <button
+                className="secondary"
+                type="button"
+                onClick={() => {
+                  onTipArtistFromShow?.(postShowLoop);
+                  setPostShowLoop(null);
+                }}
+              >
+                Tip {postShowLoop.stage_name}
+              </button>
+              {postShowLoop.has_ended && (
+                <button
+                  className="secondary"
+                  type="button"
+                  onClick={() => {
+                    onReviewShow?.(postShowLoop.booking_id, postShowLoop.stage_name);
+                    setPostShowLoop(null);
+                  }}
+                >
+                  Leave a review
+                </button>
+              )}
+              {!postShowLoop.has_ended && (
+                <p className="muted form-hint">Reviews open after the host marks the show complete.</p>
+              )}
+              <button className="secondary" type="button" onClick={() => setPostShowLoop(null)}>
+                Done
+              </button>
+            </div>
+          </section>
         </div>
       )}
     </div>

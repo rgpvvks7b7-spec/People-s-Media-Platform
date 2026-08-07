@@ -395,11 +395,17 @@ def tips(request):
             source=ArtistFanContact.SUPPORT_PROMPT if share_email else ArtistFanContact.SIGNUP_OPT_IN,
             explicit_share=share_email,
         )
+        tip_source = (request.data.get("tip_source") or "").strip()[:40]
         log_fan_journey_event(
             FanJourneyEvent.TIP,
             artist,
             fan=request.user,
-            metadata={"profession": profession, "amount": str(tip.amount)},
+            metadata={
+                "profession": profession,
+                "amount": str(tip.amount),
+                "referral_source": referral_source,
+                "tip_source": tip_source,
+            },
         )
 
         from promotions.services import wallet_balance

@@ -558,14 +558,32 @@ def artist_dashboard(request):
         event_type=FanJourneyEvent.UNSUBSCRIBE,
         occurred_at__gte=start_30d,
     ).count()
-    invite_follows = FanJourneyEvent.objects.filter(
+    attributed_follows_qs = FanJourneyEvent.objects.filter(
         artist=request.user,
         event_type=FanJourneyEvent.FOLLOW,
-    ).exclude(metadata__referral_source__in=["", None]).count()
-    invite_subscribers = FanJourneyEvent.objects.filter(
+    ).exclude(metadata__referral_source__in=["", None])
+    attributed_subscribers_qs = FanJourneyEvent.objects.filter(
         artist=request.user,
         event_type=FanJourneyEvent.SUBSCRIBE,
-    ).exclude(metadata__referral_source__in=["", None]).count()
+    ).exclude(metadata__referral_source__in=["", None])
+    invite_follows = attributed_follows_qs.count()
+    invite_subscribers = attributed_subscribers_qs.count()
+    invite_link_follows = attributed_follows_qs.filter(
+        metadata__referral_source__startswith="invite_",
+    ).count()
+    invite_link_subscribers = attributed_subscribers_qs.filter(
+        metadata__referral_source__startswith="invite_",
+    ).count()
+    invite_follow_to_subscribe_rate = (
+        round((invite_link_subscribers / invite_link_follows) * 100, 2)
+        if invite_link_follows
+        else 0
+    )
+    attributed_follow_to_subscribe_rate = (
+        round((invite_subscribers / invite_follows) * 100, 2)
+        if invite_follows
+        else 0
+    )
 
     track_metrics = []
     for track in MusicUpload.objects.filter(artist=request.user).order_by("-created_at"):
@@ -667,6 +685,14 @@ def artist_dashboard(request):
             "supporters_this_month": referrals_this_month,
             "invite_follows": invite_follows,
             "invite_subscribers": invite_subscribers,
+            "invite_link_follows": invite_link_follows,
+            "invite_link_subscribers": invite_link_subscribers,
+            "invite_follow_to_subscribe_rate": invite_follow_to_subscribe_rate,
+            "attributed_follow_to_subscribe_rate": attributed_follow_to_subscribe_rate,
+            "funnel": [
+                {"step": "follow", "label": "Follows from invites", "count": invite_link_follows},
+                {"step": "subscribe", "label": "Subscribes from invites", "count": invite_link_subscribers},
+            ],
         },
         "audience_cities": audience_cities,
         "engaging_content": engaging_posts,

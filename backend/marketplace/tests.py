@@ -199,6 +199,8 @@ class CommissionRequestTests(APITestCase):
         self.assertEqual(response.data["error"], "Commission requests are for arts and creative services.")
 
     def test_artist_can_update_commission_status_and_quote(self):
+        self.artist.artist_plan = "pro"
+        self.artist.save(update_fields=["artist_plan"])
         request = CommissionRequest.objects.create(
             fan=self.fan,
             artist=self.artist,
@@ -224,6 +226,27 @@ class CommissionRequestTests(APITestCase):
         self.assertEqual(str(request.quoted_price), "180.00")
         self.assertEqual(str(request.quoted_artist_share), "153.00")
         self.assertEqual(str(request.quoted_platform_fee), "27.00")
+
+    def test_free_artist_cannot_manage_commission_inbox(self):
+        request = CommissionRequest.objects.create(
+            fan=self.fan,
+            artist=self.artist,
+            profession="visual_art",
+            title="Poster",
+            brief="A poster commission.",
+        )
+        self.client.force_authenticate(self.artist)
+
+        response = self.client.post(
+            f"/api/marketplace/commissions/{request.id}/update/",
+            {"status": "accepted"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(response.data.get("upgrade_required"))
+        request.refresh_from_db()
+        self.assertEqual(request.status, CommissionRequest.NEW)
 
 
 @override_settings(DEBUG=True, STRIPE_SECRET_KEY="")

@@ -9,6 +9,7 @@ export function ListeningPartyPage({
   onClearFocusSession,
   onOpenArtist,
   onRequireAccount,
+  onTipArtist,
 }) {
   const [sessions, setSessions] = useState([]);
   const [sessionsLoaded, setSessionsLoaded] = useState(false);
@@ -147,7 +148,35 @@ export function ListeningPartyPage({
             {!party.is_live && (
               <div className="empty-state">
                 <h3>This party has ended.</h3>
-                <p>Follow the artist to catch the next one.</p>
+                <p>Follow the artist to catch the next one — or tip them while the moment is warm.</p>
+                <div className="action-grid">
+                  <button className="primary" type="button" onClick={() => onOpenArtist(party.artist_username)}>
+                    Follow {party.artist_display}
+                  </button>
+                  {currentUser && onTipArtist && !party.is_host && (
+                    <button
+                      className="secondary"
+                      type="button"
+                      onClick={() => onTipArtist({
+                        artistId: party.artist_id,
+                        artistUsername: party.artist_username,
+                        artistName: party.artist_display,
+                        profession: party.track?.profession || "music",
+                        reason: "party_end",
+                        contextLabel: party.track?.title
+                          ? `Thanks for listening to “${party.track.title}” live.`
+                          : "Thanks for joining the listening party.",
+                      })}
+                    >
+                      Tip {party.artist_display}
+                    </button>
+                  )}
+                  {!currentUser && (
+                    <button className="secondary" type="button" onClick={onRequireAccount}>
+                      Sign in to tip
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
