@@ -69,24 +69,37 @@ Fixed before any new beta invites or marketing push.
 
 #### Artist growth
 9. ~~**Challenge board surfacing**~~ — ✅ daily/weekly Engagement board always on artist Home (Phase 4)
-10. **Invite funnel analytics** — track referral → follow → subscribe conversion in dashboard
-11. **Local draw playbook** — guided flow: set city → book Spaces gig → promote to local fans
+10. **Invite funnel analytics** — in [PR #15](https://github.com/rgpvvks7b7-spec/People-s-Media-Platform/pull/15) (Phase 5)
+11. **Local draw playbook** — Step 5 of [email toolkit arc](./STRATEGIC_ORDER_EMAIL_LIST.md)
 12. **Pro insights expansion** — “fans also support”, journey funnel, mailing list growth (partially built)
 
 #### Fan engagement
 13. **Discovery streaks** — reward consistent saves/listens (ties to fan discovery credits)
 14. **My Scene notifications** — push when saved artist adds nearby show
-15. **Post-show loop** — check-in → review → follow artist if guest
+15. **Post-show loop** — in [PR #15](https://github.com/rgpvvks7b7-spec/People-s-Media-Platform/pull/15) (Phase 5)
 16. **Fan radio / playlists** — deepen My Music retention (partially built)
 16b. ~~**Ticket stub collection**~~ — ✅ Profile → My tickets Upcoming / Collection (Phase 4)
 
 #### Monetization
-17. **Support tier templates** — one-click tier setup for new artists ($1 / $5 / custom)
-18. **Tip prompts at peak moments** — after full listen, post-show check-in, live end
+17. ~~**Support tier templates**~~ — ✅ starter pack + templates polish (merged)
+18. **Tip prompts at peak moments** — in [PR #15](https://github.com/rgpvvks7b7-spec/People-s-Media-Platform/pull/15) (Phase 5)
 19. ~~**Discovery credit redemption UX**~~ — ✅ cart/store toggle + tip apply; redeem-preview caps (Phase 2 cleanup)
-20. **Commission inbox** — Pro feature visibility for custom work requests
+20. **Commission inbox** — in [PR #15](https://github.com/rgpvvks7b7-spec/People-s-Media-Platform/pull/15) (Phase 5)
 20b. ~~**Public fee calculator**~~ — ✅ `/?page=pricing` + `GET /api/accounts/fee-schedule/` (Phase 2 cleanup)
 20c. ~~**50-subscription limit extension**~~ — ✅ enforce + demo extend endpoint + Profile slots UI (Phase 2 cleanup)
+
+#### Next arc — Artist email toolkit (ordered)
+
+Full plan: [STRATEGIC_ORDER_EMAIL_LIST.md](./STRATEGIC_ORDER_EMAIL_LIST.md).
+
+| Step | Item |
+|------|------|
+| 0 | Merge PR #15 (Phase 5) |
+| 1 | Mailing list studio (browse + export nudge) |
+| 2 | Template studio (copy-paste compliant drafts) |
+| 3 | Moment → draft hooks (drop / gig / thanks) |
+| 4 | CRM bridge (`mailing_list` → draft/export) |
+| 5 | Local draw playbook using list + show draft |
 
 ### P3 — Scale & production (Sprint 4+)
 
