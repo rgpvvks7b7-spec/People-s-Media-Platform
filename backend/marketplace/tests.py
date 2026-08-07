@@ -356,3 +356,49 @@ class MarketplacePurchaseTests(APITestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data["count"], 2)
         self.assertEqual(response.data["total"], "23.00")
+
+    def test_my_purchases_splits_upcoming_and_attended_tickets(self):
+        from spaces.models import HostProfile, ShowCheckIn, SpaceBooking, SpaceListing
+
+        host = User.objects.create_user(username="host2", password="password123", user_type=User.HOST)
+        HostProfile.objects.create(user=host, business_name="Room", city="Melbourne")
+        listing = SpaceListing.objects.create(host=host, name="Back Room", city="Melbourne")
+        past_product = Product.objects.create(
+            artist=self.artist,
+            title="Past Gig",
+            product_type=Product.EVENT_TICKET,
+            price="12.00",
+        )
+        upcoming = SpaceBooking.objects.create(
+            listing=listing,
+            artist=self.artist,
+            ticket_product=self.product,
+            starts_at=timezone.now() + timedelta(days=3),
+            ends_at=timezone.now() + timedelta(days=3, hours=2),
+            status=SpaceBooking.CONFIRMED,
+        )
+        attended = SpaceBooking.objects.create(
+            listing=listing,
+            artist=self.artist,
+            ticket_product=past_product,
+            starts_at=timezone.now() - timedelta(days=2),
+            ends_at=timezone.now() - timedelta(days=2, hours=-2),
+            status=SpaceBooking.COMPLETED,
+        )
+
+        self.client.force_authenticate(self.fan)
+        first = self.client.post("/api/marketplace/purchase/", {"product_id": self.product.id}, format="json")
+        second = self.client.post("/api/marketplace/purchase/", {"product_id": past_product.id}, format="json")
+        self.assertEqual(first.status_code, 201)
+        self.assertEqual(second.status_code, 201)
+        ShowCheckIn.objects.create(booking=attended, fan=self.fan)
+
+        response = self.client.get("/api/marketplace/my-purchases/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["upcoming_tickets"]), 1)
+        self.assertEqual(len(response.data["attended_tickets"]), 1)
+        self.assertEqual(response.data["upcoming_tickets"][0]["collection_status"], "upcoming")
+        self.assertEqual(response.data["attended_tickets"][0]["collection_status"], "attended")
+        self.assertEqual(response.data["attended_tickets"][0]["show"]["venue_name"], "Back Room")
+        self.assertEqual(response.data["upcoming_tickets"][0]["show"]["booking_id"], upcoming.id)
+

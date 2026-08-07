@@ -9,6 +9,7 @@ import {
 } from "../lib/spaceAvailability.js";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const SERIES_MAX_DATES = 12;
 
 function pad(value) {
   return String(value).padStart(2, "0");
@@ -48,25 +49,40 @@ export function SpaceBookingDateFields({ availableWindows = [], onValuesChange }
   );
   const today = new Date();
   const [viewMonth, setViewMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDates, setSelectedDates] = useState([]);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [seriesMode, setSeriesMode] = useState(false);
 
-  const activeWindow = selectedDate
-    ? windowForDate(parseInputDate(selectedDate), availableWindows)
+  const primaryDate = selectedDates[0] || "";
+  const activeWindow = primaryDate
+    ? windowForDate(parseInputDate(primaryDate), availableWindows)
     : null;
 
-  const startsAt = combineDateTime(selectedDate, startTime);
-  const endsAt = combineDateTime(selectedDate, endTime);
+  const dates = useMemo(() => {
+    if (!startTime || !endTime || !selectedDates.length) return [];
+    return selectedDates
+      .slice()
+      .sort()
+      .map(dateValue => ({
+        starts_at: combineDateTime(dateValue, startTime),
+        ends_at: combineDateTime(dateValue, endTime),
+      }));
+  }, [selectedDates, startTime, endTime]);
+
+  const startsAt = dates[0]?.starts_at || "";
+  const endsAt = dates[0]?.ends_at || "";
 
   useEffect(() => {
     onValuesChange?.({
       starts_at: startsAt,
       ends_at: endsAt,
-      hasStartDate: Boolean(selectedDate && startTime),
-      hasEndDate: Boolean(selectedDate && endTime),
+      dates,
+      series_mode: seriesMode,
+      hasStartDate: Boolean(selectedDates.length && startTime),
+      hasEndDate: Boolean(selectedDates.length && endTime),
     });
-  }, [startsAt, endsAt, selectedDate, startTime, endTime, onValuesChange]);
+  }, [startsAt, endsAt, dates, seriesMode, selectedDates, startTime, endTime, onValuesChange]);
 
   const monthLabel = viewMonth.toLocaleDateString(undefined, { month: "long", year: "numeric" });
 
@@ -92,24 +108,50 @@ export function SpaceBookingDateFields({ availableWindows = [], onValuesChange }
     setViewMonth(current => new Date(current.getFullYear(), current.getMonth() + delta, 1));
   }
 
+  function applyWindowTimes(date) {
+    const window = windowForDate(date, availableWindows);
+    const nextStart = window.start;
+    const nextEnd = defaultEndTime(nextStart, window);
+    setStartTime(nextStart);
+    setEndTime(nextEnd);
+  }
+
   function pickDay(date) {
     if (!isDateBookable(date, availableWindows)) return;
 
     const nextValue = toInputDate(date);
-    const window = windowForDate(date, availableWindows);
-    const nextStart = window.start;
-    const nextEnd = defaultEndTime(nextStart, window);
 
-    setSelectedDate(nextValue);
-    setStartTime(nextStart);
-    setEndTime(nextEnd);
+    if (!seriesMode) {
+      setSelectedDates([nextValue]);
+      applyWindowTimes(date);
+      return;
+    }
+
+    if (selectedDates.includes(nextValue)) {
+      setSelectedDates(selectedDates.filter(value => value !== nextValue));
+      return;
+    }
+    if (selectedDates.length >= SERIES_MAX_DATES) {
+      return;
+    }
+    if (!selectedDates.length) {
+      applyWindowTimes(date);
+    }
+    setSelectedDates([...selectedDates, nextValue].sort());
+  }
+
+  function handleSeriesModeChange(enabled) {
+    setSeriesMode(enabled);
+    if (!enabled && selectedDates.length > 1) {
+      setSelectedDates(selectedDates.slice(0, 1));
+    }
   }
 
   function handleStartTimeChange(value) {
     if (!activeWindow) return;
     const nextStart = clampTime(value, activeWindow.start, activeWindow.end);
     setStartTime(nextStart);
-    if (endTime && combineDateTime(selectedDate, endTime) <= combineDateTime(selectedDate, nextStart)) {
+    if (endTime && combineDateTime(primaryDate, endTime) <= combineDateTime(primaryDate, nextStart)) {
       setEndTime(defaultEndTime(nextStart, activeWindow));
     }
   }
@@ -133,12 +175,32 @@ export function SpaceBookingDateFields({ availableWindows = [], onValuesChange }
         Host availability: {formatAvailabilityWindows(availableWindows)}
       </p>
 
+      <label className="space-series-toggle">
+        <input
+          type="checkbox"
+          checked={seriesMode}
+          onChange={event => handleSeriesModeChange(event.target.checked)}
+        />
+        Book a series (up to {SERIES_MAX_DATES} dates)
+      </label>
+
       <div className="calendar-date-targets">
         <div className="calendar-date-target is-active">
-          <span>Show date</span>
-          <strong>{formatDisplayDate(selectedDate)}</strong>
+          <span>{seriesMode ? "Show dates" : "Show date"}</span>
+          <strong>
+            {selectedDates.length === 0
+              ? "Pick a host date"
+              : seriesMode
+                ? `${selectedDates.length} date${selectedDates.length === 1 ? "" : "s"} selected`
+                : formatDisplayDate(primaryDate)}
+          </strong>
           {activeWindow && (
             <span className="calendar-window-label">{activeWindow.start}–{activeWindow.end}</span>
+          )}
+          {seriesMode && selectedDates.length > 0 && (
+            <span className="muted form-hint">
+              {selectedDates.map(formatDisplayDate).join(" · ")}
+            </span>
           )}
         </div>
       </div>
@@ -177,12 +239,13 @@ export function SpaceBookingDateFields({ availableWindows = [], onValuesChange }
             }
 
             const bookable = isDateBookable(date, availableWindows);
-            const isSelected = selectedDate === toInputDate(date);
-            const isToday = toInputDate(date) === toInputDate(today);
+            const dateValue = toInputDate(date);
+            const isSelected = selectedDates.includes(dateValue);
+            const isToday = dateValue === toInputDate(today);
 
             return (
               <button
-                key={toInputDate(date)}
+                key={dateValue}
                 type="button"
                 className={[
                   "calendar-day",
@@ -227,7 +290,9 @@ export function SpaceBookingDateFields({ availableWindows = [], onValuesChange }
         </div>
 
         <p className="muted form-hint">
-          Only highlighted days match the host schedule. Times must stay within their open window.
+          {seriesMode
+            ? "Tap multiple highlighted days for a series. The same start and end times apply to every date."
+            : "Only highlighted days match the host schedule. Times must stay within their open window."}
         </p>
       </div>
     </div>

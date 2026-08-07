@@ -134,6 +134,7 @@ class SpaceBooking(models.Model):
     ticket_price = models.DecimalField(max_digits=8, decimal_places=2, default=15.00)
     status = models.CharField(max_length=20, choices=STATUSES, default=REQUESTED)
     linked_event_id = models.PositiveIntegerField(blank=True, null=True)
+    series_id = models.UUIDField(blank=True, null=True, db_index=True)
     ticket_product = models.ForeignKey(
         "marketplace.Product",
         on_delete=models.SET_NULL,

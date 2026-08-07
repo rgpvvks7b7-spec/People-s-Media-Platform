@@ -788,3 +788,45 @@ class SpacesApiTests(TestCase):
 
         feed = self.client.get("/api/spaces/bookings/")
         self.assertEqual(feed.data["count"], 0)
+
+    def test_artist_can_request_recurring_series(self):
+        date_a = (timezone.now() + timedelta(days=14)).date()
+        date_b = date_a + timedelta(days=7)
+        listing = self.create_live_listing(
+            available_windows=[
+                {"date": date_a.isoformat(), "start": "19:00", "end": "23:00"},
+                {"date": date_b.isoformat(), "start": "19:00", "end": "23:00"},
+            ],
+        )
+        self.client.force_authenticate(self.artist)
+
+        starts_a = timezone.make_aware(
+            datetime.combine(date_a, datetime.min.time()).replace(hour=20, minute=0),
+            timezone.get_current_timezone(),
+        )
+        ends_a = starts_a + timedelta(hours=2)
+        starts_b = timezone.make_aware(
+            datetime.combine(date_b, datetime.min.time()).replace(hour=20, minute=0),
+            timezone.get_current_timezone(),
+        )
+        ends_b = starts_b + timedelta(hours=2)
+
+        response = self.client.post("/api/spaces/bookings/", {
+            "listing_id": listing.id,
+            "dates": [
+                {"starts_at": starts_a.isoformat(), "ends_at": ends_a.isoformat()},
+                {"starts_at": starts_b.isoformat(), "ends_at": ends_b.isoformat()},
+            ],
+            "expected_audience": 35,
+            "pitch": "Two-night residency.",
+        }, format="json")
+
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("series", response.data["message"].lower())
+        self.assertIsNotNone(response.data["series_id"])
+        self.assertEqual(len(response.data["bookings"]), 2)
+        bookings = SpaceBooking.objects.filter(series_id=response.data["series_id"]).order_by("starts_at")
+        self.assertEqual(bookings.count(), 2)
+        self.assertEqual(bookings[0].pitch, "Two-night residency.")
+        self.assertEqual(str(bookings[0].series_id), response.data["series_id"])
+

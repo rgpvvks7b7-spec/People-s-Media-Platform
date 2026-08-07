@@ -5,6 +5,7 @@ from rest_framework import status
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import FileResponse, Http404
+from django.utils import timezone
 from decimal import Decimal, InvalidOperation
 from .models import CommissionRequest, Product
 from .purchase_flow import complete_product_purchase, fan_already_purchased_product, ticket_sale_split
@@ -791,27 +792,62 @@ def my_purchases(request):
             booking = (
                 SpaceBooking.objects
                 .select_related("listing")
-                .filter(ticket_product_id=product_id, status=SpaceBooking.CONFIRMED)
+                .filter(
+                    ticket_product_id=product_id,
+                    status__in=[SpaceBooking.CONFIRMED, SpaceBooking.COMPLETED],
+                )
                 .order_by("starts_at")
                 .first()
             )
-            from spaces.models import ShowCheckIn
+            from spaces.models import ShowCheckIn, ShowTicketStub
 
             if booking:
-                item["checked_in"] = ShowCheckIn.objects.filter(booking=booking, fan=request.user).exists()
+                checked_in = ShowCheckIn.objects.filter(booking=booking, fan=request.user).exists()
+                now = timezone.now()
+                has_ended = (
+                    booking.status == SpaceBooking.COMPLETED
+                    or (booking.ends_at is not None and booking.ends_at < now)
+                )
+                if checked_in:
+                    collection_status = "attended"
+                elif has_ended:
+                    collection_status = "past"
+                else:
+                    collection_status = "upcoming"
+
+                stub = (
+                    ShowTicketStub.objects
+                    .filter(booking=booking, redeemed_by=request.user)
+                    .order_by("-redeemed_at")
+                    .first()
+                )
+                item["checked_in"] = checked_in
+                item["collection_status"] = collection_status
                 item["show"] = {
                     "booking_id": booking.id,
                     "starts_at": booking.starts_at,
+                    "ends_at": booking.ends_at,
                     "venue_name": booking.listing.name,
                     "venue_city": booking.listing.city,
-                    "checked_in": item["checked_in"],
+                    "booking_status": booking.status,
+                    "has_ended": has_ended,
+                    "checked_in": checked_in,
+                    "collection_status": collection_status,
+                    "stub_code": stub.stub_code if stub else "",
+                    "series_id": str(booking.series_id) if booking.series_id else None,
                 }
 
         results.append(item)
 
     tickets = [item for item in results if item["product_type"] == Product.EVENT_TICKET]
+    upcoming_tickets = [item for item in tickets if item.get("collection_status") == "upcoming"]
+    attended_tickets = [item for item in tickets if item.get("collection_status") == "attended"]
+    past_tickets = [item for item in tickets if item.get("collection_status") == "past"]
     return Response({
         "results": results,
         "tickets": tickets,
+        "upcoming_tickets": upcoming_tickets,
+        "attended_tickets": attended_tickets,
+        "past_tickets": past_tickets,
         "count": len(results),
     })

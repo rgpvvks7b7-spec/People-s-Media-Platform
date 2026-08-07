@@ -28,7 +28,7 @@ Help independent artists build sustainable income from real fans — not algorit
 | Local scene | Spaces, My Scene, tickets, check-in | Mobile nav broken (BUG-003) |
 | Discovery | Swipe review, promoted releases (capped ads) | Gesture / signal E2E missing |
 | Artist studio | Posts, music, calendar, live, promote | Studio flows untested E2E |
-| Growth loops | Referrals, challenges, journey rollups | Challenge UI discoverability TBD |
+| Growth loops | Referrals, challenges, journey rollups | Challenge board now on artist Home |
 | Trust & SEO | Public artist pages, meta, robots | Session hydration broken (BUG-001) |
 
 ---
@@ -67,7 +67,7 @@ Fixed before any new beta invites or marketing push.
 ### P2 — Growth (Sprint 2–3)
 
 #### Artist growth
-9. **Challenge board surfacing** — daily/weekly goals on artist dashboard (backend exists; make front-and-center)
+9. ~~**Challenge board surfacing**~~ — ✅ daily/weekly Engagement board always on artist Home (Phase 4)
 10. **Invite funnel analytics** — track referral → follow → subscribe conversion in dashboard
 11. **Local draw playbook** — guided flow: set city → book Spaces gig → promote to local fans
 12. **Pro insights expansion** — “fans also support”, journey funnel, mailing list growth (partially built)
@@ -77,6 +77,7 @@ Fixed before any new beta invites or marketing push.
 14. **My Scene notifications** — push when saved artist adds nearby show
 15. **Post-show loop** — check-in → review → follow artist if guest
 16. **Fan radio / playlists** — deepen My Music retention (partially built)
+16b. ~~**Ticket stub collection**~~ — ✅ Profile → My tickets Upcoming / Collection (Phase 4)
 
 #### Monetization
 17. **Support tier templates** — one-click tier setup for new artists ($1 / $5 / custom)
@@ -156,10 +157,25 @@ Aligns with [BUG_REPORT.md](./BUG_REPORT.md) gaps.
 
 ---
 
+## Strategic post-launch bets (product Phase 4)
+
+Separate from [PRELAUNCH_STRATEGY.md](./PRELAUNCH_STRATEGY.md) Phase 4 (legal/email). These are post-launch product bets after fee/CRM/drops/parties/growth surfaces.
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Fan ticket-stub collection / show history | ✅ | `my-purchases` collection_status + Profile Upcoming/Collection |
+| Challenge board on artist Home | ✅ | Always rendered under launch checklist / growth CTA |
+| Recurring show series (Spaces) | ✅ | `SpaceBooking.series_id` + multi-date booking create (max 12) |
+| Protected masters / DRM transcoding | ❌ Descope | Keep Origin Lock + signed stream access; no master vault/transcode pipeline for launch |
+
+---
+
 ## Decision log
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
+| 2026-08-07 | Protected masters descope: do not build master vault, fingerprint matching, or DRM transcoding for launch; Origin Lock + anti-scraping signed media remain the protection layer | `master_file` / `acoustic_fingerprint` fields are placeholders; stream gating already covers listener access. Transcoding/CDN DRM is a large infra bet with weak artist demand vs series, stubs, and challenges |
+| 2026-08-07 | Spaces recurring series v1: shared `series_id` across multi-date booking requests (cap 12) | Artists often pitch residencies; one request with N dates is enough before calendar recurrence UI |
 | 2026-06-28 | Pre-launch strategy: no artist beta QA; early creator signup then fan launch | [PRELAUNCH_STRATEGY.md](./PRELAUNCH_STRATEGY.md) |
 | 2026-06-23 | Gate beta expansion on P0 bug fixes | QA shows auth + mobile broken despite Phase 5 “complete” |
 | 2026-06-23 | Prioritize checkout E2E before new monetization features | Revenue paths shipped but unverified |
