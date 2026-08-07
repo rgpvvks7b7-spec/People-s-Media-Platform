@@ -145,6 +145,11 @@ class SpaceBooking(models.Model):
         default=0,
         help_text="0 uses venue capacity; set explicitly to cap ticket sales.",
     )
+    supporter_presale_hours = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Hours after tickets go on sale during which only the artist's supporters can buy.",
+    )
+    tickets_on_sale_at = models.DateTimeField(blank=True, null=True)
     check_in_token = models.CharField(max_length=64, blank=True)
     attendance_checked_in = models.PositiveSmallIntegerField(default=0)
     dismissed_by_host_at = models.DateTimeField(blank=True, null=True)

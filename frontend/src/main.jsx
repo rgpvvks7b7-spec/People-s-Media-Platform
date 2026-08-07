@@ -3654,6 +3654,13 @@ function App() {
       setMessage("This show is sold out.");
       return;
     }
+    if (res.status === 403 && data.presale_only) {
+      setMessage("Tickets are in supporter presale. Support this artist to buy now.");
+      if (data.artist_username) {
+        openArtistByUsername(data.artist_username);
+      }
+      return;
+    }
     if (data.checkout_url) {
       window.location.href = data.checkout_url;
       return;
@@ -8816,6 +8823,18 @@ function App() {
                   placeholder="15.00"
                 />
                 <p className="muted form-hint">Fans buy a ticket when the show confirms. Set 0 for a free RSVP ticket.</p>
+                <label htmlFor={`booking-presale-hours-${bookingListing.id}`}>Supporter presale (hours)</label>
+                <input
+                  id={`booking-presale-hours-${bookingListing.id}`}
+                  name="supporter_presale_hours"
+                  type="number"
+                  min="0"
+                  max="720"
+                  step="1"
+                  defaultValue="0"
+                  placeholder="0"
+                />
+                <p className="muted form-hint">Give your supporters first dibs — only they can buy tickets for this many hours after the show confirms. Set 0 to open sales to everyone immediately.</p>
                 <button className="primary compact" type="submit" disabled={!meetsLocalRequirement || !hasBookableWindows}>
                   {!hasBookableWindows
                     ? "Host availability not set"

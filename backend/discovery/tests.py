@@ -538,6 +538,58 @@ class PlayingNearYouTests(APITestCase):
         self.assertEqual(show["ticket"]["id"], ticket.id)
         self.assertEqual(show["ticket"]["price"], "12.00")
 
+    def test_my_scene_reports_presale_state_for_non_supporter(self):
+        from django.utils import timezone as tz
+        from marketplace.models import Product
+        from spaces.models import SpaceBooking
+
+        ticket = Product.objects.create(
+            artist=self.artist,
+            title="Door cover",
+            product_type=Product.EVENT_TICKET,
+            price="12.00",
+            is_active=True,
+        )
+        booking = SpaceBooking.objects.get(artist=self.artist)
+        booking.ticket_product = ticket
+        booking.supporter_presale_hours = 24
+        booking.tickets_on_sale_at = tz.now()
+        booking.save(update_fields=["ticket_product", "supporter_presale_hours", "tickets_on_sale_at"])
+
+        self.client.force_authenticate(self.fan)
+        response = self.client.get("/api/discovery/my-scene/")
+        self.assertEqual(response.status_code, 200)
+        presale = response.data["all_shows"][0]["presale"]
+        self.assertTrue(presale["presale_active"])
+        self.assertFalse(presale["can_buy_now"])
+        self.assertIsNotNone(presale["presale_ends_at"])
+
+    def test_my_scene_presale_admits_supporter(self):
+        from django.utils import timezone as tz
+        from marketplace.models import Product
+        from spaces.models import SpaceBooking
+
+        ticket = Product.objects.create(
+            artist=self.artist,
+            title="Door cover",
+            product_type=Product.EVENT_TICKET,
+            price="12.00",
+            is_active=True,
+        )
+        booking = SpaceBooking.objects.get(artist=self.artist)
+        booking.ticket_product = ticket
+        booking.supporter_presale_hours = 24
+        booking.tickets_on_sale_at = tz.now()
+        booking.save(update_fields=["ticket_product", "supporter_presale_hours", "tickets_on_sale_at"])
+        FanSubscription.objects.create(fan=self.fan, artist=self.artist, active=True, monthly_amount="3.00")
+
+        self.client.force_authenticate(self.fan)
+        response = self.client.get("/api/discovery/my-scene/")
+        presale = response.data["supported_shows"][0]["presale"]
+        self.assertTrue(presale["presale_active"])
+        self.assertTrue(presale["can_buy_now"])
+        self.assertTrue(presale["is_supporter"])
+
     def test_show_detail_returns_ticket_and_pitch(self):
         from spaces.models import SpaceBooking
 

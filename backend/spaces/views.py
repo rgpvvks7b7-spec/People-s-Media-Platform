@@ -19,7 +19,7 @@ from subscriptions.models import FanSubscription
 from .availability import validate_booking_window
 from .local_draw import local_supporter_counts, resolve_local_city
 from .models import HostProfile, SpaceBooking, SpaceBookingReview, SpaceListing, SpaceListingPhoto
-from .services import link_ticket_product, on_booking_confirmed, sync_booking_calendar_item
+from .services import link_ticket_product, on_booking_confirmed, presale_ends_at, sync_booking_calendar_item
 
 
 User = get_user_model()
@@ -265,6 +265,9 @@ def serialize_booking(booking, request):
         "check_in_count": booking.check_ins.count(),
         "tickets_verified_at_door": verified_admission_count(booking),
         "cover_charge": str(booking.ticket_price),
+        "supporter_presale_hours": booking.supporter_presale_hours,
+        "tickets_on_sale_at": booking.tickets_on_sale_at,
+        "presale_ends_at": presale_ends_at(booking),
         "calendar_item_id": calendar_item_id_for(booking),
         "created_at": booking.created_at,
     }
@@ -525,6 +528,9 @@ def bookings(request):
         material_url=material_url,
         material_credit=material_credit,
         ticket_price=parse_decimal(request.data.get("ticket_price"), default="15.00"),
+        supporter_presale_hours=parse_int(
+            request.data.get("supporter_presale_hours"), default=0, minimum=0, maximum=24 * 30,
+        ),
         status=SpaceBooking.CONFIRMED if listing.booking_mode == SpaceListing.INSTANT_BOOK else SpaceBooking.REQUESTED,
         linked_event_id=request.data.get("linked_event_id") or None,
     )

@@ -46,11 +46,20 @@ function ticketPriceLabel(ticket) {
   return `$${ticket.price}`;
 }
 
+function presaleLockedForFan(show) {
+  return Boolean(show?.presale?.presale_active && !show.presale.can_buy_now);
+}
+
+function presaleEarlyAccess(show) {
+  return Boolean(show?.presale?.presale_active && show.presale.can_buy_now);
+}
+
 function ShowCard({ show, onOpen, onOpenArtist, onOpenArtistByUsername, onPurchaseTicket, ownedTicketProductIds = new Set() }) {
   const ticket = resolveShowTicket(show);
   const ownsTicket = show.owns_ticket || (ticket && ownedTicketProductIds.has(ticket.id));
   const soldOut = ticket?.sold_out || show.ticket_availability?.sold_out;
   const priceLabel = ticket ? ticketPriceLabel(ticket) : "";
+  const presaleLocked = presaleLockedForFan(show);
 
   return (
     <article className="activity-item my-scene-card">
@@ -71,14 +80,27 @@ function ShowCard({ show, onOpen, onOpenArtist, onOpenArtistByUsername, onPurcha
           {show.kitchen_open ? " · kitchen open" : ""}
         </p>
         {show.is_supported && <small className="support-badge">Artist you support</small>}
-        {ticket && !ownsTicket && !soldOut && <small className="ticket-price-hint">Cover · {priceLabel}</small>}
+        {ticket && !ownsTicket && !soldOut && !presaleLocked && <small className="ticket-price-hint">Cover · {priceLabel}</small>}
+        {ticket && !ownsTicket && !soldOut && presaleEarlyAccess(show) && (
+          <small className="support-badge">Supporter presale — you're in early</small>
+        )}
+        {ticket && !ownsTicket && !soldOut && presaleLocked && (
+          <small className="support-badge">
+            Supporter presale — general sale {formatShowDate(show.presale.presale_ends_at)}
+          </small>
+        )}
         {ticket && !ownsTicket && soldOut && <small className="support-badge">Sold out</small>}
         {ownsTicket && <small className="support-badge">Ticket confirmed</small>}
       </div>
       <div className="my-scene-card-actions">
-        {ticket && !ownsTicket && !soldOut && (
+        {ticket && !ownsTicket && !soldOut && !presaleLocked && (
           <button className="primary compact" type="button" onClick={() => onPurchaseTicket(ticket, show)}>
             {Number(ticket.price) > 0 ? `Buy ticket · ${priceLabel}` : "Get free ticket"}
+          </button>
+        )}
+        {ticket && !ownsTicket && !soldOut && presaleLocked && (
+          <button className="primary compact" type="button" onClick={() => onOpenArtist(show)}>
+            Support to buy now
           </button>
         )}
         <button className="secondary compact" type="button" onClick={() => onOpen(show)}>Details</button>
@@ -350,10 +372,24 @@ export function MyScenePage({
                 <p className="muted form-hint">
                   {ownsSelectedTicket ? "Thanks for coming — this show has wrapped." : "Tickets are closed for this show."}
                 </p>
+              ) : ticketProduct && !ownsSelectedTicket && !ticketSoldOut && presaleLockedForFan(selectedShow) ? (
+                <>
+                  <p className="support-badge">
+                    Supporter presale — general sale opens {formatShowDate(selectedShow.presale.presale_ends_at)}
+                  </p>
+                  <button className="primary" type="button" onClick={() => onOpenArtistFromGig(selectedShow)}>
+                    Support {selectedShow.stage_name} to buy now
+                  </button>
+                </>
               ) : ticketProduct && !ownsSelectedTicket && !ticketSoldOut ? (
-                <button className="primary" type="button" onClick={() => onPurchaseTicket(ticketProduct, selectedShow)}>
-                  {Number(ticketProduct.price) > 0 ? `Buy ticket · ${ticketPrice}` : "Get free ticket"}
-                </button>
+                <>
+                  {presaleEarlyAccess(selectedShow) && (
+                    <p className="support-badge">Supporter presale — you're in early</p>
+                  )}
+                  <button className="primary" type="button" onClick={() => onPurchaseTicket(ticketProduct, selectedShow)}>
+                    {Number(ticketProduct.price) > 0 ? `Buy ticket · ${ticketPrice}` : "Get free ticket"}
+                  </button>
+                </>
               ) : ticketProduct && ticketSoldOut && !ownsSelectedTicket ? (
                 <p className="support-badge">This show is sold out.</p>
               ) : ownsSelectedTicket ? (

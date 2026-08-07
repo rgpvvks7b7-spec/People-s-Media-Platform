@@ -515,6 +515,70 @@ class SpacesApiTests(TestCase):
         host_profile = HostProfile.objects.get(user=self.host)
         self.assertEqual(str(host_profile.pending_ticket_earnings), "3.00")
 
+    def create_presale_booking(self, presale_hours=24):
+        listing = self.create_live_listing(booking_mode=SpaceListing.INSTANT_BOOK)
+        self.client.force_authenticate(self.artist)
+        starts_at = timezone.now() + timedelta(days=3)
+        create = self.client.post("/api/spaces/bookings/", {
+            "listing_id": listing.id,
+            "starts_at": starts_at.isoformat(),
+            "ends_at": (starts_at + timedelta(hours=2)).isoformat(),
+            "ticket_price": "12.00",
+            "supporter_presale_hours": presale_hours,
+        }, format="json")
+        self.assertEqual(create.status_code, 201)
+        return SpaceBooking.objects.get(id=create.data["booking"]["id"])
+
+    @override_settings(DEBUG=True, STRIPE_SECRET_KEY="")
+    def test_presale_blocks_non_supporters_until_window_ends(self):
+        booking = self.create_presale_booking()
+        self.assertEqual(booking.supporter_presale_hours, 24)
+        self.assertIsNotNone(booking.tickets_on_sale_at)
+
+        self.client.force_authenticate(self.fan)
+        blocked = self.client.post("/api/marketplace/checkout/", {"product_id": booking.ticket_product_id}, format="json")
+        self.assertEqual(blocked.status_code, 403)
+        self.assertTrue(blocked.data["presale_only"])
+        self.assertEqual(blocked.data["artist_username"], "artist")
+
+        SpaceBooking.objects.filter(id=booking.id).update(
+            tickets_on_sale_at=timezone.now() - timedelta(hours=25),
+        )
+        open_sale = self.client.post("/api/marketplace/checkout/", {"product_id": booking.ticket_product_id}, format="json")
+        self.assertEqual(open_sale.status_code, 201)
+
+    @override_settings(DEBUG=True, STRIPE_SECRET_KEY="")
+    def test_presale_admits_supporters_immediately(self):
+        booking = self.create_presale_booking()
+        FanSubscription.objects.create(
+            fan=self.fan,
+            artist=self.artist,
+            active=True,
+            monthly_amount="3.00",
+        )
+
+        self.client.force_authenticate(self.fan)
+        purchase = self.client.post("/api/marketplace/checkout/", {"product_id": booking.ticket_product_id}, format="json")
+        self.assertEqual(purchase.status_code, 201)
+
+    @override_settings(DEBUG=True, STRIPE_SECRET_KEY="")
+    def test_zero_presale_hours_keeps_general_sale_open(self):
+        booking = self.create_presale_booking(presale_hours=0)
+
+        self.client.force_authenticate(self.fan)
+        purchase = self.client.post("/api/marketplace/checkout/", {"product_id": booking.ticket_product_id}, format="json")
+        self.assertEqual(purchase.status_code, 201)
+
+    def test_booking_feed_exposes_presale_fields(self):
+        booking = self.create_presale_booking()
+
+        self.client.force_authenticate(self.artist)
+        feed = self.client.get("/api/spaces/bookings/")
+        record = next(item for item in feed.data["results"] if item["id"] == booking.id)
+        self.assertEqual(record["supporter_presale_hours"], 24)
+        self.assertIsNotNone(record["tickets_on_sale_at"])
+        self.assertIsNotNone(record["presale_ends_at"])
+
     @override_settings(DEBUG=True, STRIPE_SECRET_KEY="")
     def test_host_stub_and_fan_check_in_at_door(self):
         from spaces.models import ShowCheckIn, ShowTicketStub

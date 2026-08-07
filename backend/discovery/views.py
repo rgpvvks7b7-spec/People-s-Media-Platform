@@ -1289,12 +1289,14 @@ def serialize_confirmed_show(booking, request, supported_artist_ids=None):
         except Product.DoesNotExist:
             pass
 
+    from spaces.services import ticket_presale_state
     from spaces.ticket_inventory import ticket_availability_for_booking
 
     availability = ticket_availability_for_booking(booking)
     if ticket:
         ticket["sold_out"] = availability["sold_out"]
         ticket["remaining"] = availability["remaining"]
+    presale = ticket_presale_state(booking, request.user)
 
     payload = {
         "booking_id": booking.id,
@@ -1320,6 +1322,7 @@ def serialize_confirmed_show(booking, request, supported_artist_ids=None):
         "calendar_item_id": calendar_item.id if calendar_item else None,
         "is_supported": booking.artist_id in supported_artist_ids,
         "ticket_availability": availability,
+        "presale": presale,
     }
     if request.user.is_authenticated and booking.ticket_product_id:
         from spaces.ticket_admission import enrich_show_fan_check_in

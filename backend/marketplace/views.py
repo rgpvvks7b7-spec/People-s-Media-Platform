@@ -610,6 +610,35 @@ def handle_cart_checkout(request):
     })
 
 
+def ticket_presale_block(user, product):
+    """403 response when the product is a ticket still in its supporter presale window."""
+    if product.product_type != Product.EVENT_TICKET:
+        return None
+
+    from spaces.models import SpaceBooking
+    from spaces.services import ticket_presale_state
+
+    booking = (
+        SpaceBooking.objects
+        .filter(ticket_product=product, status=SpaceBooking.CONFIRMED)
+        .order_by("starts_at")
+        .first()
+    )
+    if not booking:
+        return None
+
+    state = ticket_presale_state(booking, user)
+    if state["can_buy_now"]:
+        return None
+    return Response({
+        "error": "Tickets are in supporter presale. Support this artist to buy now.",
+        "presale_only": True,
+        "presale_ends_at": state["presale_ends_at"],
+        "product_id": product.id,
+        "artist_username": product.artist.username,
+    }, status=status.HTTP_403_FORBIDDEN)
+
+
 def handle_purchase_checkout(request):
     if not request.user.is_authenticated:
         return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -637,6 +666,10 @@ def handle_purchase_checkout(request):
             "already_purchased": True,
             "product_id": product.id,
         }, status=status.HTTP_409_CONFLICT)
+
+    presale_block = ticket_presale_block(request.user, product)
+    if presale_block:
+        return presale_block
 
     if demo_mode_allowed():
         from artists.contact_utils import request_bool
@@ -667,6 +700,12 @@ def handle_purchase_checkout(request):
                 "sold_out": True,
                 "product_id": product.id,
             }, status=status.HTTP_409_CONFLICT)
+        if error == "presale_only":
+            return Response({
+                "error": "Tickets are in supporter presale. Support this artist to buy now.",
+                "presale_only": True,
+                "product_id": product.id,
+            }, status=status.HTTP_403_FORBIDDEN)
         return Response({
             "demo": True,
             "message": (

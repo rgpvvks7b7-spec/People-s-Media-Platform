@@ -84,6 +84,11 @@ def complete_product_purchase(fan, product, *, payment_provider="demo"):
         )
         if booking and not ticket_is_available(booking):
             return None, "sold_out"
+        if booking:
+            from spaces.services import ticket_presale_state
+
+            if not ticket_presale_state(booking, fan)["can_buy_now"]:
+                return None, "presale_only"
 
     receipt = build_purchase_receipt(product)
     if product.product_type == Product.EVENT_TICKET and booking:
