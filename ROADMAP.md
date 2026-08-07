@@ -95,11 +95,11 @@ Full plan: [STRATEGIC_ORDER_EMAIL_LIST.md](./STRATEGIC_ORDER_EMAIL_LIST.md).
 | Step | Item |
 |------|------|
 | 0 | ~~Merge PR #15 (Phase 5)~~ — ✅ |
-| 1 | Mailing list studio (browse + export nudge) |
-| 2 | Template studio (copy-paste compliant drafts) |
-| 3 | Moment → draft hooks (drop / gig / thanks) |
-| 4 | CRM bridge (`mailing_list` → draft/export) |
-| 5 | Local draw playbook using list + show draft |
+| 1 | ~~Mailing list studio~~ — ✅ `/?page=mailing-list` browse + export nudge |
+| 2 | ~~Template studio~~ — ✅ copy-paste compliant drafts |
+| 3 | ~~Moment → draft hooks~~ — ✅ track upload + confirmed/completed gig CTAs |
+| 4 | ~~CRM bridge~~ — ✅ Fans → mailing_list export/draft |
+| 5 | ~~Local draw playbook~~ — ✅ checklist on mailing list studio |
 
 ### P3 — Scale & production (Sprint 4+)
 

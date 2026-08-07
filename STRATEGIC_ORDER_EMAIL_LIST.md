@@ -14,11 +14,11 @@
 | Step | Name | Outcome | Depends on |
 |------|------|---------|------------|
 | **0** | Land Phase 5 | ~~PR #15 merged to `main`~~ ✅ | — |
-| **1** | Mailing list studio | Browse opted-in contacts + export nudge | Step 0 |
-| **2** | Template studio | Tailored copy-paste email drafts | Step 1 |
-| **3** | Moment → draft hooks | One-click draft after drop / gig / thank-you moments | Step 2 |
-| **4** | CRM bridge | `mailing_list` segment → “Copy email draft” | Steps 1–2 |
-| **5** | Local draw + list | City → Spaces gig → promote locals (in-app + draft) | Steps 2–3 |
+| **1** | Mailing list studio | ~~Browse opted-in contacts + export nudge~~ ✅ | Step 0 |
+| **2** | Template studio | ~~Tailored copy-paste email drafts~~ ✅ | Step 1 |
+| **3** | Moment → draft hooks | ~~One-click draft after drop / gig / thank-you moments~~ ✅ | Step 2 |
+| **4** | CRM bridge | ~~`mailing_list` segment → “Copy email draft”~~ ✅ | Steps 1–2 |
+| **5** | Local draw + list | ~~City → Spaces gig → promote locals (in-app + draft)~~ ✅ | Steps 2–3 |
 
 Do **not** start Step 2 until Step 1 ships a real list surface (counts alone are not enough).  
 Do **not** build platform-sent fan email or an ESP integration in this arc.
@@ -51,10 +51,10 @@ Make the existing `ArtistFanContact` / `GET /api/artists/mailing-list/` surface 
 **Primary files:** `artists/views.py` (`mailing_list`), `main.jsx` / `AccountPages.jsx`, `FanCrmPage.jsx`, Pro gate via `can_export`.
 
 **Done when:**
-- [ ] Owner can open a mailing list view and see opted-in fans
-- [ ] Pro/Studio can download CSV from that view
-- [ ] Free plan sees upgrade path at ≥10 contacts
-- [ ] Narrow e2e: list visible + export/upgrade CTA
+- [x] Owner can open a mailing list view and see opted-in fans
+- [x] Pro/Studio can download CSV from that view
+- [x] Free plan sees upgrade path at ≥10 contacts
+- [x] Narrow e2e: list visible + export/upgrade CTA
 
 ---
 
@@ -80,9 +80,9 @@ Help artists email *outside* IndieFund with compliant, brand-aware drafts.
 - No “paste imported list” flow
 
 **Done when:**
-- [ ] Artist can generate and copy at least the four template types
-- [ ] Draft includes unsubscribe/compliance footer
-- [ ] e2e: open template → copy succeeds (clipboard or visible textarea select-all)
+- [x] Artist can generate and copy at least the four template types
+- [x] Draft includes unsubscribe/compliance footer
+- [x] e2e: open template → copy succeeds (clipboard or visible textarea select-all)
 
 ---
 
@@ -100,8 +100,8 @@ Wire peak artist moments to a pre-filled template (still copy-paste, still no se
 **Ship:** “Email your list” secondary CTA near those success toasts / panels → opens Template studio with context filled.
 
 **Done when:**
-- [ ] At least drop-publish and gig-confirmed expose the CTA
-- [ ] Opening the CTA lands on a preselected template with merge fields filled
+- [x] At least drop-publish and gig-confirmed expose the CTA
+- [x] Opening the CTA lands on a preselected template with merge fields filled
 
 ---
 
@@ -115,7 +115,7 @@ Connect Fan CRM to the toolkit without duplicating surfaces.
 3. Keep broadcast as **in-app + push only** (existing) — label clearly vs email draft
 
 **Done when:**
-- [ ] From Fans → mailing_list, artist can export and/or open template studio in one click
+- [x] From Fans → mailing_list, artist can export and/or open template studio in one click
 
 ---
 
@@ -129,8 +129,8 @@ Reuse the email toolkit for the existing Roadmap “local draw playbook” inste
 3. Template pre-fills venue, date, ticket/public link when available
 
 **Done when:**
-- [ ] Artist can complete the three checklist steps
-- [ ] Local show draft is available when a confirmed gig exists
+- [x] Artist can complete the three checklist steps
+- [x] Local show draft is available when a confirmed gig exists
 
 ---
 

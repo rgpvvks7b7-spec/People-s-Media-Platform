@@ -1,6 +1,7 @@
-import { expect, request as playwrightRequest, test } from "@playwright/test";
+import { execFileSync } from "child_process";
+import path from "path";
+import { expect, test } from "@playwright/test";
 import {
-  API,
   DEMO_PASSWORD,
   createBetaUsers,
   loginAccount,
@@ -12,64 +13,38 @@ test.describe.configure({ mode: "serial" });
 const stamp = Date.now();
 const users = createBetaUsers(`mail_${stamp}`);
 
-async function csrfHeaders(api) {
-  await api.get(`${API}/accounts/current-user/`);
-  const token = (await api.storageState()).cookies.find(cookie => cookie.name === "csrftoken")?.value;
-  return token ? { "X-CSRFToken": token } : {};
-}
-
 /**
- * Seeds N opted-in mailing contacts for an artist using isolated API contexts.
+ * Seeds N opted-in mailing contacts directly in Django for stable e2e setup.
  */
-async function seedMailingContacts({ artistUsername, count }) {
-  const artistApi = await playwrightRequest.newContext({
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:5173",
-  });
-  try {
-    await artistApi.post(`${API}/accounts/login/`, {
-      headers: { "Content-Type": "application/json", ...(await csrfHeaders(artistApi)) },
-      data: { username: artistUsername, password: DEMO_PASSWORD },
-    });
-    const me = await artistApi.get(`${API}/accounts/current-user/`);
-    expect(me.ok(), await me.text()).toBeTruthy();
-    const meData = await me.json();
-    const artistId = meData.user?.id || meData.id;
-    expect(artistId).toBeTruthy();
-
-    for (let index = 0; index < count; index += 1) {
-      const fan = `mail_seed_${stamp}_${index}`;
-      const fanApi = await playwrightRequest.newContext({
-        baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:5173",
-      });
-      try {
-        await fanApi.post(`${API}/accounts/register/`, {
-          headers: { "Content-Type": "application/json", ...(await csrfHeaders(fanApi)) },
-          data: {
-            username: fan,
-            password: DEMO_PASSWORD,
-            user_type: "fan",
-            display_name: fan,
-            email: `${fan}@example.com`,
-            terms_accepted: true,
-            discovery_location: "Melbourne",
-          },
-        });
-        await fanApi.post(`${API}/accounts/login/`, {
-          headers: { "Content-Type": "application/json", ...(await csrfHeaders(fanApi)) },
-          data: { username: fan, password: DEMO_PASSWORD },
-        });
-        const share = await fanApi.post(`${API}/artists/fan-email-sharing/`, {
-          headers: { "Content-Type": "application/json", ...(await csrfHeaders(fanApi)) },
-          data: { artist_id: artistId, email_shared: true },
-        });
-        expect(share.ok(), await share.text()).toBeTruthy();
-      } finally {
-        await fanApi.dispose();
-      }
-    }
-  } finally {
-    await artistApi.dispose();
-  }
+function seedMailingContacts({ artistUsername, count }) {
+  const script = `
+from django.contrib.auth import get_user_model
+from artists.models import ArtistFanContact
+User = get_user_model()
+artist = User.objects.get(username=${JSON.stringify(artistUsername)})
+for index in range(${Number(count)}):
+    fan, _ = User.objects.get_or_create(
+        username=f"mail_seed_${stamp}_{index}",
+        defaults={
+            "email": f"mail_seed_${stamp}_{index}@example.com",
+            "user_type": User.FAN,
+        },
+    )
+    if not fan.has_usable_password():
+        fan.set_password(${JSON.stringify(DEMO_PASSWORD)})
+        fan.save()
+    contact, _ = ArtistFanContact.objects.get_or_create(fan=fan, artist=artist)
+    contact.share(source=ArtistFanContact.MANUAL)
+    contact.save()
+print("ok", ArtistFanContact.objects.filter(artist=artist, email_shared=True).count())
+`;
+  const backendDir = path.resolve(process.cwd(), "../backend");
+  const output = execFileSync(
+    path.join(backendDir, ".venv/bin/python"),
+    ["manage.py", "shell", "-c", script],
+    { cwd: backendDir, encoding: "utf8" },
+  );
+  expect(output).toContain("ok");
 }
 
 test.describe("Artist email toolkit", () => {
@@ -92,23 +67,14 @@ test.describe("Artist email toolkit", () => {
     await expect(page.getByText(/copied|Select the draft/i)).toBeVisible();
   });
 
-  test("free artist with 10 contacts sees export nudge", async ({ page, request }) => {
+  test("free artist with 10 contacts sees export nudge", async ({ page }) => {
     const artist = `mail_nudge_${stamp}`;
-    await request.post(`${API}/accounts/register/`, {
-      data: {
-        username: artist,
-        password: DEMO_PASSWORD,
-        user_type: "artist",
-        display_name: "Nudge Artist",
-        email: `${artist}@example.com`,
-        terms_accepted: true,
-        stage_name: "Nudge Artist",
-        genre: "indie",
-        city: "Melbourne",
-        professions: ["music"],
-      },
+    await registerAccount(page, {
+      username: artist,
+      userType: "artist",
+      extra: { stageName: "Nudge Artist" },
     });
-    await seedMailingContacts({ artistUsername: artist, count: 10 });
+    seedMailingContacts({ artistUsername: artist, count: 10 });
     await loginAccount(page, artist, DEMO_PASSWORD, { force: true });
     await page.goto("/?page=mailing-list");
     await expect(page.getByRole("heading", { name: "You have 10 opted-in contacts" })).toBeVisible();
