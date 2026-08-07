@@ -56,7 +56,7 @@ import {
   markInviteLinkShared,
   markPreviewedPublicPage,
 } from "./lib/setupChecklist.js";
-import { SUPPORT_TIER_TEMPLATES } from "./lib/supportTierTemplates.js";
+import { SUPPORT_TIER_TEMPLATES, availableSupportTierTemplates } from "./lib/supportTierTemplates.js";
 import { IubendaConsent } from "./components/IubendaConsent.jsx";
 import { CookieConsentFallback } from "./components/CookieConsentFallback.jsx";
 import { isIubendaConsentConfigured } from "./lib/iubenda.js";
@@ -4717,10 +4717,10 @@ function App() {
     loadData();
   }
 
-  async function createSupportTierFromTemplate(template) {
+  async function createSupportTierFromTemplate(template, { announce = true, reload = true } = {}) {
     if (!currentUser?.is_artist) {
       setMessage("Artist account required.");
-      return;
+      return false;
     }
 
     const res = await apiFetch("/subscriptions/tiers/", {
@@ -4737,11 +4737,38 @@ function App() {
 
     if (!res.ok) {
       setMessage(data.error || "Unable to create support tier.");
+      return false;
+    }
+
+    if (announce) setMessage(`${template.label} tier is live.`);
+    if (reload) loadData();
+    return true;
+  }
+
+  async function createSupportTierStarterPack() {
+    const snapshotTiers = supportTiers.filter(tier =>
+      tier.artist === currentUser?.username && tier.profession === activeProfession
+    );
+    const available = availableSupportTierTemplates(snapshotTiers, activeProfession);
+    if (available.length === 0) {
+      setMessage("Your starter tiers are already live.");
       return;
     }
 
-    setMessage(`${template.label} tier is live.`);
-    loadData();
+    let created = 0;
+    for (const template of available) {
+      const ok = await createSupportTierFromTemplate(template, { announce: false, reload: false });
+      if (ok) created += 1;
+    }
+
+    if (created > 0) {
+      loadData();
+      setMessage(
+        created === available.length && available.length > 1
+          ? "Starter pack live — $1 Supporter and $5 Member are ready for fans."
+          : `${created} starter tier${created === 1 ? "" : "s"} created.`,
+      );
+    }
   }
 
   async function submitTip(event) {
@@ -5530,6 +5557,8 @@ function App() {
   function renderSupportTierEditorPanel(snapshot) {
     if (!snapshot) return null;
 
+    const availableTemplates = availableSupportTierTemplates(snapshot.supportTiers, snapshot.profession);
+
     return (
       <section className="support-tier-panel">
         <div className="tab-title-row">
@@ -5539,11 +5568,22 @@ function App() {
           </div>
         </div>
 
-        {snapshot.supportTiers.length === 0 && (
+        {availableTemplates.length > 0 && (
           <div className="tier-template-row">
-            <p className="muted form-hint">Launch with a preset tier in one tap, or create your own below.</p>
+            <p className="muted form-hint">
+              Launch with a preset in one tap. Starter pack creates the common $1 and $5 tiers artists open with.
+            </p>
             <div className="action-grid tier-template-actions">
-              {SUPPORT_TIER_TEMPLATES.map(template => (
+              {availableTemplates.length > 1 && (
+                <button
+                  type="button"
+                  className="primary compact"
+                  onClick={() => createSupportTierStarterPack()}
+                >
+                  Launch starter pack
+                </button>
+              )}
+              {availableTemplates.map(template => (
                 <button
                   key={template.id}
                   type="button"
@@ -5564,11 +5604,18 @@ function App() {
           <button className="secondary compact" type="submit">Create custom tier</button>
         </form>
         <div className="tier-card-grid">
-          {SUPPORT_TIER_TEMPLATES.map(template => (
+          {availableTemplates.map(template => (
             <article className="tier-card tier-card--template" key={template.id}>
               <strong>{template.label}</strong>
               <span>${template.monthly_amount}/month</span>
               <p>{template.benefits}</p>
+              <button
+                type="button"
+                className="secondary compact"
+                onClick={() => createSupportTierFromTemplate(template)}
+              >
+                Use this template
+              </button>
             </article>
           ))}
           {snapshot.supportTiers.map(tier => (
