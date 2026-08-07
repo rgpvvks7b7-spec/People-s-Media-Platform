@@ -71,17 +71,38 @@ def local_saved_fans(artist, city):
     return User.objects.filter(id__in=fan_ids, is_active=True).exclude(id=artist.id)
 
 
-def local_gig_alert_fans(artist, city):
-    """Local subscribers plus local savers/followers (deduped)."""
-    city = (city or "").strip()
-    if not city:
+def venue_follow_fans(listing):
+    """Fans who follow this venue listing (any discovery city)."""
+    if not listing or not getattr(listing, "id", None):
         return User.objects.none()
 
-    return User.objects.filter(
-        Q(id__in=local_subscriber_fans(artist, city).values("id"))
-        | Q(id__in=local_saved_fans(artist, city).values("id")),
-        is_active=True,
-    ).exclude(id=artist.id).distinct()
+    from spaces.models import SpaceFollow
+
+    fan_ids = (
+        SpaceFollow.objects
+        .filter(listing=listing, fan__is_active=True)
+        .values_list("fan_id", flat=True)
+        .distinct()
+    )
+    return User.objects.filter(id__in=fan_ids, is_active=True)
+
+
+def local_gig_alert_fans(artist, city, listing=None):
+    """Local subscribers, local savers/followers, plus venue followers (deduped)."""
+    city = (city or "").strip()
+    clauses = []
+    if city:
+        clauses.append(Q(id__in=local_subscriber_fans(artist, city).values("id")))
+        clauses.append(Q(id__in=local_saved_fans(artist, city).values("id")))
+    if listing is not None:
+        clauses.append(Q(id__in=venue_follow_fans(listing).values("id")))
+    if not clauses:
+        return User.objects.none()
+
+    query = clauses[0]
+    for clause in clauses[1:]:
+        query |= clause
+    return User.objects.filter(query, is_active=True).exclude(id=artist.id).distinct()
 
 
 def email_opted_in_fan_ids(artist, fan_ids):
@@ -147,7 +168,7 @@ def notify_local_supporters_for_booking(booking, *, reminder=False, force=False)
                 "reason": "already_notified",
             }
 
-    fans = list(local_gig_alert_fans(booking.artist, city))
+    fans = list(local_gig_alert_fans(booking.artist, city, listing=booking.listing))
     if not fans:
         return {
             "notified_count": 0,

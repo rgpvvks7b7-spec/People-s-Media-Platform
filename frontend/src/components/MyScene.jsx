@@ -119,6 +119,7 @@ export function MyScenePage({
   onRequireAccount,
   onOpenArtistByUsername,
   onOpenArtistFromGig,
+  onOpenVenue,
   onPurchaseTicket,
   ownedTicketProductIds = new Set(),
   products = [],
@@ -131,6 +132,7 @@ export function MyScenePage({
     counts: { all: 0, supported: 0 },
     needs_location: false,
   });
+  const [followedVenues, setFollowedVenues] = useState([]);
   const [activeTab, setActiveTab] = useState("supported");
   const [selectedShow, setSelectedShow] = useState(null);
   const [showLoadError, setShowLoadError] = useState("");
@@ -181,7 +183,21 @@ export function MyScenePage({
       }
     }
 
-    if (currentUser) loadScene();
+    async function loadFollowedVenues() {
+      try {
+        const res = await apiFetch("/spaces/listings/followed/");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) setFollowedVenues(Array.isArray(data.results) ? data.results : []);
+      } catch {
+        if (!cancelled) setFollowedVenues([]);
+      }
+    }
+
+    if (currentUser) {
+      loadScene();
+      loadFollowedVenues();
+    }
     return () => {
       cancelled = true;
     };
@@ -295,6 +311,40 @@ export function MyScenePage({
         />
         <button className="primary compact" type="submit">Search</button>
       </form>
+
+      {followedVenues.length > 0 && (
+        <section className="my-scene-followed-venues" aria-labelledby="followed-venues-heading">
+          <div className="section-head">
+            <div>
+              <h3 id="followed-venues-heading">Venues you follow</h3>
+              <p className="muted">Get alerted when these rooms book a show.</p>
+            </div>
+          </div>
+          <div className="activity-list">
+            {followedVenues.map(venue => (
+              <article key={venue.id} className="activity-item my-scene-card">
+                <span>venue</span>
+                <div>
+                  <strong>{venue.name}</strong>
+                  <p>
+                    {[venue.city, venue.host_business_name].filter(Boolean).join(" · ")}
+                    {venue.capacity ? ` · ${venue.capacity} capacity` : ""}
+                  </p>
+                </div>
+                <div className="my-scene-card-actions">
+                  <button
+                    className="secondary compact"
+                    type="button"
+                    onClick={() => onOpenVenue?.(venue)}
+                  >
+                    Open venue
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="tab-row">
         <button
