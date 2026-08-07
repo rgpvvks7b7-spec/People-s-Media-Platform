@@ -10,6 +10,9 @@ export function SpaceListingDetailModal({
   photoTypeLabels = {},
   formatAvailabilityWindows,
   footer = null,
+  onToggleFollow = null,
+  followBusy = false,
+  onCopyPublicLink = null,
 }) {
   const photos = listing?.photos || [];
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -129,6 +132,28 @@ export function SpaceListingDetailModal({
             <p className="eyebrow">{listing.city || "Local room"} · {listing.capacity} capacity</p>
             <h2 id="space-detail-title">{listing.name}</h2>
             <p className="space-detail-subtitle">{listing.host_business_name} · {splitLabel}</p>
+            {(onToggleFollow || onCopyPublicLink) && (
+              <div className="action-grid space-detail-actions">
+                {onToggleFollow && (
+                  <button
+                    type="button"
+                    className={listing.viewer_following ? "secondary supporting" : "secondary"}
+                    onClick={onToggleFollow}
+                    disabled={followBusy}
+                  >
+                    {listing.viewer_following ? "Following venue" : "Follow venue"}
+                  </button>
+                )}
+                {onCopyPublicLink && (
+                  <button type="button" className="secondary" onClick={onCopyPublicLink}>
+                    Copy venue link
+                  </button>
+                )}
+              </div>
+            )}
+            {typeof listing.follower_count === "number" && listing.follower_count > 0 && (
+              <p className="muted">{listing.follower_count} fan{listing.follower_count === 1 ? "" : "s"} following this room</p>
+            )}
           </header>
 
           <p className="space-detail-description">{listing.description || "Flexible room for independent performers."}</p>

@@ -18,7 +18,7 @@ from notifications.models import Notification
 from subscriptions.models import FanSubscription
 from .availability import validate_booking_window
 from .local_draw import local_supporter_counts, resolve_local_city
-from .models import HostProfile, SpaceBooking, SpaceBookingReview, SpaceListing, SpaceListingPhoto
+from .models import HostProfile, SpaceBooking, SpaceBookingReview, SpaceFollow, SpaceListing, SpaceListingPhoto
 from .services import link_ticket_product, on_booking_confirmed, sync_booking_calendar_item
 
 
@@ -197,6 +197,9 @@ def serialize_host_profile(profile):
 
 def serialize_listing(listing, request):
     host_profile = getattr(listing.host, "host_profile", None)
+    viewer_following = False
+    if request.user.is_authenticated:
+        viewer_following = SpaceFollow.objects.filter(fan=request.user, listing=listing).exists()
     return {
         "id": listing.id,
         "host_id": listing.host_id,
@@ -222,6 +225,9 @@ def serialize_listing(listing, request):
         "min_local_supporters": listing.min_local_supporters,
         "status": listing.status,
         "can_edit": request.user.is_authenticated and request.user == listing.host,
+        "follower_count": listing.follows.count(),
+        "viewer_following": viewer_following,
+        "public_url": f"/?listing={listing.id}",
         "created_at": listing.created_at,
     }
 
@@ -384,7 +390,11 @@ def host_profile(request):
 @throttle_classes([UploadRateThrottle])
 def listings(request):
     if request.method == "GET":
-        queryset = SpaceListing.objects.select_related("host", "host__host_profile").prefetch_related("gallery_photos")
+        queryset = (
+            SpaceListing.objects
+            .select_related("host", "host__host_profile")
+            .prefetch_related("gallery_photos", "follows")
+        )
         if request.user.is_authenticated and request.user.user_type == User.HOST and request.query_params.get("mine"):
             queryset = queryset.filter(host=request.user)
         else:
@@ -419,9 +429,25 @@ def listings(request):
     return Response({"message": "Space listing saved.", "listing": serialize_listing(listing, request)}, status=status.HTTP_201_CREATED)
 
 
-@api_view(["PATCH", "DELETE"])
+@api_view(["GET", "PATCH", "DELETE"])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
 def listing_detail(request, listing_id):
+    if request.method == "GET":
+        try:
+            listing = (
+                SpaceListing.objects
+                .select_related("host", "host__host_profile")
+                .prefetch_related("gallery_photos", "follows")
+                .get(id=listing_id)
+            )
+        except SpaceListing.DoesNotExist:
+            return Response({"error": "Space listing not found"}, status=status.HTTP_404_NOT_FOUND)
+        if listing.status != SpaceListing.LIVE and not (
+            request.user.is_authenticated and request.user == listing.host
+        ):
+            return Response({"error": "Space listing not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"listing": serialize_listing(listing, request)})
+
     if not request.user.is_authenticated:
         return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
     if request.user.user_type != User.HOST:
@@ -444,6 +470,63 @@ def listing_detail(request, listing_id):
     if photo_error:
         return Response({"error": photo_error}, status=status.HTTP_400_BAD_REQUEST)
     return Response({"message": "Space listing updated.", "listing": serialize_listing(listing, request)})
+
+
+@api_view(["POST"])
+def listing_follow(request, listing_id):
+    if not request.user.is_authenticated:
+        return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+    if request.user.user_type == User.HOST:
+        return Response({"error": "Hosts follow venues from a fan account"}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        listing = SpaceListing.objects.get(id=listing_id, status=SpaceListing.LIVE)
+    except SpaceListing.DoesNotExist:
+        return Response({"error": "Space listing not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    follow, created = SpaceFollow.objects.get_or_create(fan=request.user, listing=listing)
+    return Response({
+        "message": "Venue saved." if created else "Already following this venue.",
+        "listing": serialize_listing(listing, request),
+        "created": created,
+        "viewer_following": True,
+        "follow_id": follow.id,
+    })
+
+
+@api_view(["POST"])
+def listing_unfollow(request, listing_id):
+    if not request.user.is_authenticated:
+        return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    deleted, _ = SpaceFollow.objects.filter(fan=request.user, listing_id=listing_id).delete()
+    try:
+        listing = SpaceListing.objects.select_related("host", "host__host_profile").get(id=listing_id)
+        payload = serialize_listing(listing, request)
+    except SpaceListing.DoesNotExist:
+        payload = None
+    return Response({
+        "message": "Venue removed from saved." if deleted else "Venue was not saved.",
+        "deleted_count": deleted,
+        "listing": payload,
+        "viewer_following": False,
+    })
+
+
+@api_view(["GET"])
+def followed_listings(request):
+    if not request.user.is_authenticated:
+        return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    follows = (
+        SpaceFollow.objects
+        .select_related("listing", "listing__host", "listing__host__host_profile")
+        .prefetch_related("listing__gallery_photos")
+        .filter(fan=request.user, listing__status=SpaceListing.LIVE)
+        .order_by("-created_at")
+    )
+    results = [serialize_listing(follow.listing, request) for follow in follows]
+    return Response({"results": results, "count": len(results)})
 
 
 @api_view(["DELETE"])
@@ -678,8 +761,8 @@ def notify_local_supporters(request, booking_id):
     message = "Local supporters notified."
     if result.get("skipped") and result.get("reason") == "already_notified":
         message = "Local supporters were already notified for this gig."
-    elif result.get("reason") == "no_local_subscribers":
-        message = "No active local subscribers to notify yet."
+    elif result.get("reason") in {"no_local_subscribers", "no_local_fans"}:
+        message = "No local supporters or saved fans to notify yet."
 
     return Response({
         "message": message,
@@ -697,9 +780,23 @@ def host_earnings(request):
     if request.user.user_type != User.HOST:
         return Response({"error": "Host account required"}, status=status.HTTP_403_FORBIDDEN)
     completed = SpaceBooking.objects.filter(listing__host=request.user, status=SpaceBooking.COMPLETED)
+    profile, _ = HostProfile.objects.get_or_create(
+        user=request.user,
+        defaults={"business_name": request.user.display_name or request.user.username},
+    )
+    pending = profile.pending_ticket_earnings
+    payouts_ready = bool(profile.stripe_connect_account_id and profile.stripe_connect_onboarded_at)
     return Response({
         "completed_bookings": completed.count(),
         "attendance_checked_in": sum(item.attendance_checked_in for item in completed),
+        "pending_ticket_earnings": str(pending),
+        "payouts_ready": payouts_ready,
+        "connect_onboarded": payouts_ready,
+        "ticket_share_note": (
+            "Ticket door share from confirmed shows accrues here after each sale. "
+            "Flat listing fees are settled with the artist outside IndieFund. "
+            "F&B stays with the venue — IndieFund never takes a cut."
+        ),
         "policy": "IndieFund does not take a cut of food and beverage revenue. F&B stays with the venue.",
     })
 

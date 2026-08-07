@@ -81,6 +81,33 @@ class SpaceListing(models.Model):
         return self.name
 
 
+class SpaceFollow(models.Model):
+    """Fan following a venue listing for local-scene alerts and discovery."""
+
+    fan = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="space_follows",
+    )
+    listing = models.ForeignKey(
+        SpaceListing,
+        on_delete=models.CASCADE,
+        related_name="follows",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("fan", "listing")]
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["fan", "created_at"]),
+            models.Index(fields=["listing", "created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.fan} → {self.listing}"
+
+
 class SpaceListingPhoto(models.Model):
     STAGE = "stage"
     AUDIENCE = "audience"

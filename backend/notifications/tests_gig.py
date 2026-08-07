@@ -6,7 +6,8 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from artists.models import ArtistFanContact, ArtistProfile
+from artists.models import ArtistFanContact, ArtistFollow, ArtistProfile
+from discovery.models import ArtistSignal
 from notifications.models import Notification
 from spaces.models import HostProfile, SpaceBooking, SpaceListing
 from subscriptions.models import FanSubscription
@@ -105,3 +106,54 @@ class GigNotificationTests(TestCase):
         self.assertEqual(first.status_code, 200)
         second = self.client.post(f"/api/spaces/bookings/{booking.id}/notify-local-supporters/")
         self.assertEqual(second.status_code, 429)
+
+    def test_notify_reaches_local_saved_fans_without_subscription(self):
+        saver = User.objects.create_user(
+            username="saver",
+            password="pass",
+            user_type=User.FAN,
+            discovery_location="Melbourne",
+        )
+        ArtistSignal.objects.create(
+            fan=saver,
+            artist=self.artist,
+            signal_type=ArtistSignal.SAVE,
+            liked_genre="indie",
+            weight=1.4,
+        )
+        ArtistFollow.objects.get_or_create(fan=saver, artist=self.artist)
+
+        booking = self.create_confirmed_booking()
+        self.client.force_authenticate(self.artist)
+        response = self.client.post(f"/api/spaces/bookings/{booking.id}/notify-local-supporters/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["notified_count"], 3)
+        self.assertTrue(
+            Notification.objects.filter(recipient=saver, notification_type=Notification.GIG).exists()
+        )
+
+    def test_remote_saved_fan_is_not_notified(self):
+        remote = User.objects.create_user(
+            username="remote",
+            password="pass",
+            user_type=User.FAN,
+            discovery_location="Sydney",
+        )
+        ArtistSignal.objects.create(
+            fan=remote,
+            artist=self.artist,
+            signal_type=ArtistSignal.SAVE,
+            liked_genre="indie",
+            weight=1.4,
+        )
+
+        booking = self.create_confirmed_booking()
+        self.client.force_authenticate(self.artist)
+        response = self.client.post(f"/api/spaces/bookings/{booking.id}/notify-local-supporters/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["notified_count"], 2)
+        self.assertFalse(
+            Notification.objects.filter(recipient=remote, notification_type=Notification.GIG).exists()
+        )

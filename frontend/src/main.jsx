@@ -1697,7 +1697,14 @@ function App() {
     const view = params.get("view") || "";
     const section = params.get("section") || "";
     const artistUsername = params.get("artist");
+    const listingId = params.get("listing");
     setMySceneShowId(params.get("show") || "");
+
+    if (listingId) {
+      applyPageRoute("spaces", tab, view);
+      openSpaceListingById(listingId);
+      return;
+    }
 
     if (artistUsername && artists.length) {
       const artist = artists.find(item => item.owner_username === artistUsername);
@@ -5611,7 +5618,8 @@ function App() {
     const artistLink = getArtistPublicUrl();
     const instagramLink = getArtistPublicUrl("instagram");
     const shareTemplate = `I'm on IndieFund - subscribe for exclusive content: ${artistLink}`;
-    const embedSnippet = `<a data-embed-from="indiefund" href="${artistLink}">Support ${currentUser.display_name || currentUser.username} on IndieFund</a>`;
+    const embedUrl = `${window.location.origin}/api/artists/public/${encodeURIComponent(currentUser.username)}/embed/`;
+    const embedSnippet = `<iframe src="${embedUrl}" title="Support ${currentUser.display_name || currentUser.username} on IndieFund" width="360" height="168" style="border:0;border-radius:18px;overflow:hidden;max-width:100%" loading="lazy"></iframe>`;
     const hasSupporters = Number(fans.active_subscribers || 0) > 0;
     const hasMailingList = Number(fans.mailing_list_size || 0) > 0;
     const studioSnapshot = getOwnerStudioSnapshot();
@@ -6108,6 +6116,55 @@ function App() {
 
   function openSpaceListingDetail(listing) {
     setSelectedSpaceListing(listing);
+    if (listing?.id) {
+      const params = new URLSearchParams(window.location.search);
+      params.set("page", "spaces");
+      params.set("listing", String(listing.id));
+      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+    }
+  }
+
+  async function openSpaceListingById(listingId) {
+    if (!listingId) return;
+    const existing = spaceListings.find(item => String(item.id) === String(listingId));
+    if (existing) {
+      openSpaceListingDetail(existing);
+      return;
+    }
+    goToPage("spaces");
+    const data = await fetchJson(`/spaces/listings/${listingId}/`, null);
+    if (data?.listing) {
+      setSpaceListings(current => (
+        current.some(item => item.id === data.listing.id) ? current : [data.listing, ...current]
+      ));
+      openSpaceListingDetail(data.listing);
+    }
+  }
+
+  async function toggleSpaceListingFollow(listing) {
+    if (!listing?.id) return;
+    if (!currentUser) {
+      goToPage("profile");
+      setMessage("Log in to follow venues.");
+      return;
+    }
+    const endpoint = listing.viewer_following
+      ? `/spaces/listings/${listing.id}/unfollow/`
+      : `/spaces/listings/${listing.id}/follow/`;
+    const res = await apiFetch(endpoint, { method: "POST" });
+    const data = await res.json();
+    if (!res.ok) {
+      setMessage(data.error || "Unable to update venue follow.");
+      return;
+    }
+    const nextListing = data.listing || {
+      ...listing,
+      viewer_following: !listing.viewer_following,
+      follower_count: Math.max(0, (listing.follower_count || 0) + (listing.viewer_following ? -1 : 1)),
+    };
+    setSelectedSpaceListing(nextListing);
+    setSpaceListings(current => current.map(item => (item.id === nextListing.id ? { ...item, ...nextListing } : item)));
+    setMessage(data.message || (nextListing.viewer_following ? "Venue saved." : "Venue removed from saved."));
   }
 
   function handleSpaceCardClick(event, listing) {
@@ -6229,7 +6286,7 @@ function App() {
 
         <SetupChecklistPanel
           title="Three steps to your local scene"
-          subtitle="Save artists you like, build a playlist, then support one to unlock gig alerts and Shows near me."
+          subtitle="Save artists you like and set your city — you'll get gig alerts when they announce a show near you. Support unlocks ticket presales and deeper perks."
           items={checklistItems}
           checklistHidden={setupChecklistDismissed}
           onDismiss={dismissSetupChecklist}
@@ -8597,6 +8654,10 @@ function App() {
         {currentUser?.is_host && (
           <section className="spaces-host-summary" aria-label="Host summary">
             <div className="spaces-host-summary-item">
+              <span>Pending ticket share</span>
+              <strong>${Number(spaceEarnings?.pending_ticket_earnings || 0).toFixed(2)}</strong>
+            </div>
+            <div className="spaces-host-summary-item">
               <span>Completed bookings</span>
               <strong>{spaceEarnings?.completed_bookings || 0}</strong>
             </div>
@@ -8617,8 +8678,15 @@ function App() {
               </strong>
             </div>
             <p className="spaces-host-summary-note">
-              {spaceEarnings?.policy || "IndieFund does not take a cut of food and beverage revenue. F&B stays with the venue."}
+              {spaceEarnings?.ticket_share_note
+                || spaceEarnings?.policy
+                || "IndieFund does not take a cut of food and beverage revenue. F&B stays with the venue."}
             </p>
+            {spaceEarnings && !spaceEarnings.payouts_ready && Number(spaceEarnings.pending_ticket_earnings || 0) > 0 && (
+              <p className="spaces-host-summary-note">
+                Ticket share is accruing. Host payouts via Stripe Connect land in a later release — your ledger is already tracking every sale.
+              </p>
+            )}
           </section>
         )}
 
@@ -8829,11 +8897,32 @@ function App() {
 
         <SpaceListingDetailModal
           listing={selectedSpaceListing}
-          onClose={() => setSelectedSpaceListing(null)}
+          onClose={() => {
+            setSelectedSpaceListing(null);
+            const params = new URLSearchParams(window.location.search);
+            if (params.has("listing")) {
+              params.delete("listing");
+              const query = params.toString();
+              window.history.replaceState({}, "", query ? `${window.location.pathname}?${query}` : window.location.pathname);
+            }
+          }}
           splitLabels={SPACE_SPLIT_LABELS}
           photoTypeLabels={SPACE_PHOTO_TYPE_LABELS}
           formatAvailabilityWindows={formatAvailabilityWindows}
           footer={selectedSpaceListing ? renderSpaceListingDetailFooter(selectedSpaceListing) : null}
+          onToggleFollow={
+            selectedSpaceListing && !currentUser?.is_host
+              ? () => toggleSpaceListingFollow(selectedSpaceListing)
+              : null
+          }
+          onCopyPublicLink={
+            selectedSpaceListing
+              ? () => copyText(
+                  `${window.location.origin}${window.location.pathname}?page=spaces&listing=${selectedSpaceListing.id}`,
+                  "Venue link copied.",
+                )
+              : null
+          }
         />
 
       </>

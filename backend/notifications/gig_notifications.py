@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from django.utils import timezone
 
-from artists.models import ArtistFanContact
+from artists.models import ArtistFanContact, ArtistFollow
+from discovery.models import ArtistSignal
 from spaces.local_draw import resolve_local_city
 from subscriptions.models import FanSubscription
 
@@ -48,6 +50,40 @@ def local_subscriber_fans(artist, city):
     return User.objects.filter(id__in=fan_ids, is_active=True).exclude(id=artist.id)
 
 
+def local_saved_fans(artist, city):
+    """Fans who saved/followed the artist and live in the gig city."""
+    city = (city or "").strip()
+    if not city:
+        return User.objects.none()
+
+    save_ids = ArtistSignal.objects.filter(
+        artist=artist,
+        signal_type=ArtistSignal.SAVE,
+        fan__is_active=True,
+        fan__discovery_location__iexact=city,
+    ).values_list("fan_id", flat=True)
+    follow_ids = ArtistFollow.objects.filter(
+        artist=artist,
+        fan__is_active=True,
+        fan__discovery_location__iexact=city,
+    ).values_list("fan_id", flat=True)
+    fan_ids = set(save_ids) | set(follow_ids)
+    return User.objects.filter(id__in=fan_ids, is_active=True).exclude(id=artist.id)
+
+
+def local_gig_alert_fans(artist, city):
+    """Local subscribers plus local savers/followers (deduped)."""
+    city = (city or "").strip()
+    if not city:
+        return User.objects.none()
+
+    return User.objects.filter(
+        Q(id__in=local_subscriber_fans(artist, city).values("id"))
+        | Q(id__in=local_saved_fans(artist, city).values("id")),
+        is_active=True,
+    ).exclude(id=artist.id).distinct()
+
+
 def email_opted_in_fan_ids(artist, fan_ids):
     if not fan_ids:
         return set()
@@ -81,7 +117,8 @@ def recent_reminder_sent(booking_id):
 
 def notify_local_supporters_for_booking(booking, *, reminder=False, force=False):
     """
-    Notify all active local subscribers (in-app). Email only when fan opted in.
+    Notify local subscribers and local savers/followers (in-app).
+    Email still only goes to fans who opted in to share email with the artist.
     Auto-notify skips if this booking was already announced unless force=True.
     Manual reminders respect a 48h cooldown unless force=True.
     """
@@ -110,13 +147,13 @@ def notify_local_supporters_for_booking(booking, *, reminder=False, force=False)
                 "reason": "already_notified",
             }
 
-    fans = list(local_subscriber_fans(booking.artist, city))
+    fans = list(local_gig_alert_fans(booking.artist, city))
     if not fans:
         return {
             "notified_count": 0,
             "email_count": 0,
             "skipped": False,
-            "reason": "no_local_subscribers",
+            "reason": "no_local_fans",
         }
 
     fan_ids = [fan.id for fan in fans]
