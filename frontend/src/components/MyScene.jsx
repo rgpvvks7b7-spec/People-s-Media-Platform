@@ -116,6 +116,7 @@ export function MyScenePage({
   initialShowId = "",
   fanChannelUsername = "",
   onGoToProfile,
+  onRequireAccount,
   onOpenArtistByUsername,
   onOpenArtistFromGig,
   onPurchaseTicket,
@@ -265,7 +266,7 @@ export function MyScenePage({
       <section className="space-panel">
         <h2>My Scene</h2>
         <p className="muted">Sign in to see local shows from artists you support.</p>
-        <button className="primary" type="button" onClick={onGoToProfile}>Sign up or log in</button>
+        <button className="primary" type="button" onClick={onRequireAccount || onGoToProfile}>Sign up or log in</button>
       </section>
     );
   }

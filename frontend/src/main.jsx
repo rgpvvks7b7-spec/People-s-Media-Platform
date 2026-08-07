@@ -28,7 +28,7 @@ import {
 } from "./components/SpaceAvailabilityEditor.jsx";
 import { SpaceListingAvailabilityPicker, slotsToWindows } from "./components/SpaceListingAvailabilityPicker.jsx";
 import { SpaceListingCardPreview, SpaceListingDetailModal } from "./components/SpaceListingDetailModal.jsx";
-import { ExternalLinkConfirm, PlaylistPickerSheet, PreviewBeforeShareSheet, ProductTypePicker, SupportConfirmSheet } from "./components/Modals.jsx";
+import { ExternalLinkConfirm, PlaylistPickerSheet, PreviewBeforeShareSheet, ProductTypePicker, SignupGateSheet, SupportConfirmSheet } from "./components/Modals.jsx";
 import { StoreCart } from "./components/StoreCart.jsx";
 import { FinalizeReleasePanel } from "./components/FinalizeReleasePanel.jsx";
 import { SpaceListingWizard } from "./components/SpaceListingWizard.jsx";
@@ -81,6 +81,7 @@ const FAN_ARTIST_RAIL_PAGES = new Set(["home", "feed", "my-scene", "listen", "my
 const HOST_PAGES = new Set(["spaces", "notifications", "profile", "faq"]);
 const GUEST_SHELL_PAGES = new Set(["listen", "discover", "music", "profile", "spaces", "my-scene", "stores", "live", "faq", "prelaunch", "early-access", ...LEGAL_PAGE_IDS]);
 const SUPPORT_EMAIL = "support@indiefund.app";
+const SIGNUP_INTENT_KEY = "indiefund_signup_intent";
 
 function resolveListenRoute(page, tabParam = "", viewParam = "") {
   if (page === "saved") {
@@ -674,6 +675,7 @@ function App() {
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [activeProfession, setActiveProfession] = useState(DEFAULT_PROFESSION);
   const [pendingSupportArtist, setPendingSupportArtist] = useState(null);
+  const [signupGate, setSignupGate] = useState(null);
   const [selectedSupportTierId, setSelectedSupportTierId] = useState("");
   const [selectedSupportEmailShare, setSelectedSupportEmailShare] = useState(false);
   const [mailingList, setMailingList] = useState(null);
@@ -1642,6 +1644,89 @@ function App() {
     goToPage("profile");
   }
 
+  // Contextual signup gates: when a guest tries a fan action we show a sheet
+  // explaining the benefit, remember what they were doing, and resume the
+  // action after they sign up or log in.
+  function requestSignupGate(intent) {
+    try {
+      sessionStorage.setItem(SIGNUP_INTENT_KEY, JSON.stringify(intent));
+    } catch {
+      // sessionStorage unavailable; the gate still works without resume.
+    }
+    setSignupGate(intent);
+  }
+
+  function readSignupIntent() {
+    try {
+      return JSON.parse(sessionStorage.getItem(SIGNUP_INTENT_KEY) || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  function clearSignupIntent() {
+    try {
+      sessionStorage.removeItem(SIGNUP_INTENT_KEY);
+    } catch {
+      // Nothing to clear.
+    }
+  }
+
+  function dismissSignupGate() {
+    setSignupGate(null);
+    clearSignupIntent();
+  }
+
+  function openSignupGateAuth(mode) {
+    setSignupGate(null);
+    setAuthMode(mode);
+    if (mode === "register") {
+      setRegisterType("fan");
+    }
+    goToPage("profile");
+  }
+
+  async function resumeSignupIntent(user) {
+    const intent = readSignupIntent();
+    clearSignupIntent();
+    if (!intent || !user || user.is_host) return false;
+
+    if (intent.artistUsername) {
+      if (intent.type === "follow") {
+        const meta = await fetchJson(`/artists/public/${intent.artistUsername}/`, null);
+        if (meta?.owner_id) {
+          const res = await apiFetch("/discovery/signal/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ artist_id: meta.owner_id, signal_type: "save" }),
+          });
+          if (res.ok) {
+            setMessage(`You're following ${intent.artistName || meta.stage_name}.`);
+            loadSavedArtists();
+          }
+        }
+      }
+      await openArtistByUsername(intent.artistUsername);
+      if (intent.type === "support") {
+        const artist = artistFromUsername(intent.artistUsername)
+          || (await fetchJson("/artists/", []) || []).find(item => item.owner_username === intent.artistUsername);
+        if (artist) {
+          setSelectedSupportTierId("");
+          setSelectedSupportEmailShare(false);
+          setPendingSupportArtist({ artist, profession: intent.profession || activeProfession });
+        }
+      }
+      return true;
+    }
+
+    if (intent.page && FAN_PAGES.has(intent.page)) {
+      goToPage(intent.page);
+      return true;
+    }
+
+    return false;
+  }
+
   function openFanWaitlist() {
     setAuthMode("waitlist");
     goToPage("profile");
@@ -2352,7 +2437,13 @@ function App() {
 
   async function supportArtist(username, profession = activeProfession, tierId = selectedSupportTierId, shareEmail = selectedSupportEmailShare) {
     if (!currentUser) {
-      setMessage("Log in before supporting artists.");
+      const artist = artistFromUsername(username);
+      requestSignupGate({
+        type: "support",
+        artistUsername: username,
+        artistName: artist?.stage_name,
+        profession,
+      });
       return;
     }
 
@@ -2481,7 +2572,12 @@ function App() {
     }
 
     if (!currentUser) {
-      setMessage("Log in before supporting artists.");
+      requestSignupGate({
+        type: "support",
+        artistUsername: artist?.owner_username,
+        artistName: artist?.stage_name,
+        profession,
+      });
       return;
     }
 
@@ -2786,7 +2882,11 @@ function App() {
 
   async function sendDiscoverySignal(artist, signalType) {
     if (!currentUser) {
-      setMessage("Log in before personalizing discovery.");
+      requestSignupGate({
+        type: signalType === "save" ? "follow" : "discover",
+        artistUsername: artist?.owner_username,
+        artistName: artist?.stage_name,
+      });
       return;
     }
 
@@ -2853,7 +2953,7 @@ function App() {
 
   async function sendDiscoveryTrackSignal(track, signalType) {
     if (!currentUser) {
-      setMessage("Log in before personalizing discovery.");
+      requestSignupGate({ type: "discover" });
       return;
     }
 
@@ -3630,7 +3730,11 @@ function App() {
 
   async function purchaseProduct(product, showContext = null) {
     if (!currentUser) {
-      setMessage("Log in to purchase.");
+      requestSignupGate({
+        type: "shop",
+        artistUsername: product?.artist_username,
+        artistName: product?.stage_name || product?.artist_username,
+      });
       return;
     }
 
@@ -3756,7 +3860,11 @@ function App() {
 
   async function togglePostLike(postId) {
     if (!currentUser) {
-      setMessage("Log in before liking posts.");
+      requestSignupGate({
+        type: "engage",
+        artistUsername: selectedArtist?.owner_username,
+        artistName: selectedArtist?.stage_name,
+      });
       return;
     }
 
@@ -3772,7 +3880,11 @@ function App() {
     event.preventDefault();
 
     if (!currentUser) {
-      setMessage("Log in before commenting.");
+      requestSignupGate({
+        type: "engage",
+        artistUsername: selectedArtist?.owner_username,
+        artistName: selectedArtist?.stage_name,
+      });
       return;
     }
 
@@ -3905,7 +4017,11 @@ function App() {
   function addToCart(product) {
     if (currentUser?.is_host) return;
     if (!currentUser) {
-      setMessage("Log in to add items to your cart.");
+      requestSignupGate({
+        type: "shop",
+        artistUsername: product?.artist_username,
+        artistName: product?.stage_name || product?.artist_username,
+      });
       return;
     }
     if (!isCartableProduct(product)) {
@@ -3936,7 +4052,7 @@ function App() {
 
   async function checkoutCart() {
     if (!currentUser) {
-      setMessage("Log in to checkout.");
+      requestSignupGate({ type: "shop" });
       return;
     }
     if (storeCart.length === 0) {
@@ -4632,7 +4748,11 @@ function App() {
     event.preventDefault();
 
     if (!currentUser) {
-      setMessage("Log in before sending a tip.");
+      requestSignupGate({
+        type: "support",
+        artistUsername: selectedArtist?.owner_username,
+        artistName: selectedArtist?.stage_name,
+      });
       return;
     }
 
@@ -6715,10 +6835,12 @@ function App() {
     loadSavedArtists();
 
     if (authMode === "register" && data.user?.is_host) {
+      clearSignupIntent();
       setSearchLocation(data.user?.discovery_location || "");
       goToPage("spaces");
       setShowSpaceListingForm(true);
     } else if (data.user?.is_host) {
+      clearSignupIntent();
       setSearchLocation(data.user?.discovery_location || "");
       goToPage("spaces");
     } else {
@@ -6726,7 +6848,10 @@ function App() {
         await loadData();
       }
       setSearchLocation(data.user?.discovery_location || "");
-      goToPage("home");
+      const resumed = await resumeSignupIntent(data.user);
+      if (!resumed) {
+        goToPage("home");
+      }
     }
   }
 
@@ -7900,6 +8025,18 @@ function App() {
       { id: "youtube", label: "YouTube", url: artist.youtube_url },
       { id: "website", label: "Website", url: artist.website_url },
     ].filter(item => item.url);
+  }
+
+  function renderSignupGateSheet() {
+    if (currentUser) return null;
+    return (
+      <SignupGateSheet
+        gate={signupGate}
+        onCancel={dismissSignupGate}
+        onLogin={() => openSignupGateAuth("login")}
+        onSignup={() => openSignupGateAuth("register")}
+      />
+    );
   }
 
   function renderSupportConfirmSheet() {
@@ -9329,6 +9466,7 @@ function App() {
         data-branch={professionBranch(activeProfession)}
       >
         {renderSupportConfirmSheet()}
+        {renderSignupGateSheet()}
         {renderExternalLinkConfirm()}
         {renderPlaylistPicker()}
         <ArtistTopbar
@@ -9422,7 +9560,14 @@ function App() {
               <div className="profile-actions">
                 {!currentUser ? (
                   <>
-                    <button className="primary" onClick={() => goToPage("profile")}>
+                    <button
+                      className="primary"
+                      onClick={() => requestSignupGate({
+                        type: "follow",
+                        artistUsername: selectedArtist?.owner_username,
+                        artistName: selectedArtist?.stage_name,
+                      })}
+                    >
                       Log in or sign up
                     </button>
                     <button
@@ -10848,7 +10993,16 @@ function App() {
               </div>
               {!realOwner && !currentUser && (
                 <div className="action-grid">
-                  <button className="primary" type="button" onClick={() => goToPage("profile")}>
+                  <button
+                    className="primary"
+                    type="button"
+                    onClick={() => requestSignupGate({
+                      type: "support",
+                      artistUsername: selectedArtist?.owner_username,
+                      artistName: selectedArtist?.stage_name,
+                      profession: activeProfession,
+                    })}
+                  >
                     Log in or sign up
                   </button>
                 </div>
@@ -11049,6 +11203,7 @@ function App() {
   return renderAppShell(
     <main className={`page-${activePage}${!currentUser && (activePage === "home" || activePage === "early-access") ? " page-guest-auth" : ""}`}>
       {renderSupportConfirmSheet()}
+      {renderSignupGateSheet()}
       {renderSpaceReviewModal()}
       {renderExternalLinkConfirm()}
       {renderPlaylistPicker()}
@@ -11404,6 +11559,7 @@ function App() {
           initialShowId={mySceneShowId}
           fanChannelUsername={fanChannelUsername}
           onGoToProfile={() => goToPage("profile")}
+          onRequireAccount={() => requestSignupGate({ type: "tickets", page: "my-scene" })}
           onOpenArtistByUsername={openArtistByUsername}
           onOpenArtistFromGig={openArtistFromGig}
           onPurchaseTicket={(product, show) => purchaseProduct(product, show)}
