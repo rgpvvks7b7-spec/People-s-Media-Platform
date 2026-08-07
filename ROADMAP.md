@@ -82,8 +82,10 @@ Fixed before any new beta invites or marketing push.
 #### Monetization
 17. **Support tier templates** — one-click tier setup for new artists ($1 / $5 / custom)
 18. **Tip prompts at peak moments** — after full listen, post-show check-in, live end
-19. **Discovery ad credits UX** — clearer Studio plan value ($25/mo credits, $100 cap campaigns)
+19. ~~**Discovery credit redemption UX**~~ — ✅ cart/store toggle + tip apply; redeem-preview caps (Phase 2 cleanup)
 20. **Commission inbox** — Pro feature visibility for custom work requests
+20b. ~~**Public fee calculator**~~ — ✅ `/?page=pricing` + `GET /api/accounts/fee-schedule/` (Phase 2 cleanup)
+20c. ~~**50-subscription limit extension**~~ — ✅ enforce + demo extend endpoint + Profile slots UI (Phase 2 cleanup)
 
 ### P3 — Scale & production (Sprint 4+)
 
@@ -91,7 +93,6 @@ Fixed before any new beta invites or marketing push.
 22. **Cross-browser E2E** — WebKit + Firefox
 23. **Performance budgets** — LCP on discover, stream latency
 24. **Capacitor native shell** — iOS/Android wrapper after PWA stable
-25. **50-subscription limit extension** — paid fan tier or one-time unlock (blueprint item)
 
 ---
 

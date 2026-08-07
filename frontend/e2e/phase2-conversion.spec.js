@@ -23,6 +23,26 @@ test.describe("Phase 2 conversion funnel", () => {
     await expect(page.getByText(/You keep \$/i)).toBeVisible();
   });
 
+  test("artist upload form offers 10/30/60 preview presets", async ({ page }) => {
+    await page.goto("/");
+    await registerViaApi(page, {
+      username: users.artistUser,
+      userType: "artist",
+      extra: {
+        displayName: users.artistStage,
+        email: `${users.artistUser}@example.com`,
+        stageName: users.artistStage,
+        genre: "indie",
+        city: "Melbourne",
+      },
+    });
+    await page.goto("/?page=home");
+    await page.getByRole("button", { name: "Upload track" }).click();
+    await expect(page.getByRole("heading", { name: "Upload Track" })).toBeVisible();
+    await expect(page.getByLabel("Preview length")).toBeVisible();
+    await expect(page.getByLabel("Preview length").getByRole("option")).toHaveCount(3);
+  });
+
   test("fan library shows support slot count", async ({ page }) => {
     await registerViaApi(page, {
       username: users.fanUser,
