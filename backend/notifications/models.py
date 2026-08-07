@@ -12,6 +12,7 @@ class Notification(models.Model):
     GIG = "gig"
     PURCHASE = "purchase"
     PROMOTION = "promotion"
+    MESSAGE = "message"
     SYSTEM = "system"
 
     TYPES = [
@@ -24,6 +25,7 @@ class Notification(models.Model):
         (GIG, "Gig"),
         (PURCHASE, "Purchase"),
         (PROMOTION, "Promotion"),
+        (MESSAGE, "Message"),
         (SYSTEM, "System"),
     ]
 

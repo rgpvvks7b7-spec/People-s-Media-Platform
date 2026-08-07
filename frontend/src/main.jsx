@@ -5,6 +5,7 @@ import { TrackNameLink } from "./components/TrackNameLink.jsx";
 import { NotificationsPage, ProfilePage } from "./components/AccountPages.jsx";
 import { PromotePage } from "./components/PromotePage.jsx";
 import { AdsManagerPage } from "./components/AdsManagerPage.jsx";
+import { FanCrmPage } from "./components/FanCrmPage.jsx";
 import { AccountActions, AppShell } from "./components/AppShell.jsx";
 import { AuthPanel } from "./components/AuthPanel.jsx";
 import { IndieFundLogo } from "./components/IndieFundLogo.jsx";
@@ -6651,6 +6652,7 @@ function App() {
 
     const artistNav = currentUser?.is_artist ? [
       { id: "create", kind: "studio", tab: "feed", activeTabs: ["feed", "live", "more"], icon: "+", label: "Create", detail: "Post or drop", onClick: () => openStudioTab("feed", { createPost: true }) },
+      { id: "fans", kind: "page", page: "fans", icon: "♥", label: "Fans", detail: "CRM & messages", onClick: () => goToPage("fans") },
       { id: "promote", kind: "page", page: "promote", icon: "P", label: "Promote", detail: "Discovery ads", onClick: () => goToPage("promote") },
       { id: "ads-manager", kind: "page", page: "ads-manager", icon: "A", label: "Ads Manager", detail: "Growth campaigns", onClick: () => goToPage("ads-manager") },
       { id: "store", kind: "studio", tab: "shop", shopTab: "merch", activeTabs: ["shop"], icon: "$", label: "Merch", detail: "Merch store", onClick: () => openStudioTab("merch") },
@@ -11554,6 +11556,10 @@ function App() {
           onLoadTargetingSuggestions={loadPromotionTargetingSuggestions}
           onSearchTargetArtists={searchPromotionTargetArtists}
         />
+      )}
+
+      {activePage === "fans" && currentUser?.is_artist && (
+        <FanCrmPage apiFetch={apiFetch} />
       )}
 
       {activePage === "ads-manager" && currentUser?.is_artist && (
