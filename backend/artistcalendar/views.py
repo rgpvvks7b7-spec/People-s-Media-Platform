@@ -184,9 +184,26 @@ def calendar_items(request):
     item.save()
     from challenges.services import increment_metric
     increment_metric(request.user, "calendar_item")
+
+    announced = 0
+    announce_requested = request.data.get("announce_drop") in {True, "true", "1", "on"}
+    if (
+        announce_requested
+        and item.item_type == ArtistCalendarItem.RELEASE
+        and item.visibility != ArtistCalendarItem.PRIVATE
+        and item.starts_at > timezone.now()
+    ):
+        from .drops import announce_drop
+
+        announced = announce_drop(item)
+
+    message = "Calendar item saved."
+    if announced:
+        message = f"Drop scheduled and announced to {announced} supporter{'s' if announced != 1 else ''}."
     return Response({
-        "message": "Calendar item saved.",
+        "message": message,
         "item": serialize_calendar_item(item, request),
+        "announced": announced,
     }, status=status.HTTP_201_CREATED)
 
 
