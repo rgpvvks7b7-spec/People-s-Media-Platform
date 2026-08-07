@@ -8983,6 +8983,20 @@ h3 .artist-name-link.click-title:focus-visible {
   gap: 20px;
 }
 
+.my-scene-followed-venues {
+  display: grid;
+  gap: 12px;
+}
+
+.my-scene-followed-venues .section-head {
+  margin: 0;
+}
+
+.my-scene-followed-venues h3 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+}
+
 .fan-subscriptions-rail-wrap {
   margin: 0 0 8px;
   padding: 0 0 4px;

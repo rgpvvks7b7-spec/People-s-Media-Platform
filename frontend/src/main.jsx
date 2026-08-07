@@ -11752,6 +11752,7 @@ function App() {
           onRequireAccount={() => requestSignupGate({ type: "tickets", page: "my-scene" })}
           onOpenArtistByUsername={openArtistByUsername}
           onOpenArtistFromGig={openArtistFromGig}
+          onOpenVenue={(listing) => openSpaceListingById(listing?.id)}
           onPurchaseTicket={(product, show) => purchaseProduct(product, show)}
           ownedTicketProductIds={ownedTicketProductIds()}
           products={products}

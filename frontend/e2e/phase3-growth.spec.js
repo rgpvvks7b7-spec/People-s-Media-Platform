@@ -112,5 +112,12 @@ test.describe("Phase 3 growth surfaces", () => {
     await expect(page.getByRole("heading", { name: roomName })).toBeVisible();
     await page.getByRole("button", { name: "Follow venue" }).click();
     await expect(page.getByRole("button", { name: "Following venue" })).toBeVisible();
+
+    await page.goto("/?page=my-scene");
+    await expect(page.getByRole("heading", { name: "Venues you follow" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Local shows near you" })).toBeVisible();
+    await page.getByRole("button", { name: "Open venue" }).click();
+    await expect(page.getByRole("heading", { name: roomName })).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`[?&]listing=${listing.id}(?:&|$)`));
   });
 });

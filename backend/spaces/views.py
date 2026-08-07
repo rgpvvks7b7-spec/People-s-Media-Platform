@@ -260,7 +260,7 @@ def serialize_listing(listing, request):
         "can_edit": request.user.is_authenticated and request.user == listing.host,
         "follower_count": listing.follows.count(),
         "viewer_following": viewer_following,
-        "public_url": f"/?listing={listing.id}",
+        "public_url": f"/?page=spaces&listing={listing.id}",
         "created_at": listing.created_at,
     }
 

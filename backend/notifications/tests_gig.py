@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from artists.models import ArtistFanContact, ArtistFollow, ArtistProfile
 from discovery.models import ArtistSignal
 from notifications.models import Notification
-from spaces.models import HostProfile, SpaceBooking, SpaceListing
+from spaces.models import HostProfile, SpaceBooking, SpaceFollow, SpaceListing
 from subscriptions.models import FanSubscription
 
 
@@ -156,4 +156,23 @@ class GigNotificationTests(TestCase):
         self.assertEqual(response.data["notified_count"], 2)
         self.assertFalse(
             Notification.objects.filter(recipient=remote, notification_type=Notification.GIG).exists()
+        )
+
+    def test_notify_reaches_venue_followers_even_without_local_city(self):
+        venue_fan = User.objects.create_user(
+            username="venue_fan",
+            password="pass",
+            user_type=User.FAN,
+            discovery_location="Brisbane",
+        )
+        SpaceFollow.objects.create(fan=venue_fan, listing=self.listing)
+
+        booking = self.create_confirmed_booking()
+        self.client.force_authenticate(self.artist)
+        response = self.client.post(f"/api/spaces/bookings/{booking.id}/notify-local-supporters/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["notified_count"], 3)
+        self.assertTrue(
+            Notification.objects.filter(recipient=venue_fan, notification_type=Notification.GIG).exists()
         )

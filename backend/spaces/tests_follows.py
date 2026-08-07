@@ -35,7 +35,7 @@ class SpaceFollowTests(APITestCase):
         response = self.client.get(f"/api/spaces/listings/{self.listing.id}/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["listing"]["name"], "Back Room")
-        self.assertEqual(response.data["listing"]["public_url"], f"/?listing={self.listing.id}")
+        self.assertEqual(response.data["listing"]["public_url"], f"/?page=spaces&listing={self.listing.id}")
         self.assertFalse(response.data["listing"]["viewer_following"])
 
     def test_draft_listing_is_hidden_from_public(self):
