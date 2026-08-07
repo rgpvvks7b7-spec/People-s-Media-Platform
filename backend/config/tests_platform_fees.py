@@ -3,6 +3,8 @@ from decimal import Decimal
 from django.test import SimpleTestCase
 
 from config.platform_fees import (
+    fee_calculator,
+    fee_schedule_for_plan,
     MARKETPLACE_PLATFORM_RATE,
     TICKET_PLATFORM_RATE,
     TIP_PLATFORM_RATE,
@@ -79,3 +81,18 @@ class PlatformFeesTests(SimpleTestCase):
         self.assertEqual(items["marketplace"]["you_keep_percent"], "88%")
         self.assertEqual(items["commission"]["you_keep_percent"], "88%")
         self.assertEqual(items["event_tickets"]["you_keep_percent"], "85%")
+
+    def test_fee_calculator_keeps_tips_whole(self):
+        result = fee_calculator("free", support_gmv="100", tips_gmv="50", marketplace_gmv="100")
+        self.assertEqual(result["plan"], "free")
+        self.assertEqual(result["you_keep_total"], "225.00")
+        self.assertEqual(result["platform_total"], "25.00")
+        tips = next(line for line in result["lines"] if line["id"] == "tips")
+        self.assertEqual(tips["you_keep"], "50.00")
+
+    def test_fee_schedule_for_plan_uses_studio_rates(self):
+        schedule = fee_schedule_for_plan("studio")
+        items = {item["id"]: item for item in schedule["items"]}
+        self.assertEqual(items["support"]["you_keep_percent"], "95%")
+        self.assertEqual(items["marketplace"]["you_keep_percent"], "88%")
+

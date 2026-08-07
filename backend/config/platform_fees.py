@@ -181,3 +181,68 @@ def fee_schedule(artist=None):
         ),
         "discovery_ads_note": DISCOVERY_ADS_TAGLINE,
     }
+
+
+class _PlanArtist:
+    def __init__(self, plan):
+        self.artist_plan = plan
+
+
+def fee_schedule_for_plan(plan="free"):
+    plan = plan if plan in PLAN_SUPPORT_RATES else "free"
+    return fee_schedule(_PlanArtist(plan))
+
+
+def _money(value):
+    try:
+        amount = Decimal(str(value if value not in {"", None} else "0"))
+    except Exception:
+        amount = Decimal("0")
+    if amount < 0:
+        amount = Decimal("0")
+    return amount.quantize(Decimal("0.01"))
+
+
+def fee_calculator(plan="free", *, support_gmv=0, tips_gmv=0, marketplace_gmv=0):
+    """Interactive keep-vs-fee estimate for the public pricing page."""
+    plan = plan if plan in PLAN_SUPPORT_RATES else "free"
+    support_rate = PLAN_SUPPORT_RATES[plan]
+    marketplace_rate = PLAN_MARKETPLACE_RATES[plan]
+    support = _money(support_gmv)
+    tips = _money(tips_gmv)
+    marketplace = _money(marketplace_gmv)
+
+    lines = []
+    for stream_id, label, amount, rate in [
+        ("support", "Monthly support", support, support_rate),
+        ("tips", "Tips", tips, TIP_PLATFORM_RATE),
+        ("marketplace", "Store / merch", marketplace, marketplace_rate),
+    ]:
+        artist_share, platform_fee = split_amount(amount, rate)
+        lines.append({
+            "id": stream_id,
+            "label": label,
+            "gmv": str(amount),
+            "platform_rate": str(rate),
+            "platform_percent": _whole_percent(rate),
+            "you_keep": str(artist_share),
+            "platform_fee": str(platform_fee),
+        })
+
+    gmv_total = support + tips + marketplace
+    platform_total = sum((Decimal(line["platform_fee"]) for line in lines), Decimal("0.00"))
+    you_keep_total = gmv_total - platform_total
+    effective = (
+        (platform_total / gmv_total).quantize(Decimal("0.0001"))
+        if gmv_total > 0
+        else Decimal("0")
+    )
+    return {
+        "plan": plan,
+        "lines": lines,
+        "gmv_total": str(gmv_total),
+        "you_keep_total": str(you_keep_total.quantize(Decimal("0.01"))),
+        "platform_total": str(platform_total.quantize(Decimal("0.01"))),
+        "effective_rate": str(effective),
+        "effective_rate_percent": _whole_percent(effective) if gmv_total > 0 else "0%",
+    }

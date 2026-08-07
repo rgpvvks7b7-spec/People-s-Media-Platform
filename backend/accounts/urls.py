@@ -14,6 +14,7 @@ urlpatterns = [
     path('beta-feedback/summary/', views.beta_feedback_summary),
     path('beta-feedback/<int:feedback_id>/resolve/', views.beta_feedback_resolve),
     path('artist-plans/', views.artist_plans),
+    path('fee-schedule/', views.public_fee_schedule),
     path('artist-plan/', views.update_artist_plan),
     path('artist-plan/checkout/', views.artist_plan_checkout),
     path('verify-email/', views.verify_email),

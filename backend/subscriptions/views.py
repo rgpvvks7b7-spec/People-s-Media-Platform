@@ -26,6 +26,7 @@ from config.stripe_checkout import (
     subscription_connect_params,
 )
 from notifications.purchase_notifications import notify_payment_failed, notify_subscription_started
+from .limits import extend_subscription_limit, subscription_limit_block
 from .models import FanSubscription, OneTimeTip, SupportTier
 
 try:
@@ -466,6 +467,10 @@ def subscribe_to_artist(request):
     if request.user == artist:
         return Response({"error": "You cannot subscribe to yourself"}, status=status.HTTP_400_BAD_REQUEST)
 
+    limit_block = subscription_limit_block(request.user, artist, profession)
+    if limit_block:
+        return limit_block
+
     share_email = request_bool(request.data, "share_email_with_artist", False)
     referral_source = (request.data.get("referral_source") or request.query_params.get("ref") or "").strip()[:80]
     sub, created = FanSubscription.objects.update_or_create(
@@ -512,6 +517,28 @@ def subscribe_to_artist(request):
     })
 
 
+
+@api_view(["POST"])
+def extend_limit(request):
+    """Bump a fan's support-slot limit (demo/DEBUG unlock for Phase 2)."""
+    if not request.user.is_authenticated:
+        return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+    if request.user.user_type not in {User.FAN, User.ARTIST}:
+        return Response({"error": "Fan account required"}, status=status.HTTP_403_FORBIDDEN)
+    if not (settings.DEBUG or demo_mode_allowed()):
+        return Response(
+            {"error": "Paid limit extensions are not configured yet."},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+    amount = request.data.get("amount")
+    result = extend_subscription_limit(request.user, amount=amount)
+    return Response({
+        "message": f"Discovery limit extended by {result['extended_by']}.",
+        **result,
+    })
+
+
 @api_view(["POST"])
 @throttle_classes([CheckoutRateThrottle])
 def create_checkout_session(request):
@@ -539,6 +566,11 @@ def create_checkout_session(request):
 
     if request.user == artist:
         return Response({"error": "You cannot subscribe to yourself"}, status=status.HTTP_400_BAD_REQUEST)
+
+    limit_block = subscription_limit_block(request.user, artist, profession)
+    if limit_block:
+        return limit_block
+
     share_email = request_bool(request.data, "share_email_with_artist", False)
     referral_source = (request.data.get("referral_source") or request.query_params.get("ref") or "").strip()[:80]
 

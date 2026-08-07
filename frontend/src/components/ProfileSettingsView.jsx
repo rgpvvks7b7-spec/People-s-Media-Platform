@@ -242,7 +242,12 @@ export function ProfileSettingsView({
             <div className="library-section">
               <div className="library-section-head">
                 <strong>Artists you support</strong>
-                <span className="muted">{mySubscriptions.length} active</span>
+                <span className="muted">
+                  {currentUser?.subscription_count ?? mySubscriptions.length}
+                  {" of "}
+                  {currentUser?.subscription_limit || 50}
+                  {" slots"}
+                </span>
               </div>
               {mySubscriptions.length === 0 ? (
                 <p className="muted">You aren't supporting any artists yet. Support unlocks subscriber-only content.</p>

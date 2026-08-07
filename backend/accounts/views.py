@@ -18,7 +18,12 @@ from rest_framework.response import Response
 from artists.models import ArtistProfile
 from artists.contact_utils import update_global_email_consent
 from artists.themes import normalize_profile_theme
-from config.platform_fees import ARTIST_PRO_PLANS, STUDIO_PLAN_MONTHLY_CREDITS
+from config.platform_fees import (
+    ARTIST_PRO_PLANS,
+    STUDIO_PLAN_MONTHLY_CREDITS,
+    fee_calculator,
+    fee_schedule_for_plan,
+)
 from config.platform_mode import fan_registration_allowed
 from config.stripe_checkout import demo_mode_allowed
 from config.throttling import AuthRateThrottle, CheckoutRateThrottle
@@ -71,7 +76,9 @@ def serialize_user(user, request=None):
         if cover_url:
             cover_url = request.build_absolute_uri(cover_url)
 
-    return {
+    from subscriptions.limits import active_subscription_count, subscription_limit_for
+
+    payload = {
         "id": user.id,
         "username": user.username,
         "email": user.email,
@@ -98,7 +105,10 @@ def serialize_user(user, request=None):
         "email_verification_required": verification_required(user),
         "session_login_count": getattr(user, "session_login_count", 0),
         "theme_name": getattr(user, "theme_name", "theme-indie-dark"),
+        "subscription_limit": subscription_limit_for(user),
+        "subscription_count": active_subscription_count(user),
     }
+    return payload
 
 
 def record_session_login(user):
@@ -501,6 +511,24 @@ def artist_plans(request):
             }
             for plan in ARTIST_PRO_PLANS
         ],
+    })
+
+
+@api_view(["GET"])
+def public_fee_schedule(request):
+    """Public fee table + keep-vs-fee calculator for the pricing page."""
+    plan = (request.query_params.get("plan") or "free").strip().lower()
+    schedule = fee_schedule_for_plan(plan)
+    calculator = fee_calculator(
+        schedule["plan"],
+        support_gmv=request.query_params.get("support_gmv") or "0",
+        tips_gmv=request.query_params.get("tips_gmv") or "0",
+        marketplace_gmv=request.query_params.get("marketplace_gmv") or "0",
+    )
+    return Response({
+        "schedule": schedule,
+        "calculator": calculator,
+        "plans": ["free", "pro", "studio"],
     })
 
 

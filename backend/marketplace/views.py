@@ -528,8 +528,24 @@ def handle_cart_checkout(request):
         return error_response
 
     if demo_mode_allowed():
+        from artists.contact_utils import request_bool
+        from promotions.redemption import redeem_for_purchase
+        from promotions.services import wallet_balance
+
         receipts = []
+        credits_applied = Decimal("0.00")
+        apply_credits = request_bool(request.data, "apply_discovery_credits", False)
         for product in products:
+            if apply_credits:
+                redeemed, redeem_error = redeem_for_purchase(
+                    request.user,
+                    product.price,
+                    product_title=product.title,
+                    apply_credits=True,
+                )
+                if redeem_error:
+                    return Response({"error": redeem_error}, status=status.HTTP_400_BAD_REQUEST)
+                credits_applied += redeemed or Decimal("0.00")
             receipt, error = complete_product_purchase(request.user, product, payment_provider="demo")
             if error == "sold_out":
                 return Response({"error": f"Sold out: {product.title}", "sold_out": True}, status=status.HTTP_409_CONFLICT)
@@ -539,10 +555,16 @@ def handle_cart_checkout(request):
         total = sum(Decimal(item["amount"]) for item in receipts)
         return Response({
             "demo": True,
-            "message": f"Cart purchase recorded ({len(receipts)} items).",
+            "message": (
+                f"Cart purchase recorded ({len(receipts)} items) with ${credits_applied} discovery credits applied."
+                if credits_applied > Decimal("0.00")
+                else f"Cart purchase recorded ({len(receipts)} items)."
+            ),
             "receipts": receipts,
             "count": len(receipts),
             "total": str(total),
+            "discovery_credits_applied": str(credits_applied.quantize(Decimal("0.01"))),
+            "wallet_balance": str(wallet_balance(request.user).quantize(Decimal("0.01"))),
         }, status=status.HTTP_201_CREATED)
 
     if stripe is None:

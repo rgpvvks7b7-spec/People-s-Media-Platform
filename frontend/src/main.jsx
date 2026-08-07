@@ -29,6 +29,7 @@ import {
 import { SpaceListingAvailabilityPicker, slotsToWindows } from "./components/SpaceListingAvailabilityPicker.jsx";
 import { SpaceListingCardPreview, SpaceListingDetailModal } from "./components/SpaceListingDetailModal.jsx";
 import { ExternalLinkConfirm, PlaylistPickerSheet, PreviewBeforeShareSheet, ProductTypePicker, SignupGateSheet, SupportConfirmSheet } from "./components/Modals.jsx";
+import { PricingCalculatorPage } from "./components/PricingCalculatorPage.jsx";
 import { StoreCart } from "./components/StoreCart.jsx";
 import { FinalizeReleasePanel } from "./components/FinalizeReleasePanel.jsx";
 import { SpaceListingWizard } from "./components/SpaceListingWizard.jsx";
@@ -76,10 +77,10 @@ function resolveApiBase() {
 }
 
 const API = resolveApiBase();
-const FAN_PAGES = new Set(["home", "feed", "listen", "discover", "music", "my-music", "my-scene", "stores", "spaces", "live", "notifications", "profile", "promote", "ads-manager", "faq", "prelaunch"]);
+const FAN_PAGES = new Set(["home", "feed", "listen", "discover", "music", "my-music", "my-scene", "stores", "spaces", "live", "notifications", "profile", "promote", "ads-manager", "faq", "pricing", "prelaunch"]);
 const FAN_ARTIST_RAIL_PAGES = new Set(["home", "feed", "my-scene", "listen", "my-music", "stores"]);
-const HOST_PAGES = new Set(["spaces", "notifications", "profile", "faq"]);
-const GUEST_SHELL_PAGES = new Set(["listen", "discover", "music", "profile", "spaces", "my-scene", "stores", "live", "faq", "prelaunch", "early-access", ...LEGAL_PAGE_IDS]);
+const HOST_PAGES = new Set(["spaces", "notifications", "profile", "faq", "pricing"]);
+const GUEST_SHELL_PAGES = new Set(["listen", "discover", "music", "profile", "spaces", "my-scene", "stores", "live", "faq", "pricing", "prelaunch", "early-access", ...LEGAL_PAGE_IDS]);
 const SUPPORT_EMAIL = "support@indiefund.app";
 const SIGNUP_INTENT_KEY = "indiefund_signup_intent";
 
@@ -366,7 +367,10 @@ function GlobalPlayer({
     const x = e.clientX - rect.left;
     const pct = Math.max(0, Math.min(1, x / rect.width));
     if (audioRef.current && !isNaN(audioRef.current.duration)) {
-      audioRef.current.currentTime = pct * audioRef.current.duration;
+      const maxSeconds = track?.is_preview_playback && track.preview_limit_seconds
+        ? Math.min(track.preview_limit_seconds, audioRef.current.duration)
+        : audioRef.current.duration;
+      audioRef.current.currentTime = pct * maxSeconds;
     }
   };
 
@@ -701,6 +705,7 @@ function App() {
   const [promotionGenres, setPromotionGenres] = useState([]);
   const [promotionTargetingSuggestions, setPromotionTargetingSuggestions] = useState(null);
   const [applyDiscoveryCredits, setApplyDiscoveryCredits] = useState(true);
+  const [supportLimitPrompt, setSupportLimitPrompt] = useState(null);
   const [promotionFeedbackSent, setPromotionFeedbackSent] = useState({});
   const [fansAlsoSupport, setFansAlsoSupport] = useState([]);
   const [homePromotionPlacements, setHomePromotionPlacements] = useState([]);
@@ -2504,6 +2509,19 @@ function App() {
     const data = await res.json();
 
     if (!res.ok) {
+      if (data.code === "subscription_limit_reached") {
+        setSupportLimitPrompt({
+          count: data.count,
+          limit: data.limit,
+          extensionSize: data.extension_size || 25,
+          artistUsername: username,
+          profession,
+          tierId,
+          shareEmail,
+        });
+        setMessage(data.error || "Support limit reached.");
+        return;
+      }
       setMessage(data.error || "Unable to start checkout.");
       setPendingSupportArtist(null);
       return;
@@ -4119,7 +4137,10 @@ function App() {
     const res = await apiFetch("/marketplace/cart-checkout/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ product_ids: storeCart.map(item => item.id) }),
+      body: JSON.stringify({
+        product_ids: storeCart.map(item => item.id),
+        apply_discovery_credits: applyDiscoveryCredits && Number(promotionWallet?.balance || 0) > 0,
+      }),
     });
     const data = await res.json();
     if (data.checkout_url) {
@@ -4130,6 +4151,9 @@ function App() {
       persistStoreCart([]);
       setShowStoreCart(false);
       setMessage(data.message || `Cart purchase complete (${data.count || storeCart.length} items).`);
+      if (data.wallet_balance != null) {
+        setPromotionWallet(current => ({ ...current, balance: data.wallet_balance }));
+      }
       loadMyPurchases();
       loadNotifications();
       loadArtistDashboard();
@@ -9208,7 +9232,7 @@ function App() {
             <button
               className="secondary compact"
               type="button"
-              onClick={() => handleTogglePlay(previewTrack)}
+              onClick={() => handleTogglePlay(resolvePlayableDiscoveryTrack(previewTrack) || previewTrack)}
             >
               {isPlayingPlacement ? "Pause" : "Play"}
             </button>
@@ -10438,9 +10462,16 @@ function App() {
 
                   <label className="check-row">
                     <input name="preview_enabled" type="checkbox" value="true" defaultChecked />
-                    Public 30-second preview
+                    Public guest preview
                   </label>
-                  <input name="preview_seconds" type="number" min="10" max="120" defaultValue="30" />
+                  <label>
+                    Preview length
+                    <select name="preview_seconds" defaultValue="30" aria-label="Preview length">
+                      <option value="10">10 seconds</option>
+                      <option value="30">30 seconds</option>
+                      <option value="60">60 seconds</option>
+                    </select>
+                  </label>
 
                   <label className="check-row">
                     <input name="allow_fan_radio" type="checkbox" value="true" />
@@ -11797,7 +11828,67 @@ function App() {
           onClose={() => setShowStoreCart(false)}
           onOpenArtist={openArtistByUsername}
           onRemove={removeFromCart}
+          promotionWallet={promotionWallet}
+          applyDiscoveryCredits={applyDiscoveryCredits}
+          onApplyDiscoveryCreditsChange={setApplyDiscoveryCredits}
         />
+      )}
+
+      {supportLimitPrompt && (
+        <div className="modal-backdrop" role="presentation" onClick={() => setSupportLimitPrompt(null)}>
+          <div
+            className="modal-panel support-limit-sheet"
+            role="dialog"
+            aria-labelledby="support-limit-title"
+            aria-modal="true"
+            onClick={event => event.stopPropagation()}
+          >
+            <p className="eyebrow">Support limit</p>
+            <h3 id="support-limit-title">You&apos;re supporting {supportLimitPrompt.count} of {supportLimitPrompt.limit}</h3>
+            <p className="muted">
+              Extend your discovery limit by {supportLimitPrompt.extensionSize} slots to keep supporting more artists.
+            </p>
+            <div className="action-grid">
+              <button
+                className="primary"
+                type="button"
+                onClick={async () => {
+                  const res = await apiFetch("/subscriptions/extend-limit/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ amount: supportLimitPrompt.extensionSize }),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) {
+                    setMessage(data.error || "Could not extend support limit.");
+                    return;
+                  }
+                  setCurrentUser(current => current ? {
+                    ...current,
+                    subscription_limit: data.subscription_limit,
+                    subscription_count: data.subscription_count,
+                  } : current);
+                  const pending = supportLimitPrompt;
+                  setSupportLimitPrompt(null);
+                  setMessage(data.message || "Discovery limit extended.");
+                  if (pending?.artistUsername) {
+                    await supportArtist(
+                      pending.artistUsername,
+                      pending.profession,
+                      pending.tierId,
+                      pending.shareEmail,
+                    );
+                  }
+                }}
+              >
+                Extend by {supportLimitPrompt.extensionSize}
+              </button>
+              <button className="secondary" type="button" onClick={() => setSupportLimitPrompt(null)}>
+                Not now
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {pendingRelease && (
@@ -11865,6 +11956,10 @@ function App() {
         />
       )}
 
+      {activePage === "pricing" && (
+        <PricingCalculatorPage apiFetch={apiFetch} onNavigate={goToPage} />
+      )}
+
       {activePage === "faq" && (
         <section className="faq-page">
           <p className="eyebrow">Help</p>
@@ -11880,7 +11975,10 @@ function App() {
             </article>
             <article className="feature-card">
               <h3>What fees does IndieFund charge?</h3>
-              <p className="muted">10% on support (5% on paid plans), 0% on tips, 15% on marketplace sales (12% on Studio) and show tickets. Venue door splits on ticketed shows are handled automatically when your space uses a door-percent deal. See your artist dashboard for the full fee schedule.</p>
+              <p className="muted">10% on support (5% on paid plans), 0% on tips, 15% on marketplace sales (12% on Studio) and show tickets. Venue door splits on ticketed shows are handled automatically when your space uses a door-percent deal.</p>
+              <button className="secondary compact" type="button" onClick={() => goToPage("pricing")}>
+                Open fee calculator
+              </button>
             </article>
             <article className="feature-card">
               <h3>How do show tickets work?</h3>

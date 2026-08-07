@@ -67,6 +67,7 @@ export function MainTopbar({
           {(currentUser.is_artist || currentUser.is_host) && (
             <button type="button" className={activePage === "spaces" ? "nav-pill active" : "nav-pill"} onClick={() => onNavigate("spaces")}>Spaces</button>
           )}
+          <button type="button" className={activePage === "pricing" ? "nav-pill active" : "nav-pill"} onClick={() => onNavigate("pricing")}>Pricing</button>
           <button type="button" className={activePage === "faq" ? "nav-pill active" : "nav-pill"} onClick={() => onNavigate("faq")}>FAQ</button>
         </div>
       )}
